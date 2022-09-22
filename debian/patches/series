@@ -1,0 +1,4 @@
+01-use-system-help2man.patch
+02-library-dependencies.patch
+03-disable-libtextstyle.patch
+04-fix-powerpc-ftbfs.patch
