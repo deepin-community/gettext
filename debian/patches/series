@@ -2,3 +2,10 @@
 02-library-dependencies.patch
 03-disable-libtextstyle.patch
 04-fix-powerpc-ftbfs.patch
+05-update-after-gnulib-changed.patch
+06-remove-unportable-tests.patch
+07-java-17-support.patch
+08-disable-autopoint-3.patch
+09-update-po-mode-1-of-3.patch
+10-update-po-mode-2-of-3.patch
+11-update-po-mode-3-of-3.patch
