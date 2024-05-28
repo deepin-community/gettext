@@ -1,0 +1,34 @@
+From: Bruno Haible <bruno@clisp.org>
+Subject: po-mode: Fix incompatibility with the forthcoming Emacs 29
+Origin: upstream, https://git.savannah.gnu.org/gitweb/?p=gettext.git;a=commitdiff;h=f59e9441caa599a4e010f49e7a3480d765e6d315
+Bug-Debian: https://bugs.debian.org/1055020
+
+    po-mode: Fix incompatibility with the forthcoming Emacs 29.
+    
+    Patch by Takesi Ayanokoji <ayanokoji.takesi@gmail.com>.
+    
+    * gettext-tools/emacs/po-mode.el (po-font-lock-keywords): Use
+    font-lock-constant-face, introduced in Emacs 20.3, instead of the
+    long-deprecated font-lock-reference-face.
+    * NEWS: Mention it.
+
+--- a/gettext-tools/emacs/po-mode.el
++++ b/gettext-tools/emacs/po-mode.el
+@@ -1,7 +1,6 @@
+ ;;; po-mode.el --- major mode for GNU gettext PO files
+ 
+-;; Copyright (C) 1995-2002, 2005-2008, 2010, 2013-2017, 2019-2020 Free Software
+-;; Foundation, Inc.
++;; Copyright (C) 1995-2002, 2005-2008, 2010, 2013-2017, 2019-2020, 2023 Free Software Foundation, Inc.
+ 
+ ;; Authors: François Pinard <pinard@iro.umontreal.ca>
+ ;;          Greg McGary <gkm@magilla.cichlid.com>
+@@ -909,7 +908,7 @@
+ (defconst po-font-lock-keywords
+   '(
+     ("^# .*\\|^#[:,]?" . font-lock-comment-face)
+-    ("^#:\\(.*\\)" 1 font-lock-reference-face)
++    ("^#:\\(.*\\)" 1 font-lock-constant-face)
+     ("^#,\\(.*\\)" 1 font-lock-function-name-face)
+     ("^\\(\\(msg\\(ctxt\\|id\\(_plural\\)?\\|str\\(\\[[0-9]\\]\\)?\\)\\) \\)?\"\\|\"$"
+      . font-lock-keyword-face)

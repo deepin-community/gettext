@@ -1,0 +1,15 @@
+From: Santiago Vila <sanvila@debian.org>
+Subject: Disable tests/autopoint-3, will be fixed in gettext 0.22.x
+Bug-Debian: https://bugs.debian.org/1057120
+
+--- a/gettext-tools/tests/autopoint-3
++++ b/gettext-tools/tests/autopoint-3
+@@ -1,6 +1,8 @@
+ #! /bin/sh
+ . "${srcdir=.}/init.sh"; path_prepend_ . ../src
+ 
++echo "Skipping test: does not work anymore, will be fixed in gettext 0.22.x"; Exit 77
++
+ # Test the autopoint program, with Automake.
+ 
+ : ${AUTOCONF=autoconf}
