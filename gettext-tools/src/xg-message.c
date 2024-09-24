@@ -1,5 +1,5 @@
 /* Extracting a message.  Accumulating the message list.
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2020, 2023 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include "xalloc.h"
 #include "xerror.h"
 #include "xvasprintf.h"
+#include "verify.h"
 
 #include "xgettext.h"
 
@@ -53,7 +54,8 @@ set_format_flags_from_context (enum is_format is_format[NFORMATS],
 
   if (context.is_format1 != undecided
       || context.is_format2 != undecided
-      || context.is_format3 != undecided)
+      || context.is_format3 != undecided
+      || context.is_format4 != undecided)
     for (i = 0; i < NFORMATS; i++)
       {
         if (is_format[i] == undecided)
@@ -67,6 +69,9 @@ set_format_flags_from_context (enum is_format is_format[NFORMATS],
             if (formatstring_parsers[i] == current_formatstring_parser3
                 && context.is_format3 != undecided)
               is_format[i] = (enum is_format) context.is_format3;
+            if (formatstring_parsers[i] == current_formatstring_parser4
+                && context.is_format4 != undecided)
+              is_format[i] = (enum is_format) context.is_format4;
           }
         if (possible_format_p (is_format[i]))
           {
@@ -81,7 +86,7 @@ set_format_flags_from_context (enum is_format is_format[NFORMATS],
                 /* The string is not a valid format string.  */
                 if (is_format[i] != possible)
                   {
-                    char buffer[21];
+                    char buffer[22];
 
                     error_with_progname = false;
                     if (pos->line_number == (size_t)(-1))
@@ -119,7 +124,8 @@ decide_is_format (message_ty *mp)
       if (mp->is_format[i] == undecided
           && (formatstring_parsers[i] == current_formatstring_parser1
               || formatstring_parsers[i] == current_formatstring_parser2
-              || formatstring_parsers[i] == current_formatstring_parser3)
+              || formatstring_parsers[i] == current_formatstring_parser3
+              || formatstring_parsers[i] == current_formatstring_parser4)
           /* But avoid redundancy: objc-format is stronger than c-format.  */
           && !(i == format_c && possible_format_p (mp->is_format[format_objc]))
           && !(i == format_objc && possible_format_p (mp->is_format[format_c]))
@@ -217,7 +223,7 @@ warn_format_string (enum is_format is_format[NFORMATS], const char *string,
   if (possible_format_p (is_format[format_python])
       && get_python_format_unnamed_arg_count (string) > 1)
     {
-      char buffer[21];
+      char buffer[22];
 
       error_with_progname = false;
       if (pos->line_number == (size_t)(-1))
@@ -249,7 +255,6 @@ remember_a_message (message_list_ty *mlp, char *msgctxt, char *msgid,
   enum is_wrap do_wrap;
   enum is_syntax_check do_syntax_check[NSYNTAXCHECKS];
   message_ty *mp;
-  char *msgstr;
   size_t i;
 
   /* See whether we shall exclude this message.  */
@@ -286,7 +291,7 @@ remember_a_message (message_list_ty *mlp, char *msgctxt, char *msgid,
 
   if (msgctxt == NULL && msgid[0] == '\0' && !xgettext_omit_header)
     {
-      char buffer[21];
+      char buffer[22];
 
       error_with_progname = false;
       if (pos->line_number == (size_t)(-1))
@@ -310,8 +315,8 @@ meta information, not the empty string.\n")));
         {
           lex_pos_ty pos1;
           lex_pos_ty pos2;
-          char buffer1[21];
-          char buffer2[21];
+          char buffer1[22];
+          char buffer2[22];
 
           if (pluralp)
             {
@@ -354,10 +359,15 @@ meta information, not the empty string.\n")));
     }
   else
     {
+      const char *msgstr;
+
       /* Construct the msgstr from the prefix and suffix, otherwise use the
          empty string.  */
       if (msgstr_prefix)
-        msgstr = xasprintf ("%s%s%s", msgstr_prefix, msgid, msgstr_suffix);
+        {
+          msgstr = xasprintf ("%s%s%s", msgstr_prefix, msgid, msgstr_suffix);
+          assume (msgstr != NULL);
+        }
       else
         msgstr = "";
 
@@ -557,10 +567,6 @@ remember_a_message_plural (message_ty *mp, char *string, bool is_utf8,
                            bool comment_is_utf8)
 {
   char *msgid_plural;
-  char *msgstr1;
-  size_t msgstr1_len;
-  char *msgstr;
-  size_t i;
 
   msgid_plural = string;
 
@@ -572,14 +578,24 @@ remember_a_message_plural (message_ty *mp, char *string, bool is_utf8,
   /* See if the message is already a plural message.  */
   if (mp->msgid_plural == NULL)
     {
+      char *msgstr1_malloc = NULL;
+      const char *msgstr1;
+      size_t msgstr1_len;
+      char *msgstr;
+      size_t i;
+
       mp->msgid_plural = msgid_plural;
 
       /* Construct the first plural form from the prefix and suffix,
          otherwise use the empty string.  The translator will have to
          provide additional plural forms.  */
       if (msgstr_prefix)
-        msgstr1 =
-          xasprintf ("%s%s%s", msgstr_prefix, msgid_plural, msgstr_suffix);
+        {
+          msgstr1_malloc =
+            xasprintf ("%s%s%s", msgstr_prefix, msgid_plural, msgstr_suffix);
+          msgstr1 = msgstr1_malloc;
+          assume (msgstr1 != NULL);
+        }
       else
         msgstr1 = "";
       msgstr1_len = strlen (msgstr1) + 1;
@@ -588,8 +604,7 @@ remember_a_message_plural (message_ty *mp, char *string, bool is_utf8,
       memcpy (msgstr + mp->msgstr_len, msgstr1, msgstr1_len);
       mp->msgstr = msgstr;
       mp->msgstr_len = mp->msgstr_len + msgstr1_len;
-      if (msgstr_prefix)
-        free (msgstr1);
+      free (msgstr1_malloc);
 
       /* Determine whether the context specifies that the msgid_plural is a
          format string.  */
@@ -602,7 +617,8 @@ remember_a_message_plural (message_ty *mp, char *string, bool is_utf8,
       for (i = 0; i < NFORMATS; i++)
         if ((formatstring_parsers[i] == current_formatstring_parser1
              || formatstring_parsers[i] == current_formatstring_parser2
-             || formatstring_parsers[i] == current_formatstring_parser3)
+             || formatstring_parsers[i] == current_formatstring_parser3
+             || formatstring_parsers[i] == current_formatstring_parser4)
             && (mp->is_format[i] == undecided || mp->is_format[i] == possible)
             /* But avoid redundancy: objc-format is stronger than c-format.  */
             && !(i == format_c

@@ -1,5 +1,5 @@
 /* xgettext awk backend.
-   Copyright (C) 2002-2003, 2005-2009, 2018-2019 Free Software Foundation, Inc.
+   Copyright (C) 2002-2003, 2005-2009, 2018-2023 Free Software Foundation, Inc.
 
    This file was written by Bruno Haible <haible@clisp.cons.org>, 2002.
 
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "xgettext.h"
 #include "xg-pos.h"
@@ -401,7 +402,7 @@ x_awk_lex (token_ty *tp)
              FIXME: Newlines after any of ',' '{' '?' ':' '||' '&&' 'do' 'else'
              does *not* introduce a fresh statement.  */
           prefer_division_over_regexp = false;
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case '\t':
         case ' ':
           /* Ignore whitespace and comments.  */
@@ -428,7 +429,7 @@ x_awk_lex (token_ty *tp)
                 return;
               }
           }
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
         case 'G': case 'H': case 'I': case 'J': case 'K': case 'L':
         case 'M': case 'N': case 'O': case 'P': case 'Q': case 'R':
@@ -645,7 +646,7 @@ x_awk_lex (token_ty *tp)
               prefer_division_over_regexp = false;
               return;
             }
-          /* FALLTHROUGH */
+          FALLTHROUGH;
 
         default:
           /* We could carefully recognize each of the 2 and 3 character
@@ -664,6 +665,13 @@ x_awk_lex (token_ty *tp)
 
 /* Context lookup table.  */
 static flag_context_list_table_ty *flag_context_list_table;
+
+
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depth.  */
+static int nesting_depth;
 
 
 /* The file is broken into tokens.  Scan the token stream, looking for
@@ -755,6 +763,12 @@ extract_parenthesized (message_list_ty *mlp,
           continue;
 
         case token_type_lparen:
+          if (++nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open parentheses"),
+                     logical_file_name, line_number);
+            }
           if (extract_parenthesized (mlp, inner_context, next_context_iter,
                                      arglist_parser_alloc (mlp,
                                                            state ? next_shapes : NULL)))
@@ -762,6 +776,7 @@ extract_parenthesized (message_list_ty *mlp,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          nesting_depth--;
           next_is_argument = false;
           next_context_iter = null_context_list_iterator;
           state = 0;
@@ -878,6 +893,7 @@ extract_awk (FILE *f,
   prefer_division_over_regexp = false;
 
   flag_context_list_table = flag_table;
+  nesting_depth = 0;
 
   init_keywords ();
 

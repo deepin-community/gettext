@@ -1,5 +1,5 @@
 /* setlocale() function that respects the locale chosen by the user.
-   Copyright (C) 2009, 2011, 2013, 2018-2019 Free Software Foundation, Inc.
+   Copyright (C) 2009, 2011, 2013, 2018-2019, 2022-2023 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2009.
 
    This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,10 @@
    This matters on MacOS X 10 and Windows.
    See the comments in localename.c, function gl_locale_name_default.  */
 
+/* Specification.  */
 #include <locale.h>
+
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,12 +39,25 @@
 #if HAVE_VISIBILITY && BUILDING_DLL
 # define DLL_EXPORTED __attribute__((__visibility__("default")))
 #elif defined _MSC_VER && BUILDING_DLL
-# define DLL_EXPORTED __declspec(dllexport)
+/* When building with MSVC, exporting a symbol means that the object file
+   contains a "linker directive" of the form /EXPORT:symbol.  This can be
+   inspected through the "objdump -s --section=.drectve FILE" or
+   "dumpbin /directives FILE" commands.
+   The symbols from this file should be exported if and only if the object
+   file gets included in a DLL.  Libtool, on Windows platforms, defines
+   the C macro DLL_EXPORT (together with PIC) when compiling for a DLL
+   and does not define it when compiling an object file meant to be linked
+   statically into some executable.  */
+# if defined DLL_EXPORT
+#  define DLL_EXPORTED __declspec(dllexport)
+# else
+#  define DLL_EXPORTED
+# endif
 #else
 # define DLL_EXPORTED
 #endif
 
-#include "gettextP.h"
+#include "localename.h"
 
 #if HAVE_CFLOCALECOPYPREFERREDLANGUAGES || HAVE_CFPREFERENCESCOPYAPPVALUE
 # if HAVE_CFLOCALECOPYPREFERREDLANGUAGES
@@ -52,7 +68,11 @@
 # include <CoreFoundation/CFPropertyList.h>
 # include <CoreFoundation/CFArray.h>
 # include <CoreFoundation/CFString.h>
+extern void gl_locale_name_canonicalize (char *name);
 #endif
+
+/* Get _nl_msg_cat_cntr declaration.  */
+#include "gettextP.h"
 
 #if (defined __APPLE__ && defined __MACH__) || defined _WIN32 || defined __CYGWIN__
 
@@ -1061,7 +1081,7 @@ static char const locales_with_principal_territory[][6 + 1] =
     "tl_PH",    /* Tagalog      Philippines */
     "to_TO",    /* Tonga        Tonga */
     "tpi_PG",   /* Tok Pisin    Papua New Guinea */
-    "tr_TR",    /* Turkish      Turkey */
+    "tr_TR",    /* Turkish      Türkiye */
     "tum_MW",   /* Tumbuka      Malawi */
     "ug_CN",    /* Uighur       China */
     "uk_UA",    /* Ukrainian    Ukraine */
@@ -1316,7 +1336,7 @@ static char const locales_with_principal_language[][6 + 1] =
     "tk_TM",    /* Turkmen      Turkmenistan */
     "ar_TN",    /* Arabic       Tunisia */
     "to_TO",    /* Tonga        Tonga */
-    "tr_TR",    /* Turkish      Turkey */
+    "tr_TR",    /* Turkish      Türkiye */
     "zh_TW",    /* Chinese      Taiwan */
     "sw_TZ",    /* Swahili      Tanzania */
     "uk_UA",    /* Ukrainian    Ukraine */

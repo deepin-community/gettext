@@ -1,5 +1,5 @@
 /* xgettext Scheme backend.
-   Copyright (C) 2004-2009, 2011, 2014, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2004-2009, 2011, 2014, 2018-2023 Free Software Foundation, Inc.
 
    This file was written by Bruno Haible <bruno@clisp.org>, 2004-2005.
 
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "xgettext.h"
 #include "xg-pos.h"
@@ -38,6 +39,7 @@
 #include "xg-arglist-parser.h"
 #include "xg-message.h"
 #include "error.h"
+#include "error-progname.h"
 #include "xalloc.h"
 #include "mem-hash-map.h"
 #include "gettext.h"
@@ -294,7 +296,7 @@ is_integer_syntax (const char *str, int len, int radix)
    If unconstrained is false, only real numbers are accepted; otherwise,
    complex numbers are accepted as well.
    Taken from guile-1.6.4/libguile/numbers.c:scm_istr2flo().  */
-static inline bool
+static bool
 is_other_number_syntax (const char *str, int len, int radix, bool unconstrained)
 {
   const char *p = str;
@@ -666,19 +668,34 @@ string_of_object (const struct object *op)
   return str;
 }
 
+
 /* Context lookup table.  */
 static flag_context_list_table_ty *flag_context_list_table;
+
+
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depth.  */
+static int nesting_depth;
+
 
 /* Read the next object.  */
 static void
 read_object (struct object *op, flag_context_ty outer_context)
 {
+  if (nesting_depth > MAX_NESTING_DEPTH)
+    {
+      error_with_progname = false;
+      error (EXIT_FAILURE, 0, _("%s:%d: error: too deeply nested objects"),
+             logical_file_name, line_number);
+    }
   for (;;)
     {
-      int c = do_getc ();
+      int ch = do_getc ();
       bool seen_underscore_prefix = false;
 
-      switch (c)
+      switch (ch)
         {
         case EOF:
           op->type = t_eof;
@@ -703,7 +720,7 @@ read_object (struct object *op, flag_context_ty outer_context)
             comment_start ();
             for (;;)
               {
-                c = do_getc ();
+                int c = do_getc ();
                 if (c == EOF || c == '\n')
                   break;
                 if (c != ';')
@@ -739,7 +756,9 @@ read_object (struct object *op, flag_context_ty outer_context)
                                        flag_context_list_iterator_advance (
                                          &context_iter));
 
+                ++nesting_depth;
                 read_object (&inner, inner_context);
+                nesting_depth--;
 
                 /* Recognize end of list.  */
                 if (inner.type == t_close)
@@ -830,13 +849,15 @@ read_object (struct object *op, flag_context_ty outer_context)
             if (c != EOF && c != '@')
               do_ungetc (c);
           }
-          /*FALLTHROUGH*/
+          FALLTHROUGH;
         case '\'':
         case '`':
           {
             struct object inner;
 
+            ++nesting_depth;
             read_object (&inner, null_context);
+            nesting_depth--;
 
             /* Dots and EOF are not allowed here.  But be tolerant.  */
 
@@ -850,21 +871,23 @@ read_object (struct object *op, flag_context_ty outer_context)
         case '#':
           /* Dispatch macro handling.  */
           {
-            c = do_getc ();
-            if (c == EOF)
+            int dmc = do_getc ();
+            if (dmc == EOF)
               /* Invalid input.  Be tolerant, no error message.  */
               {
                 op->type = t_other;
                 return;
               }
 
-            switch (c)
+            switch (dmc)
               {
               case '(': /* Vector */
-                do_ungetc (c);
+                do_ungetc (dmc);
                 {
                   struct object inner;
+                  ++nesting_depth;
                   read_object (&inner, null_context);
+                  nesting_depth--;
                   /* Dots and EOF are not allowed here.
                      But be tolerant.  */
                   free_object (&inner);
@@ -890,7 +913,7 @@ read_object (struct object *op, flag_context_ty outer_context)
               case 'y':
                 {
                   struct token token;
-                  do_ungetc (c);
+                  do_ungetc (dmc);
                   read_token (&token, '#');
                   if ((token.charcount == 2
                        && (token.chars[1] == 'a' || token.chars[1] == 'c'
@@ -916,7 +939,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                                   && token.chars[2] == 'u'
                                   && token.chars[3] == '8'))))
                     {
-                      c = do_getc ();
+                      int c = do_getc ();
                       if (c != EOF)
                         do_ungetc (c);
                       if (c == '(')
@@ -944,7 +967,9 @@ read_object (struct object *op, flag_context_ty outer_context)
                                #y(...) - vector of byte (old)
                            */
                           struct object inner;
+                          ++nesting_depth;
                           read_object (&inner, null_context);
+                          nesting_depth--;
                           /* Dots and EOF are not allowed here.
                              But be tolerant.  */
                           free_token (&token);
@@ -969,7 +994,7 @@ read_object (struct object *op, flag_context_ty outer_context)
               case 'I': case 'i':
                 {
                   struct token token;
-                  do_ungetc (c);
+                  do_ungetc (dmc);
                   read_token (&token, '#');
                   if (is_number (&token))
                     {
@@ -984,7 +1009,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                       if (token.charcount == 2
                           && (token.chars[1] == 'e' || token.chars[1] == 'i'))
                         {
-                          c = do_getc ();
+                          int c = do_getc ();
                           if (c != EOF)
                             do_ungetc (c);
                           if (c == '(')
@@ -994,7 +1019,9 @@ read_object (struct object *op, flag_context_ty outer_context)
                                    #i(...) - vector of double-float (old)
                                */
                               struct object inner;
+                              ++nesting_depth;
                               read_object (&inner, null_context);
+                              nesting_depth--;
                               /* Dots and EOF are not allowed here.
                                  But be tolerant.  */
                               free_token (&token);
@@ -1134,7 +1161,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                 /* Bit vector.  */
                 {
                   struct token token;
-                  read_token (&token, c);
+                  read_token (&token, dmc);
                   /* The token should consists only of '0' and '1', except
                      for the initial '*'.  But be tolerant.  */
                   free_token (&token);
@@ -1152,7 +1179,7 @@ read_object (struct object *op, flag_context_ty outer_context)
 
                   for (;;)
                     {
-                      c = do_getc ();
+                      int c = do_getc ();
 
                       if (c == EOF)
                         break;
@@ -1184,7 +1211,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                 /* Character.  */
                 {
                   struct token token;
-                  c = do_getc ();
+                  int c = do_getc ();
                   if (c != EOF)
                     {
                       read_token (&token, c);
@@ -1215,18 +1242,23 @@ read_object (struct object *op, flag_context_ty outer_context)
                      n ::= DIGIT+
                      x ::= {'a'|'b'|'c'|'e'|'i'|'s'|'u'}
                  */
-                do
-                  c = do_getc ();
-                while (c >= '0' && c <= '9');
-                /* c should be one of {'a'|'b'|'c'|'e'|'i'|'s'|'u'}.
-                   But be tolerant.  */
-                /*FALLTHROUGH*/
+                {
+                  int c;
+                  do
+                    c = do_getc ();
+                  while (c >= '0' && c <= '9');
+                  /* c should be one of {'a'|'b'|'c'|'e'|'i'|'s'|'u'}.
+                     But be tolerant.  */
+                }
+                FALLTHROUGH;
               case '\'': /* boot-9.scm */
               case '.': /* boot-9.scm */
               case ',': /* srfi-10.scm */
                 {
                   struct object inner;
+                  ++nesting_depth;
                   read_object (&inner, null_context);
+                  nesting_depth--;
                   /* Dots and EOF are not allowed here.
                      But be tolerant.  */
                   free_object (&inner);
@@ -1270,7 +1302,7 @@ read_object (struct object *op, flag_context_ty outer_context)
               }
             seen_underscore_prefix = true;
           }
-          /*FALLTHROUGH*/
+          FALLTHROUGH;
 
         case '"':
           {
@@ -1344,7 +1376,7 @@ read_object (struct object *op, flag_context_ty outer_context)
         case '+': case '-': case '.':
           /* Read a number or symbol token.  */
           op->token = XMALLOC (struct token);
-          read_token (op->token, c);
+          read_token (op->token, ch);
           if (op->token->charcount == 1 && op->token->chars[0] == '.')
             {
               free_token (op->token);
@@ -1370,7 +1402,7 @@ read_object (struct object *op, flag_context_ty outer_context)
         default:
           /* Read a symbol token.  */
           op->token = XMALLOC (struct token);
-          read_token (op->token, c);
+          read_token (op->token, ch);
           op->type = t_symbol;
           last_non_comment_line = line_number;
           return;
@@ -1396,6 +1428,7 @@ extract_scheme (FILE *f,
   last_non_comment_line = -1;
 
   flag_context_list_table = flag_table;
+  nesting_depth = 0;
 
   init_keywords ();
 

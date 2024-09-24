@@ -1,6 +1,5 @@
 /* Converts Uniforum style .po files to binary .mo files
-   Copyright (C) 1995-1998, 2000-2007, 2009-2010, 2012, 2014-2016, 2018-2020 Free Software
-   Foundation, Inc.
+   Copyright (C) 1995-1998, 2000-2007, 2009-2010, 2012, 2014-2016, 2018-2023 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@gnu.ai.mit.edu>, April 1995.
 
    This program is free software: you can redistribute it and/or modify
@@ -70,8 +69,6 @@
 #include "gettext.h"
 
 #define _(str) gettext (str)
-
-#define SIZEOF(a) (sizeof(a) / sizeof(a[0]))
 
 /* Contains exit status for case in which no premature exit occurs.  */
 static int exit_status;
@@ -195,10 +192,12 @@ static const struct option long_options[] =
   { "help", no_argument, NULL, 'h' },
   { "java", no_argument, NULL, 'j' },
   { "java2", no_argument, NULL, CHAR_MAX + 5 },
-  { "keyword", required_argument, NULL, 'k' },
+  { "keyword", optional_argument, NULL, 'k' },
   { "language", required_argument, NULL, 'L' },
   { "locale", required_argument, NULL, 'l' },
+  { "no-convert", no_argument, NULL, CHAR_MAX + 17 },
   { "no-hash", no_argument, NULL, CHAR_MAX + 6 },
+  { "no-redundancy", no_argument, NULL, CHAR_MAX + 18 },
   { "output-file", required_argument, NULL, 'o' },
   { "properties-input", no_argument, NULL, 'P' },
   { "qt", no_argument, NULL, CHAR_MAX + 9 },
@@ -268,7 +267,7 @@ main (int argc, char *argv[])
   /* Ensure that write errors on stdout are detected.  */
   atexit (close_stdout);
 
-  while ((opt = getopt_long (argc, argv, "a:cCd:D:fhjl:L:o:Pr:vVx",
+  while ((opt = getopt_long (argc, argv, "a:cCd:D:fhjk::l:L:o:Pr:vVx",
                              long_options, NULL))
          != EOF)
     switch (opt)
@@ -312,16 +311,13 @@ main (int argc, char *argv[])
         java_mode = true;
         break;
       case 'k':
-        if (optarg == NULL)
+        if (optarg == NULL || *optarg == '\0')
           desktop_default_keywords = false;
         else
           {
+            /* Ensure that desktop_keywords is initialized.  */
             if (desktop_keywords.table == NULL)
-              {
-                hash_init (&desktop_keywords, 100);
-                desktop_default_keywords = false;
-              }
-
+              hash_init (&desktop_keywords, 100);
             desktop_add_keyword (&desktop_keywords, optarg, false);
           }
         break;
@@ -428,6 +424,12 @@ main (int argc, char *argv[])
         desktop_template_name = optarg;
         xml_template_name = optarg;
         break;
+      case CHAR_MAX + 17: /* --no-convert */
+        no_convert_to_utf8 = true;
+        break;
+      case CHAR_MAX + 18: /* --no-redundancy */
+        no_redundancy = true;
+        break;
       default:
         usage (EXIT_FAILURE);
         break;
@@ -444,7 +446,7 @@ License GPLv3+: GNU GPL version 3 or later <%s>\n\
 This is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n\
 "),
-              "1995-2020", "https://gnu.org/licenses/gpl.html");
+              "1995-2023", "https://gnu.org/licenses/gpl.html");
       printf (_("Written by %s.\n"), proper_name ("Ulrich Drepper"));
       exit (EXIT_SUCCESS);
     }
@@ -639,11 +641,13 @@ There is NO WARRANTY, to the extent permitted by law.\n\
         }
     }
 
-  if (desktop_mode && desktop_default_keywords)
+  if (desktop_mode)
     {
+      /* Ensure that desktop_keywords is initialized.  */
       if (desktop_keywords.table == NULL)
         hash_init (&desktop_keywords, 100);
-      desktop_add_default_keywords (&desktop_keywords);
+      if (desktop_default_keywords)
+        desktop_add_default_keywords (&desktop_keywords);
     }
 
   /* Bulk processing mode for .desktop files.
@@ -654,8 +658,6 @@ There is NO WARRANTY, to the extent permitted by law.\n\
                                          desktop_template_name,
                                          &desktop_keywords,
                                          output_file_name);
-      if (desktop_keywords.table != NULL)
-        hash_destroy (&desktop_keywords);
       exit (exit_status);
     }
 
@@ -777,6 +779,20 @@ There is NO WARRANTY, to the extent permitted by law.\n\
       }
   }
 
+  /* Compose the input file name(s).
+     This is used for statistics and error messages.  */
+  char *all_input_file_names;
+  {
+    string_list_ty input_file_names;
+
+    string_list_init (&input_file_names);;
+    for (arg_i = optind; arg_i < argc; arg_i++)
+      string_list_append (&input_file_names, argv[arg_i]);
+    all_input_file_names =
+      string_list_join (&input_file_names, ", ", '\0', false);
+    string_list_destroy (&input_file_names);
+  }
+
   /* Now write out all domains.  */
   for (domain = domain_list; domain != NULL; domain = domain->next)
     {
@@ -822,9 +838,6 @@ There is NO WARRANTY, to the extent permitted by law.\n\
                                        &desktop_keywords,
                                        domain->file_name))
             exit_status = EXIT_FAILURE;
-
-          if (desktop_keywords.table != NULL)
-            hash_destroy (&desktop_keywords);
         }
       else if (xml_mode)
         {
@@ -838,7 +851,7 @@ There is NO WARRANTY, to the extent permitted by law.\n\
       else
         {
           if (msgdomain_write_mo (domain->mlp, domain->domain_name,
-                                  domain->file_name))
+                                  domain->file_name, all_input_file_names))
             exit_status = EXIT_FAILURE;
         }
 
@@ -852,23 +865,9 @@ There is NO WARRANTY, to the extent permitted by law.\n\
       if (do_statistics + verbose >= 2 && optind < argc)
         {
           /* Print the input file name(s) in front of the statistics line.  */
-          char *all_input_file_names;
-
-          {
-            string_list_ty input_file_names;
-
-            string_list_init (&input_file_names);;
-            for (arg_i = optind; arg_i < argc; arg_i++)
-              string_list_append (&input_file_names, argv[arg_i]);
-            all_input_file_names =
-              string_list_join (&input_file_names, ", ", '\0', false);
-            string_list_destroy (&input_file_names);
-          }
-
           /* TRANSLATORS: The prefix before a statistics message.  The argument
              is a file name or a comma separated list of file names.  */
           fprintf (stderr, _("%s: "), all_input_file_names);
-          free (all_input_file_names);
         }
       fprintf (stderr,
                ngettext ("%d translated message", "%d translated messages",
@@ -1053,6 +1052,11 @@ Input file interpretation:\n"));
       printf ("\n");
       printf (_("\
 Output details:\n"));
+      printf (_("\
+      --no-convert            don't convert the messages to UTF-8 encoding\n"));
+      printf (_("\
+      --no-redundancy         don't pre-expand ISO C 99 <inttypes.h>\n\
+                                format string directive macros\n"));
       printf (_("\
   -a, --alignment=NUMBER      align strings to NUMBER bytes (default: %d)\n"), DEFAULT_OUTPUT_ALIGNMENT);
       printf (_("\
@@ -1408,12 +1412,12 @@ static void
 add_languages (string_list_ty *languages, string_list_ty *desired_languages,
                const char *line, size_t length)
 {
-  char *start;
+  const char *start;
 
   /* Split the line by whitespace and build the languages list.  */
-  for (start = (char *) line; start - line < length; )
+  for (start = line; start - line < length; )
     {
-      char *p;
+      const char *p;
 
       /* Skip whitespace before the string.  */
       while (*start == ' ' || *start == '\t')
@@ -1423,10 +1427,9 @@ add_languages (string_list_ty *languages, string_list_ty *desired_languages,
       while (*p != '\0' && *p != ' ' && *p != '\t')
         p++;
 
-      *p = '\0';
       if (desired_languages == NULL
-          || string_list_member (desired_languages, start))
-        string_list_append_unique (languages, start);
+          || string_list_member_desc (desired_languages, start, p - start))
+        string_list_append_unique_desc (languages, start, p - start);
       start = p + 1;
     }
 }
@@ -1639,16 +1642,13 @@ msgfmt_desktop_bulk (const char *directory,
   /* Read all .po files.  */
   nerrors = msgfmt_operand_list_add_from_directory (&operands, directory);
   if (nerrors > 0)
-    {
-      msgfmt_operand_list_destroy (&operands);
-      return 1;
-    }
-
-  /* Write the messages into .desktop file.  */
-  status = msgdomain_write_desktop_bulk (&operands,
-                                         template_file_name,
-                                         keywords,
-                                         file_name);
+    status = 1;
+  else
+    /* Write the messages into .desktop file.  */
+    status = msgdomain_write_desktop_bulk (&operands,
+                                           template_file_name,
+                                           keywords,
+                                           file_name);
 
   msgfmt_operand_list_destroy (&operands);
 

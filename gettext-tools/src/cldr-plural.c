@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.6.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -45,11 +45,11 @@
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
-/* Identify Bison output.  */
-#define YYBISON 1
+/* Identify Bison output, and Bison version.  */
+#define YYBISON 30802
 
-/* Bison version.  */
-#define YYBISON_VERSION "3.6.4"
+/* Bison version string.  */
+#define YYBISON_VERSION "3.8.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -171,7 +171,7 @@ new_range (struct cldr_plural_operand_ty *start,
   return result;
 }
 
-#line 175 "cldr-plural.tab.c"
+#line 175 "cldr-plural.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -194,70 +194,7 @@ new_range (struct cldr_plural_operand_ty *start,
 #  endif
 # endif
 
-/* Use api.header.include to #include this header
-   instead of duplicating it here.  */
-#ifndef YY_YY_CLDR_PLURAL_TAB_H_INCLUDED
-# define YY_YY_CLDR_PLURAL_TAB_H_INCLUDED
-/* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
-#endif
-
-/* Token kinds.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
-  {
-    YYEMPTY = -2,
-    YYEOF = 0,                     /* "end of file"  */
-    YYerror = 256,                 /* error  */
-    YYUNDEF = 257,                 /* "invalid token"  */
-    AND = 258,                     /* AND  */
-    OR = 259,                      /* OR  */
-    RANGE = 260,                   /* RANGE  */
-    ELLIPSIS = 261,                /* ELLIPSIS  */
-    OTHER = 262,                   /* OTHER  */
-    AT_INTEGER = 263,              /* AT_INTEGER  */
-    AT_DECIMAL = 264,              /* AT_DECIMAL  */
-    KEYWORD = 265,                 /* KEYWORD  */
-    INTEGER = 266,                 /* INTEGER  */
-    DECIMAL = 267,                 /* DECIMAL  */
-    OPERAND = 268                  /* OPERAND  */
-  };
-  typedef enum yytokentype yytoken_kind_t;
-#endif
-
-/* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
-{
-#line 129 "cldr-plural.y"
-
-  char *sval;
-  struct cldr_plural_condition_ty *cval;
-  struct cldr_plural_relation_ty *lval;
-  struct cldr_plural_expression_ty *eval;
-  struct cldr_plural_range_ty *gval;
-  struct cldr_plural_operand_ty *oval;
-  struct cldr_plural_range_list_ty *rval;
-  int ival;
-
-#line 249 "cldr-plural.tab.c"
-
-};
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
-#endif
-
-
-
-int yyparse (struct cldr_plural_parse_args *arg);
-
-#endif /* !YY_YY_CLDR_PLURAL_TAB_H_INCLUDED  */
+#include "cldr-plural.h"
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -341,6 +278,18 @@ typedef __INT_LEAST16_TYPE__ yytype_int16;
 typedef int_least16_t yytype_int16;
 #else
 typedef short yytype_int16;
+#endif
+
+/* Work around bug in HP-UX 11.23, which defines these macros
+   incorrectly for preprocessor constants.  This workaround can likely
+   be removed in 2023, as HPE has promised support for HP-UX 11.23
+   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
+   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
+#ifdef __hpux
+# undef UINT_LEAST8_MAX
+# undef UINT_LEAST16_MAX
+# define UINT_LEAST8_MAX 255
+# define UINT_LEAST16_MAX 65535
 #endif
 
 #if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
@@ -440,17 +389,23 @@ typedef int yy_state_fast_t;
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
-#if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
+# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
+# else
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
     _Pragma ("GCC diagnostic push")                                     \
     _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+# endif
 # define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
@@ -620,6 +575,7 @@ union yyalloc
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  52
 
+/* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   268
 
 
@@ -664,7 +620,7 @@ static const yytype_int8 yytranslate[] =
 };
 
 #if YYDEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
        0,   161,   161,   162,   165,   178,   181,   185,   191,   195,
@@ -702,17 +658,6 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
-   (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
-{
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,    59,    58,    61,    33,    37,    44,
-     126
-};
-#endif
-
 #define YYPACT_NINF (-20)
 
 #define yypact_value_is_default(Yyn) \
@@ -723,8 +668,8 @@ static const yytype_int16 yytoknum[] =
 #define yytable_value_is_error(Yyn) \
   0
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-     STATE-NUM.  */
+/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+   STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
        3,   -11,    -7,     0,   -20,     4,    -2,   -20,     3,    -9,
@@ -735,9 +680,9 @@ static const yytype_int8 yypact[] =
      -20,   -20
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
-     means the default is an error.  */
+/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE does not specify something else to do.  Zero
+   means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     2,    20,     0,     1,     0,     0,
@@ -748,23 +693,23 @@ static const yytype_int8 yydefact[] =
       18,    15
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
+/* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
      -20,   -20,    21,   -20,    14,    17,   -20,    18,   -19,   -20,
       20,   -20,   -20,    23,   -20,   -20,    22
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
+/* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     4,    13,    14,    15,    16,    40,    41,    42,
+       0,     3,     4,    13,    14,    15,    16,    40,    41,    42,
       10,    11,    24,    20,    21,    34,    22
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-     positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+   positive, shift that token.  If negative, reduce the rule whose
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
        7,    46,    18,    19,     5,    26,    18,    19,     6,     9,
@@ -785,8 +730,8 @@ static const yytype_int8 yycheck[] =
       -1,    -1,    -1,    -1,    -1,    33
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-     symbol of state STATE-NUM.  */
+/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
+   state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
        0,     7,    10,    22,    23,    15,    15,     0,    14,     8,
@@ -797,7 +742,7 @@ static const yytype_int8 yystos[] =
       11,    29
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
+/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    21,    22,    22,    23,    23,    24,    24,    25,    25,
@@ -806,7 +751,7 @@ static const yytype_int8 yyr1[] =
       37,    37,    37
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
+/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     1,     3,     4,     3,     1,     3,     1,     3,
@@ -824,6 +769,7 @@ enum { YYENOMEM = -2 };
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
+#define YYNOMEM         goto yyexhaustedlab
 
 
 #define YYRECOVERING()  (!!yyerrstatus)
@@ -864,10 +810,7 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-/* This macro is provided for backward compatibility. */
-# ifndef YY_LOCATION_PRINT
-#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-# endif
+
 
 
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
@@ -891,16 +834,12 @@ yy_symbol_value_print (FILE *yyo,
                        yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep, struct cldr_plural_parse_args *arg)
 {
   FILE *yyoutput = yyo;
-  YYUSE (yyoutput);
-  YYUSE (arg);
+  YY_USE (yyoutput);
+  YY_USE (arg);
   if (!yyvaluep)
     return;
-# ifdef YYPRINT
-  if (yykind < YYNTOKENS)
-    YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
-# endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -1014,8 +953,8 @@ static void
 yydestruct (const char *yymsg,
             yysymbol_kind_t yykind, YYSTYPE *yyvaluep, struct cldr_plural_parse_args *arg)
 {
-  YYUSE (yyvaluep);
-  YYUSE (arg);
+  YY_USE (yyvaluep);
+  YY_USE (arg);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
@@ -1023,70 +962,70 @@ yydestruct (const char *yymsg,
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   switch (yykind)
     {
-    case 10: /* KEYWORD  */
+    case YYSYMBOL_KEYWORD: /* KEYWORD  */
 #line 140 "cldr-plural.y"
             { free (((*yyvaluep).sval)); }
-#line 1030 "cldr-plural.tab.c"
+#line 969 "cldr-plural.c"
         break;
 
-    case 11: /* INTEGER  */
+    case YYSYMBOL_INTEGER: /* INTEGER  */
 #line 145 "cldr-plural.y"
             { free (((*yyvaluep).oval)); }
-#line 1036 "cldr-plural.tab.c"
+#line 975 "cldr-plural.c"
         break;
 
-    case 12: /* DECIMAL  */
+    case YYSYMBOL_DECIMAL: /* DECIMAL  */
 #line 145 "cldr-plural.y"
             { free (((*yyvaluep).oval)); }
-#line 1042 "cldr-plural.tab.c"
+#line 981 "cldr-plural.c"
         break;
 
-    case 13: /* OPERAND  */
+    case YYSYMBOL_OPERAND: /* OPERAND  */
 #line 147 "cldr-plural.y"
             { }
-#line 1048 "cldr-plural.tab.c"
+#line 987 "cldr-plural.c"
         break;
 
-    case 24: /* condition  */
+    case YYSYMBOL_condition: /* condition  */
 #line 141 "cldr-plural.y"
             { cldr_plural_condition_free (((*yyvaluep).cval)); }
-#line 1054 "cldr-plural.tab.c"
+#line 993 "cldr-plural.c"
         break;
 
-    case 25: /* and_condition  */
+    case YYSYMBOL_and_condition: /* and_condition  */
 #line 141 "cldr-plural.y"
             { cldr_plural_condition_free (((*yyvaluep).cval)); }
-#line 1060 "cldr-plural.tab.c"
+#line 999 "cldr-plural.c"
         break;
 
-    case 26: /* relation  */
+    case YYSYMBOL_relation: /* relation  */
 #line 142 "cldr-plural.y"
             { cldr_plural_relation_free (((*yyvaluep).lval)); }
-#line 1066 "cldr-plural.tab.c"
+#line 1005 "cldr-plural.c"
         break;
 
-    case 27: /* expression  */
+    case YYSYMBOL_expression: /* expression  */
 #line 143 "cldr-plural.y"
             { free (((*yyvaluep).eval)); }
-#line 1072 "cldr-plural.tab.c"
+#line 1011 "cldr-plural.c"
         break;
 
-    case 28: /* range_list  */
+    case YYSYMBOL_range_list: /* range_list  */
 #line 146 "cldr-plural.y"
             { cldr_plural_range_list_free (((*yyvaluep).rval)); }
-#line 1078 "cldr-plural.tab.c"
+#line 1017 "cldr-plural.c"
         break;
 
-    case 29: /* range_or_integer  */
+    case YYSYMBOL_range_or_integer: /* range_or_integer  */
 #line 144 "cldr-plural.y"
             { cldr_plural_range_free (((*yyvaluep).gval)); }
-#line 1084 "cldr-plural.tab.c"
+#line 1023 "cldr-plural.c"
         break;
 
-    case 30: /* range  */
+    case YYSYMBOL_range: /* range  */
 #line 144 "cldr-plural.y"
             { cldr_plural_range_free (((*yyvaluep).gval)); }
-#line 1090 "cldr-plural.tab.c"
+#line 1029 "cldr-plural.c"
         break;
 
       default:
@@ -1107,7 +1046,7 @@ yydestruct (const char *yymsg,
 int
 yyparse (struct cldr_plural_parse_args *arg)
 {
-/* The lookahead symbol.  */
+/* Lookahead token kind.  */
 int yychar;
 
 
@@ -1118,36 +1057,32 @@ YY_INITIAL_VALUE (static YYSTYPE yyval_default;)
 YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
 
     /* Number of syntax errors so far.  */
-    int yynerrs;
+    int yynerrs = 0;
 
-    yy_state_fast_t yystate;
+    yy_state_fast_t yystate = 0;
     /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
+    int yyerrstatus = 0;
 
-    /* The stacks and their tools:
-       'yyss': related to states.
-       'yyvs': related to semantic values.
-
-       Refer to the stacks through separate pointers, to allow yyoverflow
+    /* Refer to the stacks through separate pointers, to allow yyoverflow
        to reallocate them elsewhere.  */
 
     /* Their size.  */
-    YYPTRDIFF_T yystacksize;
+    YYPTRDIFF_T yystacksize = YYINITDEPTH;
 
-    /* The state stack.  */
+    /* The state stack: array, bottom, top.  */
     yy_state_t yyssa[YYINITDEPTH];
-    yy_state_t *yyss;
-    yy_state_t *yyssp;
+    yy_state_t *yyss = yyssa;
+    yy_state_t *yyssp = yyss;
 
-    /* The semantic value stack.  */
+    /* The semantic value stack: array, bottom, top.  */
     YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
+    YYSTYPE *yyvs = yyvsa;
+    YYSTYPE *yyvsp = yyvs;
 
   int yyn;
   /* The return value of yyparse.  */
   int yyresult;
-  /* Lookahead token as an internal (translated) token number.  */
+  /* Lookahead symbol kind.  */
   yysymbol_kind_t yytoken = YYSYMBOL_YYEMPTY;
   /* The variables used to return semantic value and location from the
      action routines.  */
@@ -1161,18 +1096,10 @@ YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  yynerrs = 0;
-  yystate = 0;
-  yyerrstatus = 0;
-
-  yystacksize = YYINITDEPTH;
-  yyssp = yyss = yyssa;
-  yyvsp = yyvs = yyvsa;
-
-
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yychar = YYEMPTY; /* Cause a token to be read.  */
+
   goto yysetstate;
 
 
@@ -1198,7 +1125,7 @@ yysetstate:
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
-    goto yyexhaustedlab;
+    YYNOMEM;
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
@@ -1226,7 +1153,7 @@ yysetstate:
 # else /* defined YYSTACK_RELOCATE */
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-        goto yyexhaustedlab;
+        YYNOMEM;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
         yystacksize = YYMAXDEPTH;
@@ -1237,7 +1164,7 @@ yysetstate:
           YY_CAST (union yyalloc *,
                    YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
-          goto yyexhaustedlab;
+          YYNOMEM;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
@@ -1258,6 +1185,7 @@ yysetstate:
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
+
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1370,7 +1298,7 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 4:
+  case 4: /* rule: KEYWORD ':' condition samples  */
 #line 166 "cldr-plural.y"
         {
           struct cldr_plural_rule_ty *rule = new_rule ((yyvsp[-3].sval), (yyvsp[-1].cval));
@@ -1384,76 +1312,76 @@ yyreduce:
             }
           result->items[result->nitems++] = rule;
         }
-#line 1388 "cldr-plural.tab.c"
+#line 1316 "cldr-plural.c"
     break;
 
-  case 6:
+  case 6: /* condition: and_condition  */
 #line 182 "cldr-plural.y"
         {
           (yyval.cval) = (yyvsp[0].cval);
         }
-#line 1396 "cldr-plural.tab.c"
+#line 1324 "cldr-plural.c"
     break;
 
-  case 7:
+  case 7: /* condition: condition OR and_condition  */
 #line 186 "cldr-plural.y"
         {
           (yyval.cval) = new_branch_condition (CLDR_PLURAL_CONDITION_OR, (yyvsp[-2].cval), (yyvsp[0].cval));
         }
-#line 1404 "cldr-plural.tab.c"
+#line 1332 "cldr-plural.c"
     break;
 
-  case 8:
+  case 8: /* and_condition: relation  */
 #line 192 "cldr-plural.y"
         {
           (yyval.cval) = new_leaf_condition ((yyvsp[0].lval));
         }
-#line 1412 "cldr-plural.tab.c"
+#line 1340 "cldr-plural.c"
     break;
 
-  case 9:
+  case 9: /* and_condition: and_condition AND relation  */
 #line 196 "cldr-plural.y"
         {
           (yyval.cval) = new_branch_condition (CLDR_PLURAL_CONDITION_AND,
                                      (yyvsp[-2].cval),
                                      new_leaf_condition ((yyvsp[0].lval)));
         }
-#line 1422 "cldr-plural.tab.c"
+#line 1350 "cldr-plural.c"
     break;
 
-  case 10:
+  case 10: /* relation: expression '=' range_list  */
 #line 204 "cldr-plural.y"
         {
           (yyval.lval) = new_relation ((yyvsp[-2].eval), CLDR_PLURAL_RELATION_EQUAL, (yyvsp[0].rval));
         }
-#line 1430 "cldr-plural.tab.c"
+#line 1358 "cldr-plural.c"
     break;
 
-  case 11:
+  case 11: /* relation: expression '!' range_list  */
 #line 208 "cldr-plural.y"
         {
           (yyval.lval) = new_relation ((yyvsp[-2].eval), CLDR_PLURAL_RELATION_NOT_EQUAL, (yyvsp[0].rval));
         }
-#line 1438 "cldr-plural.tab.c"
+#line 1366 "cldr-plural.c"
     break;
 
-  case 12:
+  case 12: /* expression: OPERAND  */
 #line 214 "cldr-plural.y"
         {
           (yyval.eval) = new_expression ((yyvsp[0].ival), 0);
         }
-#line 1446 "cldr-plural.tab.c"
+#line 1374 "cldr-plural.c"
     break;
 
-  case 13:
+  case 13: /* expression: OPERAND '%' INTEGER  */
 #line 218 "cldr-plural.y"
         {
           (yyval.eval) = new_expression ((yyvsp[-2].ival), (yyvsp[0].oval)->value.ival);
         }
-#line 1454 "cldr-plural.tab.c"
+#line 1382 "cldr-plural.c"
     break;
 
-  case 14:
+  case 14: /* range_list: range_or_integer  */
 #line 224 "cldr-plural.y"
         {
           struct cldr_plural_range_list_ty *ranges =
@@ -1461,67 +1389,67 @@ yyreduce:
           memset (ranges, 0, sizeof (struct cldr_plural_range_list_ty));
           (yyval.rval) = add_range (ranges, (yyvsp[0].gval));
         }
-#line 1465 "cldr-plural.tab.c"
+#line 1393 "cldr-plural.c"
     break;
 
-  case 15:
+  case 15: /* range_list: range_list ',' range_or_integer  */
 #line 231 "cldr-plural.y"
         {
           (yyval.rval) = add_range ((yyvsp[-2].rval), (yyvsp[0].gval));
         }
-#line 1473 "cldr-plural.tab.c"
+#line 1401 "cldr-plural.c"
     break;
 
-  case 16:
+  case 16: /* range_or_integer: range  */
 #line 237 "cldr-plural.y"
         {
           (yyval.gval) = (yyvsp[0].gval);
         }
-#line 1481 "cldr-plural.tab.c"
+#line 1409 "cldr-plural.c"
     break;
 
-  case 17:
+  case 17: /* range_or_integer: INTEGER  */
 #line 241 "cldr-plural.y"
         {
           (yyval.gval) = new_range ((yyvsp[0].oval), (yyvsp[0].oval));
         }
-#line 1489 "cldr-plural.tab.c"
+#line 1417 "cldr-plural.c"
     break;
 
-  case 18:
+  case 18: /* range: INTEGER RANGE INTEGER  */
 #line 247 "cldr-plural.y"
         {
           (yyval.gval) = new_range ((yyvsp[-2].oval), (yyvsp[0].oval));
         }
-#line 1497 "cldr-plural.tab.c"
+#line 1425 "cldr-plural.c"
     break;
 
-  case 29:
+  case 29: /* sample_range: DECIMAL  */
 #line 274 "cldr-plural.y"
         { free ((yyvsp[0].oval)); }
-#line 1503 "cldr-plural.tab.c"
+#line 1431 "cldr-plural.c"
     break;
 
-  case 30:
+  case 30: /* sample_range: DECIMAL '~' DECIMAL  */
 #line 276 "cldr-plural.y"
         { free ((yyvsp[-2].oval)); free ((yyvsp[0].oval)); }
-#line 1509 "cldr-plural.tab.c"
+#line 1437 "cldr-plural.c"
     break;
 
-  case 31:
+  case 31: /* sample_range: INTEGER  */
 #line 278 "cldr-plural.y"
         { free ((yyvsp[0].oval)); }
-#line 1515 "cldr-plural.tab.c"
+#line 1443 "cldr-plural.c"
     break;
 
-  case 32:
+  case 32: /* sample_range: INTEGER '~' INTEGER  */
 #line 280 "cldr-plural.y"
         { free ((yyvsp[-2].oval)); free ((yyvsp[0].oval)); }
-#line 1521 "cldr-plural.tab.c"
+#line 1449 "cldr-plural.c"
     break;
 
 
-#line 1525 "cldr-plural.tab.c"
+#line 1453 "cldr-plural.c"
 
       default: break;
     }
@@ -1603,6 +1531,7 @@ yyerrorlab:
      label yyerrorlab therefore never appears in user code.  */
   if (0)
     YYERROR;
+  ++yynerrs;
 
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
@@ -1663,7 +1592,7 @@ yyerrlab1:
 `-------------------------------------*/
 yyacceptlab:
   yyresult = 0;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
 /*-----------------------------------.
@@ -1671,24 +1600,22 @@ yyacceptlab:
 `-----------------------------------*/
 yyabortlab:
   yyresult = 1;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
-#if !defined yyoverflow
-/*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
-`-------------------------------------------------*/
+/*-----------------------------------------------------------.
+| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
+`-----------------------------------------------------------*/
 yyexhaustedlab:
   yyerror (arg, YY_("memory exhausted"));
   yyresult = 2;
-  /* Fall through.  */
-#endif
+  goto yyreturnlab;
 
 
-/*-----------------------------------------------------.
-| yyreturn -- parsing is finished, return the result.  |
-`-----------------------------------------------------*/
-yyreturn:
+/*----------------------------------------------------------.
+| yyreturnlab -- parsing is finished, clean up and return.  |
+`----------------------------------------------------------*/
+yyreturnlab:
   if (yychar != YYEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at

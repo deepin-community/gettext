@@ -1,12 +1,12 @@
 # getcwd.m4 - check for working getcwd that is compatible with glibc
 
-# Copyright (C) 2001, 2003-2007, 2009-2020 Free Software Foundation, Inc.
+# Copyright (C) 2001, 2003-2007, 2009-2024 Free Software Foundation, Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
 
 # Written by Paul Eggert.
-# serial 18
+# serial 22
 
 AC_DEFUN([gl_FUNC_GETCWD_NULL],
   [
@@ -21,12 +21,10 @@ AC_DEFUN([gl_FUNC_GETCWD_NULL],
 #        else /* on Windows with MSVC */
 #         include <direct.h>
 #        endif
-#        ifndef getcwd
-         char *getcwd ();
-#        endif
-]], [[
+         ]GL_MDA_DEFINES],
+         [[
 #if defined _WIN32 && ! defined __CYGWIN__
-/* mingw cwd does not start with '/', but getcwd does allocate.
+/* mingw cwd does not start with '/', but _getcwd does allocate.
    However, mingw fails to honor non-zero size.  */
 #else
            if (chdir ("/") != 0)
@@ -52,6 +50,8 @@ AC_DEFUN([gl_FUNC_GETCWD_NULL],
             *-gnu* | gnu*) gl_cv_func_getcwd_null="guessing yes";;
                            # Guess yes on musl systems.
             *-musl*)       gl_cv_func_getcwd_null="guessing yes";;
+                           # Guess yes on systems that emulate the Linux system calls.
+            midipix*)      gl_cv_func_getcwd_null="guessing yes";;
                            # Guess yes on Cygwin.
             cygwin*)       gl_cv_func_getcwd_null="guessing yes";;
                            # If we don't know, obey --enable-cross-guesses.
@@ -66,7 +66,8 @@ AC_DEFUN([gl_FUNC_GETCWD_SIGNATURE],
     [gl_cv_func_getcwd_posix_signature],
     [AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM(
-         [[#include <unistd.h>]],
+         [[#include <unistd.h>
+         ]GL_MDA_DEFINES],
          [[extern
            #ifdef __cplusplus
            "C"
@@ -112,7 +113,7 @@ AC_DEFUN([gl_FUNC_GETCWD],
 
   gl_abort_bug=no
   case "$host_os" in
-    mingw*)
+    mingw* | windows*)
       gl_cv_func_getcwd_path_max=yes
       ;;
     *)

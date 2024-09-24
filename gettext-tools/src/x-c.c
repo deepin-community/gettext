@@ -1,5 +1,5 @@
 /* xgettext C/C++/ObjectiveC backend.
-   Copyright (C) 1995-1998, 2000-2009, 2012-2015, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 1995-1998, 2000-2009, 2012-2015, 2018-2023 Free Software Foundation, Inc.
 
    This file was written by Peter Miller <millerp@canb.auug.org.au>
 
@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "rc-str-list.h"
 #include "xgettext.h"
@@ -295,6 +296,30 @@ init_flag_table_c ()
   xgettext_record_flag ("argp_error:2:c-format");
   xgettext_record_flag ("argp_failure:2:c-format");
 #endif
+
+  xgettext_record_flag ("gettext:1:pass-c++-format");
+  xgettext_record_flag ("dgettext:2:pass-c++-format");
+  xgettext_record_flag ("dcgettext:2:pass-c++-format");
+  xgettext_record_flag ("ngettext:1:pass-c++-format");
+  xgettext_record_flag ("ngettext:2:pass-c++-format");
+  xgettext_record_flag ("dngettext:2:pass-c++-format");
+  xgettext_record_flag ("dngettext:3:pass-c++-format");
+  xgettext_record_flag ("dcngettext:2:pass-c++-format");
+  xgettext_record_flag ("dcngettext:3:pass-c++-format");
+  xgettext_record_flag ("gettext_noop:1:pass-c++-format");
+  xgettext_record_flag ("pgettext:2:pass-c++-format");
+  xgettext_record_flag ("dpgettext:3:pass-c++-format");
+  xgettext_record_flag ("dcpgettext:3:pass-c++-format");
+  xgettext_record_flag ("npgettext:2:pass-c++-format");
+  xgettext_record_flag ("npgettext:3:pass-c++-format");
+  xgettext_record_flag ("dnpgettext:3:pass-c++-format");
+  xgettext_record_flag ("dnpgettext:4:pass-c++-format");
+  xgettext_record_flag ("dcnpgettext:3:pass-c++-format");
+  xgettext_record_flag ("dcnpgettext:4:pass-c++-format");
+
+  /* C++ <format> */
+  xgettext_record_flag ("vformat:1:c++-format");
+  xgettext_record_flag ("vformat_to:2:c++-format");
 
   xgettext_record_flag ("gettext:1:pass-qt-format");
   xgettext_record_flag ("dgettext:2:pass-qt-format");
@@ -664,7 +689,7 @@ phase1_ungetc (int c)
 
     case '\n':
       --line_number;
-      /* FALLTHROUGH */
+      FALLTHROUGH;
 
     default:
       if (phase1_pushback_length == SIZEOF (phase1_pushback))
@@ -882,7 +907,7 @@ phase4_getc ()
                   comment_line_end (2);
                   break;
                 }
-              /* FALLTHROUGH */
+              FALLTHROUGH;
 
             default:
               last_was_star = false;
@@ -969,7 +994,6 @@ struct token_ty
 
 /* Return value of phase7_getc when EOF is reached.  */
 #define P7_EOF (-1)
-#define P7_STRING_END (-2)
 
 /* Replace escape sequences within character strings with their single
    character equivalents.  */
@@ -993,10 +1017,13 @@ struct token_ty
 static int
 phase7_getc ()
 {
-  int c, n, j;
+  int c, j;
 
   /* Use phase 3, because phase 4 elides comments.  */
   c = phase3_getc ();
+
+  if (c == EOF)
+    return P7_EOF;
 
   /* Return a magic newline indicator, so that we can distinguish
      between the user requesting a newline in the string (e.g. using
@@ -1041,7 +1068,7 @@ phase7_getc ()
     case 'b':
       return '\b';
 
-      /* The \e escape is preculiar to gcc, and assumes an ASCII
+      /* The \e escape is peculiar to gcc, and assumes an ASCII
          character set (or superset).  We don't provide support for it
          here.  */
 
@@ -1071,56 +1098,83 @@ phase7_getc ()
         case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
           break;
         }
-      n = 0;
-      for (;;)
-        {
-          switch (c)
-            {
-            default:
-              phase3_ungetc (c);
-              return n;
+      {
+        int n;
+        bool overflow;
 
-            case '0': case '1': case '2': case '3': case '4':
-            case '5': case '6': case '7': case '8': case '9':
-              n = n * 16 + c - '0';
-              break;
+        n = 0;
+        overflow = false;
 
-            case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-              n = n * 16 + 10 + c - 'A';
-              break;
+        for (;;)
+          {
+            switch (c)
+              {
+              default:
+                phase3_ungetc (c);
+                if (overflow)
+                  {
+                    error_with_progname = false;
+                    error (0, 0, _("%s:%d: warning: hexadecimal escape sequence out of range"),
+                           logical_file_name, line_number);
+                    error_with_progname = true;
+                  }
+                return n;
 
-            case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-              n = n * 16 + 10 + c - 'a';
-              break;
-            }
-          c = phase3_getc ();
-        }
-      return n;
+              case '0': case '1': case '2': case '3': case '4':
+              case '5': case '6': case '7': case '8': case '9':
+                if (n < 0x100 / 16)
+                  n = n * 16 + c - '0';
+                else
+                  overflow = true;
+                break;
+
+              case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+                if (n < 0x100 / 16)
+                  n = n * 16 + 10 + c - 'A';
+                else
+                  overflow = true;
+                break;
+
+              case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+                if (n < 0x100 / 16)
+                  n = n * 16 + 10 + c - 'a';
+                else
+                  overflow = true;
+                break;
+              }
+            c = phase3_getc ();
+          }
+      }
 
     case '0': case '1': case '2': case '3':
     case '4': case '5': case '6': case '7':
-      n = 0;
-      for (j = 0; j < 3; ++j)
-        {
-          n = n * 8 + c - '0';
-          c = phase3_getc ();
-          switch (c)
-            {
-            default:
-              break;
+      {
+        int n;
 
-            case '0': case '1': case '2': case '3':
-            case '4': case '5': case '6': case '7':
-              continue;
-            }
-          break;
-        }
-      phase3_ungetc (c);
-      return n;
+        n = 0;
+        for (j = 0; j < 3; ++j)
+          {
+            n = n * 8 + c - '0';
+            c = phase3_getc ();
+            switch (c)
+              {
+              default:
+                break;
+
+              case '0': case '1': case '2': case '3':
+              case '4': case '5': case '6': case '7':
+                continue;
+              }
+            break;
+          }
+        phase3_ungetc (c);
+        return n;
+      }
 
     case 'U': case 'u':
       {
         unsigned char buf[8];
+        int n;
 
         n = 0;
         for (j = 0; j < (c == 'u' ? 4 : 8); j++)
@@ -1282,7 +1336,10 @@ phase5_get (token_ty *tp)
                  Note: The programmer who passes an UTF-8 encoded string to
                  gettext() or similar API functions will have to have called
                  bind_textdomain_codeset (DOMAIN, "UTF-8") first.  */
-              if (bufpos == 2 && buffer[0] == 'u' && buffer[1] == '8')
+              if ((bufpos == 1
+                   && (buffer[0] == 'u' || buffer[0] == 'U'
+                       || buffer[0] == 'L'))
+                  || (bufpos == 2 && buffer[0] == 'u' && buffer[1] == '8'))
                 goto string_literal;
               /* Recognize C++11 raw string literals.
                  See ISO C++ 11 section 2.14.5 [lex.string].
@@ -1301,8 +1358,14 @@ phase5_get (token_ty *tp)
                   && buffer[bufpos - 1] == 'R')
                 {
                   /* Only R and u8R raw strings can be used as gettext()
-                     arguments, for type reasons.  */
-                  const bool relevant = (bufpos != 2);
+                     arguments, for type reasons.  But the programmer may have
+                     defined
+                       - a c16gettext function that takes a 'const char16_t *'
+                         argument, or
+                       - a c32gettext function that takes a 'const char32_t *'
+                         argument, or
+                       - a wgettext function that takes a 'const wchar_t *'
+                         argument.  */
                   int starting_line_number = line_number;
                   bufpos = 0;
                   /* Start the buffer with a closing parenthesis.  This makes the
@@ -1344,7 +1407,7 @@ phase5_get (token_ty *tp)
                           error (0, 0, _("%s:%d: warning: a double-quote in the delimiter of a raw string literal is unsupported"),
                                  logical_file_name, starting_line_number);
                           error_with_progname = true;
-                          /* FALLTHROUGH */
+                          FALLTHROUGH;
                         default:
                           valid_delimiter_char = false;
                           break;
@@ -1368,10 +1431,8 @@ phase5_get (token_ty *tp)
                       int state;
 
                       /* Start accumulating the string.  */
-                      if (relevant)
-                        mixed_string_buffer_init (&msb, lc_string,
-                                                  logical_file_name,
-                                                  line_number);
+                      mixed_string_buffer_init (&msb, lc_string,
+                                                logical_file_name, line_number);
                       state = 0;
 
                       for (;;)
@@ -1379,8 +1440,7 @@ phase5_get (token_ty *tp)
                           c = phase3_getc ();
 
                           /* Keep line_number in sync.  */
-                          if (relevant)
-                            msb.line_number = line_number;
+                          msb.line_number = line_number;
 
                           if (c == EOF)
                             break;
@@ -1393,14 +1453,9 @@ phase5_get (token_ty *tp)
                               else /* state == bufpos && c == '"' */
                                 {
                                   /* Finished parsing the string.  */
-                                  if (relevant)
-                                    {
-                                      tp->type = token_type_string_literal;
-                                      tp->mixed_string = mixed_string_buffer_result (&msb);
-                                      tp->comment = add_reference (savable_comment);
-                                    }
-                                  else
-                                    tp->type = token_type_symbol;
+                                  tp->type = token_type_string_literal;
+                                  tp->mixed_string = mixed_string_buffer_result (&msb);
+                                  tp->comment = add_reference (savable_comment);
                                   return;
                                 }
                             }
@@ -1410,17 +1465,15 @@ phase5_get (token_ty *tp)
 
                               /* None of the bytes buffer[0]...buffer[state-1]
                                  can be ')'.  */
-                              if (relevant)
-                                for (i = 0; i < state; i++)
-                                  mixed_string_buffer_append_char (&msb, buffer[i]);
+                              for (i = 0; i < state; i++)
+                                mixed_string_buffer_append_char (&msb, buffer[i]);
 
                               /* But c may be ')'.  */
                               if (c == ')')
                                 state = 1;
                               else
                                 {
-                                  if (relevant)
-                                    mixed_string_buffer_append_char (&msb, c);
+                                  mixed_string_buffer_append_char (&msb, c);
                                   state = 0;
                                 }
                             }
@@ -1450,7 +1503,7 @@ phase5_get (token_ty *tp)
                   tp->type = token_type_symbol;
                   return;
                 }
-              /* FALLTHROUGH */
+              FALLTHROUGH;
 
             default:
               phase4_ungetc (c);
@@ -1482,7 +1535,7 @@ phase5_get (token_ty *tp)
           c = '.';
           break;
         }
-      /* FALLTHROUGH */
+      FALLTHROUGH;
 
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
@@ -1505,7 +1558,7 @@ phase5_get (token_ty *tp)
             case 'P':
               /* In C99 and C++17, 'p' and 'P' can be used as an exponent
                  marker.  */
-              /* FALLTHROUGH */
+              FALLTHROUGH;
             case 'e':
             case 'E':
               if (bufpos >= bufmax)
@@ -1586,7 +1639,41 @@ phase5_get (token_ty *tp)
                       break;
                     }
                 }
-              /* FALLTHROUGH */
+              else
+                {
+                  /* In C23, a single-quote between two hexadecimal digits
+                     can be part of a number token.  It's called a "digit
+                     separator".  See ISO C 23 § 6.4.4.1 and § 6.4.4.2.  */
+                  if (bufpos > 0)
+                    {
+                      char prev = buffer[bufpos - 1];
+                      if ((prev >= '0' && prev <= '9')
+                          || (prev >= 'A' && prev <= 'F')
+                          || (prev >= 'a' && prev <= 'f'))
+                        {
+                          int c1 = phase4_getc ();
+                          if ((c1 >= '0' && c1 <= '9')
+                              || (c1 >= 'A' && c1 <= 'F')
+                              || (c1 >= 'a' && c1 <= 'f'))
+                            {
+                              if (bufpos >= bufmax)
+                                {
+                                  bufmax = 2 * bufmax + 10;
+                                  buffer = xrealloc (buffer, bufmax);
+                                }
+                              buffer[bufpos++] = c;
+                              c = c1;
+                              continue;
+                            }
+                          /* The two phase4_getc() calls that returned c and c1
+                             did nothing more than to call phase3_getc(),
+                             without any lookahead.  Therefore 2 pushback
+                             characters are supported in this case.  */
+                          phase4_ungetc (c1);
+                        }
+                    }
+                }
+              FALLTHROUGH;
             default:
               phase4_ungetc (c);
               break;
@@ -1620,7 +1707,7 @@ phase5_get (token_ty *tp)
               phase7_ungetc ('\n');
               break;
             }
-          if (c == EOF || c == P7_QUOTE)
+          if (c == P7_EOF || c == P7_QUOTE)
             break;
         }
       tp->type = token_type_character_constant;
@@ -1657,7 +1744,7 @@ phase5_get (token_ty *tp)
                 phase7_ungetc ('\n');
                 break;
               }
-            if (c == EOF || c == P7_QUOTES)
+            if (c == P7_EOF || c == P7_QUOTES)
               break;
             if (c == P7_QUOTE)
               c = '\'';
@@ -1703,7 +1790,7 @@ phase5_get (token_ty *tp)
           tp->comment = add_reference (savable_comment);
           return;
         }
-      /* FALLTHROUGH */
+      FALLTHROUGH;
 
     default:
       /* We could carefully recognize each of the 2 and 3 character
@@ -2145,7 +2232,7 @@ x_c_lex (xgettext_token_ty *tp)
 
         case token_type_objc_special:
           drop_reference (token.comment);
-          /* FALLTHROUGH */
+          FALLTHROUGH;
 
         default:
           last_non_comment_line = newline_count;
@@ -2162,6 +2249,15 @@ x_c_lex (xgettext_token_ty *tp)
 
 /* Context lookup table.  */
 static flag_context_list_table_ty *flag_context_list_table;
+
+
+/* Maximum supported nesting depth.
+   ISO C 23 § 5.2.4.1.(1) requires 63 "nesting levels of parenthesized
+   expressions within a full expression"; then 1000 is more than enough.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depth.  */
+static int nesting_depth;
 
 
 /* The file is broken into tokens.  Scan the token stream, looking for
@@ -2245,6 +2341,12 @@ extract_parenthesized (message_list_ty *mlp,
           continue;
 
         case xgettext_token_type_lparen:
+          if (++nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open parentheses"),
+                     logical_file_name, line_number);
+            }
           if (extract_parenthesized (mlp, inner_context, next_context_iter,
                                      arglist_parser_alloc (mlp,
                                                            state ? next_shapes : NULL)))
@@ -2252,6 +2354,7 @@ extract_parenthesized (message_list_ty *mlp,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          nesting_depth--;
           next_context_iter = null_context_list_iterator;
           selectorcall_context_iter = null_context_list_iterator;
           state = 0;
@@ -2356,6 +2459,7 @@ extract_whole_file (FILE *f,
   phase6_pushback_length = 0;
 
   flag_context_list_table = flag_table;
+  nesting_depth = 0;
 
   init_keywords ();
 

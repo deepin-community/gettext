@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2020 Free Software Foundation, Inc.
+# Copyright (C) 2002-2024 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # This file is distributed in the hope that it will be useful,
@@ -39,6 +39,7 @@
 #  --libtool \
 #  --macro-prefix=gtpo \
 #  --avoid=progname \
+#  attribute \
 #  basename-lgpl \
 #  c-ctype \
 #  c-strcase \
@@ -49,6 +50,7 @@
 #  fdopen \
 #  filename \
 #  fopen \
+#  free-posix \
 #  fstrcmp \
 #  fwriteerror \
 #  gcd \
@@ -71,6 +73,7 @@
 #  stpncpy \
 #  strchrnul \
 #  strerror \
+#  string-desc \
 #  unictype/ctype-space \
 #  unilbrk/ulc-width-linebreaks \
 #  unistr/u16-mbtouc \
@@ -90,6 +93,7 @@
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([../gnulib-local])
 gl_MODULES([
+  attribute
   basename-lgpl
   c-ctype
   c-strcase
@@ -100,6 +104,7 @@ gl_MODULES([
   fdopen
   filename
   fopen
+  free-posix
   fstrcmp
   fwriteerror
   gcd
@@ -122,6 +127,7 @@ gl_MODULES([
   stpncpy
   strchrnul
   strerror
+  string-desc
   unictype/ctype-space
   unilbrk/ulc-width-linebreaks
   unistr/u16-mbtouc

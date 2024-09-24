@@ -1,5 +1,5 @@
 /* Internationalization Tag Set (ITS) handling
-   Copyright (C) 2015, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2015, 2018-2020, 2023 Free Software Foundation, Inc.
 
    This file was written by Daiki Ueno <ueno@gnu.org>, 2015.
 
@@ -312,7 +312,6 @@ its_rule_apply (struct its_rule_ty *rule, struct its_pool_ty *pool, xmlDoc *doc)
 {
   xmlXPathContext *context;
   xmlXPathObject *object;
-  size_t i;
 
   if (!rule->selector)
     {
@@ -348,6 +347,8 @@ its_rule_apply (struct its_rule_ty *rule, struct its_pool_ty *pool, xmlDoc *doc)
   if (object->nodesetval)
     {
       xmlNodeSet *nodes = object->nodesetval;
+      size_t i;
+
       for (i = 0; i < nodes->nodeNr; i++)
         {
           xmlNode *node = nodes->nodeTab[i];
@@ -632,8 +633,8 @@ _its_collect_text_content (xmlNode *node,
 
         case XML_ELEMENT_NODE:
           {
-            xmlOutputBuffer *buffer = xmlAllocOutputBuffer (NULL);
-            xmlTextWriter *writer = xmlNewTextWriter (buffer);
+            xmlOutputBuffer *obuffer = xmlAllocOutputBuffer (NULL);
+            xmlTextWriter *writer = xmlNewTextWriter (obuffer);
             char *p = _its_collect_text_content (n, whitespace,
                                                  no_escape);
             const char *ccontent;
@@ -654,7 +655,7 @@ _its_collect_text_content (xmlNode *node,
             if (*p != '\0')
               xmlTextWriterWriteRaw (writer, BAD_CAST p);
             xmlTextWriterEndElement (writer);
-            ccontent = (const char *) xmlOutputBufferGetContent (buffer);
+            ccontent = (const char *) xmlOutputBufferGetContent (obuffer);
             content = normalize_whitespace (ccontent, whitespace);
             xmlFreeTextWriter (writer);
             free (p);
@@ -723,7 +724,7 @@ its_translate_rule_constructor (struct its_rule_ty *pop, xmlNode *node)
   free (prop);
 }
 
-struct its_value_list_ty *
+static struct its_value_list_ty *
 its_translate_rule_eval (struct its_rule_ty *pop, struct its_pool_ty *pool,
                          xmlNode *node)
 {
@@ -859,7 +860,7 @@ its_localization_note_rule_constructor (struct its_rule_ty *pop, xmlNode *node)
   /* FIXME: locNoteRef and locNoteRefPointer */
 }
 
-struct its_value_list_ty *
+static struct its_value_list_ty *
 its_localization_note_rule_eval (struct its_rule_ty *pop,
                                  struct its_pool_ty *pool,
                                  xmlNode *node)
@@ -1006,7 +1007,7 @@ its_element_within_text_rule_constructor (struct its_rule_ty *pop,
   free (prop);
 }
 
-struct its_value_list_ty *
+static struct its_value_list_ty *
 its_element_within_text_rule_eval (struct its_rule_ty *pop,
                                    struct its_pool_ty *pool,
                                    xmlNode *node)
@@ -1093,7 +1094,7 @@ its_preserve_space_rule_constructor (struct its_rule_ty *pop,
   free (prop);
 }
 
-struct its_value_list_ty *
+static struct its_value_list_ty *
 its_preserve_space_rule_eval (struct its_rule_ty *pop,
                               struct its_pool_ty *pool,
                               xmlNode *node)
@@ -1186,7 +1187,7 @@ its_extension_context_rule_constructor (struct its_rule_ty *pop, xmlNode *node)
     }
 }
 
-struct its_value_list_ty *
+static struct its_value_list_ty *
 its_extension_context_rule_eval (struct its_rule_ty *pop,
                                  struct its_pool_ty *pool,
                                  xmlNode *node)
@@ -1245,7 +1246,7 @@ its_extension_escape_rule_constructor (struct its_rule_ty *pop, xmlNode *node)
   free (prop);
 }
 
-struct its_value_list_ty *
+static struct its_value_list_ty *
 its_extension_escape_rule_eval (struct its_rule_ty *pop,
                                 struct its_pool_ty *pool,
                                 xmlNode *node)
@@ -1595,12 +1596,10 @@ its_rule_list_extract_nodes (its_rule_list_ty *rules,
 {
   if (node->type == XML_ELEMENT_NODE)
     {
-      xmlNode *n;
-
       if (node->properties)
         {
-          xmlAttr *attr = node->properties;
-          for (; attr; attr = attr->next)
+          xmlAttr *attr;
+          for (attr = node->properties; attr; attr = attr->next)
             {
               xmlNode *n = (xmlNode *) attr;
               if (its_rule_list_is_translatable (rules, n, 0))
@@ -1612,6 +1611,7 @@ its_rule_list_extract_nodes (its_rule_list_ty *rules,
         its_node_list_append (nodes, node);
       else
         {
+          xmlNode *n;
           for (n = node->children; n; n = n->next)
             its_rule_list_extract_nodes (rules, nodes, n);
         }
@@ -1626,7 +1626,6 @@ _its_get_content (struct its_rule_list_ty *rules, xmlNode *node,
 {
   xmlXPathContext *context;
   xmlXPathObject *object;
-  size_t i;
   char *result = NULL;
 
   context = xmlXPathNewContext (node->doc);
@@ -1636,19 +1635,23 @@ _its_get_content (struct its_rule_list_ty *rules, xmlNode *node,
       return NULL;
     }
 
-  for (i = 0; i < rules->nitems; i++)
-    {
-      struct its_rule_ty *rule = rules->items[i];
-      if (rule->namespaces)
-        {
-          size_t i;
-          for (i = 0; rule->namespaces[i] != NULL; i++)
-            {
-              xmlNs *ns = rule->namespaces[i];
-              xmlXPathRegisterNs (context, ns->prefix, ns->href);
-            }
-        }
-    }
+  {
+    size_t i;
+
+    for (i = 0; i < rules->nitems; i++)
+      {
+        struct its_rule_ty *rule = rules->items[i];
+        if (rule->namespaces)
+          {
+            size_t j;
+            for (j = 0; rule->namespaces[j] != NULL; j++)
+              {
+                xmlNs *ns = rule->namespaces[j];
+                xmlXPathRegisterNs (context, ns->prefix, ns->href);
+              }
+          }
+      }
+  }
 
   xmlXPathSetContextNode (node, context);
   object = xmlXPathEvalExpression (BAD_CAST pointer, context);

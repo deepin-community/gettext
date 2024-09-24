@@ -1,5 +1,5 @@
 /* xgettext Emacs Lisp backend.
-   Copyright (C) 2001-2003, 2005-2009, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2003, 2005-2009, 2018-2023 Free Software Foundation, Inc.
 
    This file was written by Bruno Haible <haible@clisp.cons.org>, 2001-2002.
 
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "xgettext.h"
 #include "xg-pos.h"
@@ -38,6 +39,7 @@
 #include "xg-arglist-parser.h"
 #include "xg-message.h"
 #include "error.h"
+#include "error-progname.h"
 #include "xalloc.h"
 #include "mem-hash-map.h"
 #include "c-ctype.h"
@@ -426,14 +428,30 @@ string_of_object (const struct object *op)
   return str;
 }
 
+
 /* Context lookup table.  */
 static flag_context_list_table_ty *flag_context_list_table;
+
+
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depths.  */
+static int escape_nesting_depth;
+static int nesting_depth;
+
 
 /* Returns the character represented by an escape sequence.  */
 #define IGNORABLE_ESCAPE (EOF - 1)
 static int
 do_getc_escaped (int c, bool in_string)
 {
+  if (escape_nesting_depth > MAX_NESTING_DEPTH)
+    {
+      error_with_progname = false;
+      error (EXIT_FAILURE, 0, _("%s:%d: error: too deeply nested escape sequence"),
+             logical_file_name, line_number);
+    }
   switch (c)
     {
     case 'a':
@@ -476,7 +494,9 @@ do_getc_escaped (int c, bool in_string)
           c = do_getc ();
           if (c == EOF)
             return EOF;
+          ++escape_nesting_depth;
           c = do_getc_escaped (c, false);
+          escape_nesting_depth--;
         }
       return c | 0x80;
 
@@ -495,7 +515,9 @@ do_getc_escaped (int c, bool in_string)
           c = do_getc ();
           if (c == EOF)
             return EOF;
+          ++escape_nesting_depth;
           c = do_getc_escaped (c, false);
+          escape_nesting_depth--;
         }
       return (c >= 'a' && c <= 'z' ? c - 'a' + 'A' : c);
 
@@ -516,7 +538,9 @@ do_getc_escaped (int c, bool in_string)
           c = do_getc ();
           if (c == EOF)
             return EOF;
+          ++escape_nesting_depth;
           c = do_getc_escaped (c, false);
+          escape_nesting_depth--;
         }
       return c;
 
@@ -527,7 +551,7 @@ do_getc_escaped (int c, bool in_string)
       if (c != '-')
         /* Invalid input.  But be tolerant.  */
         return c;
-      /*FALLTHROUGH*/
+      FALLTHROUGH;
     case '^':
       c = do_getc ();
       if (c == EOF)
@@ -537,7 +561,9 @@ do_getc_escaped (int c, bool in_string)
           c = do_getc ();
           if (c == EOF)
             return EOF;
+          ++escape_nesting_depth;
           c = do_getc_escaped (c, false);
+          escape_nesting_depth--;
         }
       if (c == '?')
         return 0x7F;
@@ -617,13 +643,19 @@ static void
 read_object (struct object *op, bool first_in_list, bool new_backquote_flag,
              flag_context_ty outer_context)
 {
+  if (nesting_depth > MAX_NESTING_DEPTH)
+    {
+      error_with_progname = false;
+      error (EXIT_FAILURE, 0, _("%s:%d: error: too deeply nested objects"),
+             logical_file_name, line_number);
+    }
   for (;;)
     {
-      int c;
+      int ch;
 
-      c = do_getc ();
+      ch = do_getc ();
 
-      switch (c)
+      switch (ch)
         {
         case EOF:
           op->type = t_eof;
@@ -657,8 +689,10 @@ read_object (struct object *op, bool first_in_list, bool new_backquote_flag,
                                        flag_context_list_iterator_advance (
                                          &context_iter));
 
+                ++nesting_depth;
                 read_object (&inner, arg == 0, new_backquote_flag,
                              inner_context);
+                nesting_depth--;
 
                 /* Recognize end of list.  */
                 if (inner.type == t_listclose)
@@ -747,7 +781,9 @@ read_object (struct object *op, bool first_in_list, bool new_backquote_flag,
               {
                 struct object inner;
 
+                ++nesting_depth;
                 read_object (&inner, false, new_backquote_flag, null_context);
+                nesting_depth--;
 
                 /* Recognize end of vector.  */
                 if (inner.type == t_vectorclose)
@@ -781,7 +817,9 @@ read_object (struct object *op, bool first_in_list, bool new_backquote_flag,
           {
             struct object inner;
 
+            ++nesting_depth;
             read_object (&inner, false, new_backquote_flag, null_context);
+            nesting_depth--;
 
             /* Dots and EOF are not allowed here.  But be tolerant.  */
 
@@ -798,7 +836,9 @@ read_object (struct object *op, bool first_in_list, bool new_backquote_flag,
           {
             struct object inner;
 
+            ++nesting_depth;
             read_object (&inner, false, true, null_context);
+            nesting_depth--;
 
             /* Dots and EOF are not allowed here.  But be tolerant.  */
 
@@ -822,7 +862,9 @@ read_object (struct object *op, bool first_in_list, bool new_backquote_flag,
           {
             struct object inner;
 
+            ++nesting_depth;
             read_object (&inner, false, false, null_context);
+            nesting_depth--;
 
             /* Dots and EOF are not allowed here.  But be tolerant.  */
 
@@ -912,196 +954,245 @@ read_object (struct object *op, bool first_in_list, bool new_backquote_flag,
           }
 
         case '?':
-          c = do_getc ();
-          if (c == EOF)
-            /* Invalid input.  Be tolerant, no error message.  */
-            ;
-          else if (c == '\\')
-            {
-              c = do_getc ();
-              if (c == EOF)
-                /* Invalid input.  Be tolerant, no error message.  */
-                ;
-              else
-                {
-                  c = do_getc_escaped (c, false);
-                  if (c == EOF)
-                    /* Invalid input.  Be tolerant, no error message.  */
-                    ;
-                }
-            }
-          /* Impossible to deal with Emacs multibyte character stuff here.  */
-          op->type = t_other;
-          last_non_comment_line = line_number;
-          return;
+          {
+            int c = do_getc ();
+            if (c == EOF)
+              /* Invalid input.  Be tolerant, no error message.  */
+              ;
+            else if (c == '\\')
+              {
+                c = do_getc ();
+                if (c == EOF)
+                  /* Invalid input.  Be tolerant, no error message.  */
+                  ;
+                else
+                  {
+                    c = do_getc_escaped (c, false);
+                    if (c == EOF)
+                      /* Invalid input.  Be tolerant, no error message.  */
+                      ;
+                  }
+              }
+            /* Impossible to deal with Emacs multibyte character stuff here.  */
+            op->type = t_other;
+            last_non_comment_line = line_number;
+            return;
+          }
 
         case '#':
           /* Dispatch macro handling.  */
-          c = do_getc ();
-          if (c == EOF)
-            /* Invalid input.  Be tolerant, no error message.  */
-            {
-              op->type = t_other;
-              return;
-            }
+          {
+            int dmc = do_getc ();
+            if (dmc == EOF)
+              /* Invalid input.  Be tolerant, no error message.  */
+              {
+                op->type = t_other;
+                return;
+              }
 
-          switch (c)
-            {
-            case '^':
-              c = do_getc ();
-              if (c == '^')
-                c = do_getc ();
-              if (c == '[')
+            switch (dmc)
+              {
+              case '^':
                 {
-                  /* Read a char table, same syntax as a vector.  */
+                  int c = do_getc ();
+                  if (c == '^')
+                    c = do_getc ();
+                  if (c == '[')
+                    {
+                      /* Read a char table, same syntax as a vector.  */
+                      for (;;)
+                        {
+                          struct object inner;
+
+                          ++nesting_depth;
+                          read_object (&inner, false, new_backquote_flag,
+                                       null_context);
+                          nesting_depth--;
+
+                          /* Recognize end of vector.  */
+                          if (inner.type == t_vectorclose)
+                            {
+                              op->type = t_other;
+                              last_non_comment_line = line_number;
+                              return;
+                            }
+
+                          /* Dots and ')' are not allowed.  But be tolerant.  */
+
+                          /* EOF inside vector is illegal.  But be tolerant.  */
+                          if (inner.type == t_eof)
+                            break;
+
+                          free_object (&inner);
+                        }
+                      op->type = t_other;
+                      last_non_comment_line = line_number;
+                      return;
+                    }
+                  else
+                    /* Invalid input.  Be tolerant, no error message.  */
+                    {
+                      op->type = t_other;
+                      if (c != EOF)
+                        last_non_comment_line = line_number;
+                      return;
+                    }
+                }
+
+              case '&':
+                /* Read a bit vector.  */
+                {
+                  struct object length;
+                  ++nesting_depth;
+                  read_object (&length, first_in_list, new_backquote_flag,
+                               null_context);
+                  nesting_depth--;
+                  /* Dots and EOF are not allowed here.
+                     But be tolerant.  */
+                  free_object (&length);
+                }
+                {
+                  int c = do_getc ();
+                  if (c == '"')
+                    {
+                      struct object string;
+                      ++nesting_depth;
+                      read_object (&string, first_in_list, new_backquote_flag,
+                                   null_context);
+                      nesting_depth--;
+                      free_object (&string);
+                    }
+                  else
+                    /* Invalid input.  Be tolerant, no error message.  */
+                    do_ungetc (c);
+                }
+                op->type = t_other;
+                last_non_comment_line = line_number;
+                return;
+
+              case '[':
+                /* Read a compiled function, same syntax as a vector.  */
+              case '(':
+                /* Read a string with properties, same syntax as a list.  */
+                {
+                  struct object inner;
+                  do_ungetc (dmc);
+                  ++nesting_depth;
+                  read_object (&inner, false, new_backquote_flag, null_context);
+                  nesting_depth--;
+                  /* Dots and EOF are not allowed here.
+                     But be tolerant.  */
+                  free_object (&inner);
+                  op->type = t_other;
+                  last_non_comment_line = line_number;
+                  return;
+                }
+
+              case '@':
+                /* Read a comment consisting of a given number of bytes.  */
+                {
+                  unsigned int nskip = 0;
+                  int c;
+
                   for (;;)
                     {
-                      struct object inner;
-
-                      read_object (&inner, false, new_backquote_flag,
-                                   null_context);
-
-                      /* Recognize end of vector.  */
-                      if (inner.type == t_vectorclose)
-                        {
-                          op->type = t_other;
-                          last_non_comment_line = line_number;
-                          return;
-                        }
-
-                      /* Dots and ')' are not allowed.  But be tolerant.  */
-
-                      /* EOF inside vector is illegal.  But be tolerant.  */
-                      if (inner.type == t_eof)
+                      c = do_getc ();
+                      if (!(c >= '0' && c <= '9'))
                         break;
-
-                      free_object (&inner);
+                      nskip = 10 * nskip + (c - '0');
                     }
-                  op->type = t_other;
-                  last_non_comment_line = line_number;
-                  return;
-                }
-              else
-                /* Invalid input.  Be tolerant, no error message.  */
-                {
-                  op->type = t_other;
                   if (c != EOF)
-                    last_non_comment_line = line_number;
-                  return;
+                    {
+                      do_ungetc (c);
+                      for (; nskip > 0; nskip--)
+                        if (do_getc () == EOF)
+                          break;
+                    }
+                  continue;
                 }
 
-            case '&':
-              /* Read a bit vector.  */
-              {
-                struct object length;
-                read_object (&length, first_in_list, new_backquote_flag,
-                             null_context);
-                /* Dots and EOF are not allowed here.
-                   But be tolerant.  */
-                free_object (&length);
-              }
-              c = do_getc ();
-              if (c == '"')
-                {
-                  struct object string;
-                  read_object (&string, first_in_list, new_backquote_flag,
-                               null_context);
-                  free_object (&string);
-                }
-              else
-                /* Invalid input.  Be tolerant, no error message.  */
-                do_ungetc (c);
-              op->type = t_other;
-              last_non_comment_line = line_number;
-              return;
-
-            case '[':
-              /* Read a compiled function, same syntax as a vector.  */
-            case '(':
-              /* Read a string with properties, same syntax as a list.  */
-              {
-                struct object inner;
-                do_ungetc (c);
-                read_object (&inner, false, new_backquote_flag, null_context);
-                /* Dots and EOF are not allowed here.
-                   But be tolerant.  */
-                free_object (&inner);
+              case '$':
                 op->type = t_other;
                 last_non_comment_line = line_number;
                 return;
-              }
 
-            case '@':
-              /* Read a comment consisting of a given number of bytes.  */
-              {
-                unsigned int nskip = 0;
+              case '\'':
+              case ':':
+              case 'S': case 's': /* XEmacs only */
+                {
+                  struct object inner;
+                  ++nesting_depth;
+                  read_object (&inner, false, new_backquote_flag, null_context);
+                  nesting_depth--;
+                  /* Dots and EOF are not allowed here.
+                     But be tolerant.  */
+                  free_object (&inner);
+                  op->type = t_other;
+                  last_non_comment_line = line_number;
+                  return;
+                }
 
-                for (;;)
-                  {
-                    c = do_getc ();
-                    if (!(c >= '0' && c <= '9'))
-                      break;
-                    nskip = 10 * nskip + (c - '0');
-                  }
-                if (c != EOF)
-                  {
-                    do_ungetc (c);
-                    for (; nskip > 0; nskip--)
-                      if (do_getc () == EOF)
+              case '0': case '1': case '2': case '3': case '4':
+              case '5': case '6': case '7': case '8': case '9':
+                /* Read Common Lisp style #n# or #n=.  */
+                {
+                  int c;
+
+                  for (;;)
+                    {
+                      c = do_getc ();
+                      if (!(c >= '0' && c <= '9'))
                         break;
-                  }
-                continue;
-              }
-
-            case '$':
-              op->type = t_other;
-              last_non_comment_line = line_number;
-              return;
-
-            case '\'':
-            case ':':
-            case 'S': case 's': /* XEmacs only */
-              {
-                struct object inner;
-                read_object (&inner, false, new_backquote_flag, null_context);
-                /* Dots and EOF are not allowed here.
-                   But be tolerant.  */
-                free_object (&inner);
-                op->type = t_other;
-                last_non_comment_line = line_number;
-                return;
-              }
-
-            case '0': case '1': case '2': case '3': case '4':
-            case '5': case '6': case '7': case '8': case '9':
-              /* Read Common Lisp style #n# or #n=.  */
-              for (;;)
-                {
-                  c = do_getc ();
-                  if (!(c >= '0' && c <= '9'))
-                    break;
-                }
-              if (c == EOF)
-                /* Invalid input.  Be tolerant, no error message.  */
-                {
-                  op->type = t_other;
-                  return;
-                }
-              if (c == '=')
-                {
-                  read_object (op, false, new_backquote_flag, outer_context);
-                  last_non_comment_line = line_number;
-                  return;
-                }
-              if (c == '#')
-                {
+                    }
+                  if (c == EOF)
+                    /* Invalid input.  Be tolerant, no error message.  */
+                    {
+                      op->type = t_other;
+                      return;
+                    }
+                  if (c == '=')
+                    {
+                      ++nesting_depth;
+                      read_object (op, false, new_backquote_flag, outer_context);
+                      nesting_depth--;
+                      last_non_comment_line = line_number;
+                      return;
+                    }
+                  if (c == '#')
+                    {
+                      op->type = t_other;
+                      last_non_comment_line = line_number;
+                      return;
+                    }
+                  if (c == 'R' || c == 'r')
+                    {
+                      /* Read an integer.  */
+                      c = do_getc ();
+                      if (c == '+' || c == '-')
+                        c = do_getc ();
+                      for (; c != EOF; c = do_getc ())
+                        if (!c_isalnum (c))
+                          {
+                            do_ungetc (c);
+                            break;
+                          }
+                      op->type = t_other;
+                      last_non_comment_line = line_number;
+                      return;
+                    }
+                  /* Invalid input.  Be tolerant, no error message.  */
                   op->type = t_other;
                   last_non_comment_line = line_number;
                   return;
                 }
-              if (c == 'R' || c == 'r')
+
+              case 'X': case 'x':
+              case 'O': case 'o':
+              case 'B': case 'b':
                 {
                   /* Read an integer.  */
+                  int c;
+
                   c = do_getc ();
                   if (c == '+' || c == '-')
                     c = do_getc ();
@@ -1115,90 +1206,72 @@ read_object (struct object *op, bool first_in_list, bool new_backquote_flag,
                   last_non_comment_line = line_number;
                   return;
                 }
-              /* Invalid input.  Be tolerant, no error message.  */
-              op->type = t_other;
-              last_non_comment_line = line_number;
-              return;
 
-            case 'X': case 'x':
-            case 'O': case 'o':
-            case 'B': case 'b':
-              {
-                /* Read an integer.  */
-                c = do_getc ();
-                if (c == '+' || c == '-')
-                  c = do_getc ();
-                for (; c != EOF; c = do_getc ())
-                  if (!c_isalnum (c))
-                    {
-                      do_ungetc (c);
-                      break;
-                    }
+              case '*': /* XEmacs only */
+                {
+                  /* Read a bit-vector.  */
+                  int c;
+
+                  do
+                    c = do_getc ();
+                  while (c == '0' || c == '1');
+                  if (c != EOF)
+                    do_ungetc (c);
+                  op->type = t_other;
+                  last_non_comment_line = line_number;
+                  return;
+                }
+
+              case '+': /* XEmacs only */
+              case '-': /* XEmacs only */
+                /* Simply assume every feature expression is true.  */
+                {
+                  struct object inner;
+                  ++nesting_depth;
+                  read_object (&inner, false, new_backquote_flag, null_context);
+                  nesting_depth--;
+                  /* Dots and EOF are not allowed here.
+                     But be tolerant.  */
+                  free_object (&inner);
+                  continue;
+                }
+
+              default:
+                /* Invalid input.  Be tolerant, no error message.  */
                 op->type = t_other;
                 last_non_comment_line = line_number;
                 return;
               }
 
-            case '*': /* XEmacs only */
-              {
-                /* Read a bit-vector.  */
-                do
-                  c = do_getc ();
-                while (c == '0' || c == '1');
-                if (c != EOF)
-                  do_ungetc (c);
-                op->type = t_other;
-                last_non_comment_line = line_number;
-                return;
-              }
-
-            case '+': /* XEmacs only */
-            case '-': /* XEmacs only */
-              /* Simply assume every feature expression is true.  */
-              {
-                struct object inner;
-                read_object (&inner, false, new_backquote_flag, null_context);
-                /* Dots and EOF are not allowed here.
-                   But be tolerant.  */
-                free_object (&inner);
-                continue;
-              }
-
-            default:
-              /* Invalid input.  Be tolerant, no error message.  */
-              op->type = t_other;
-              last_non_comment_line = line_number;
-              return;
-            }
-
-          /*NOTREACHED*/
-          abort ();
+            /*NOTREACHED*/
+            abort ();
+          }
 
         case '.':
-          c = do_getc ();
-          if (c != EOF)
+          ch = do_getc ();
+          if (ch != EOF)
             {
-              do_ungetc (c);
-              if (c <= ' ' /* FIXME: Assumes ASCII compatible encoding */
-                  || strchr ("\"'`,(", c) != NULL)
+              do_ungetc (ch);
+              if (ch <= ' ' /* FIXME: Assumes ASCII compatible encoding */
+                  || strchr ("\"'`,(", ch) != NULL)
                 {
                   op->type = t_dot;
                   last_non_comment_line = line_number;
                   return;
                 }
             }
-          c = '.';
-          /*FALLTHROUGH*/
+          ch = '.';
+          FALLTHROUGH;
         default:
         default_label:
-          if (c <= ' ') /* FIXME: Assumes ASCII compatible encoding */
+          if (ch <= ' ') /* FIXME: Assumes ASCII compatible encoding */
             continue;
           /* Read a token.  */
           {
             bool symbol;
 
             op->token = XMALLOC (struct token);
-            symbol = read_token (op->token, c);
+            symbol = read_token (op->token, ch);
             if (symbol)
               {
                 op->type = t_symbol;
@@ -1236,6 +1309,8 @@ extract_elisp (FILE *f,
   last_non_comment_line = -1;
 
   flag_context_list_table = flag_table;
+  escape_nesting_depth = 0;
+  nesting_depth = 0;
 
   init_keywords ();
 

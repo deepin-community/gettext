@@ -1,5 +1,5 @@
 /* xgettext sh backend.
-   Copyright (C) 2003, 2005-2009, 2014, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2005-2009, 2014, 2018-2023 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "xgettext.h"
 #include "xg-pos.h"
@@ -181,7 +182,7 @@ do_ungetc (int c)
 
 /* Remove backslash followed by newline from the input stream.  */
 
-static int phase1_pushback[1];
+static int phase1_pushback[2];
 static int phase1_pushback_length;
 
 static int
@@ -222,7 +223,7 @@ phase1_ungetc (int c)
 
     case '\n':
       --line_number;
-      /* FALLTHROUGH */
+      FALLTHROUGH;
 
     default:
       if (phase1_pushback_length == SIZEOF (phase1_pushback))
@@ -718,7 +719,7 @@ phase2_ungetc (int c)
 
     case '\n':
       --line_number;
-      /* FALLTHROUGH */
+      FALLTHROUGH;
 
     default:
       if (phase2_pushback_length == SIZEOF (phase2_pushback))
@@ -731,6 +732,13 @@ phase2_ungetc (int c)
 
 /* Context lookup table.  */
 static flag_context_list_table_ty *flag_context_list_table;
+
+
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depth.  */
+static int nesting_depth;
 
 
 /* Forward declaration of local functions.  */
@@ -963,7 +971,9 @@ read_word (struct word *wp, int looking_for, flag_context_ty context)
                 {
                   /* Command substitution (Bash syntax).  */
                   phase2_ungetc (c3);
+                  ++nesting_depth;
                   read_command_list (')', context);
+                  nesting_depth--;
                 }
 
               open_doublequote = saved_open_doublequote;
@@ -1192,7 +1202,9 @@ read_word (struct word *wp, int looking_for, flag_context_ty context)
           /* Handle an opening backquote.  */
           saw_opening_backquote ();
 
+          ++nesting_depth;
           read_command_list (CLOSING_BACKQUOTE, context);
+          nesting_depth--;
 
           wp->type = t_other;
           continue;
@@ -1212,7 +1224,9 @@ read_word (struct word *wp, int looking_for, flag_context_ty context)
           if (c2 == '(')
             {
               /* Process substitution (Bash syntax).  */
+              ++nesting_depth;
               read_command_list (')', context);
+              nesting_depth--;
 
               wp->type = t_other;
               continue;
@@ -1492,6 +1506,12 @@ read_command (int looking_for, flag_context_ty outer_context)
 static enum word_type
 read_command_list (int looking_for, flag_context_ty outer_context)
 {
+  if (nesting_depth > MAX_NESTING_DEPTH)
+    {
+      error_with_progname = false;
+      error (EXIT_FAILURE, 0, _("%s:%d: error: too deeply nested command list"),
+             logical_file_name, line_number);
+    }
   for (;;)
     {
       enum word_type terminator;
@@ -1529,6 +1549,7 @@ extract_sh (FILE *f,
   phase2_pushback_length = 0;
 
   flag_context_list_table = flag_table;
+  nesting_depth = 0;
 
   init_keywords ();
 

@@ -39,6 +39,10 @@ msgid "no input file given"
 msgstr ""
 
 #, c-format
+msgid "The option '%s' is deprecated."
+msgstr ""
+
+#, c-format
 msgid ""
 "Cannot convert from \"%s\" to \"%s\". %s relies on iconv(), and iconv() does "
 "not support this conversion."
@@ -369,7 +373,7 @@ msgid ""
 msgstr ""
 
 #, c-format
-msgid "  -s, --sort-output           generate sorted output\n"
+msgid "  -s, --sort-output           generate sorted output (deprecated)\n"
 msgstr ""
 
 #, c-format
@@ -739,6 +743,17 @@ msgstr ""
 
 #, c-format
 msgid "  -f, --use-fuzzy             use fuzzy entries in output\n"
+msgstr ""
+
+#, c-format
+msgid ""
+"      --no-convert            don't convert the messages to UTF-8 encoding\n"
+msgstr ""
+
+#, c-format
+msgid ""
+"      --no-redundancy         don't pre-expand ISO C 99 <inttypes.h>\n"
+"                                format string directive macros\n"
 msgstr ""
 
 #, c-format

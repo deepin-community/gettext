@@ -1,3 +1,803 @@
+2024-02-21  Bruno Haible  <bruno@clisp.org>
+
+	Prepare for 0.22.5 release.
+	* gettext-runtime/intl/libgnuintl.in.h (LIBINTL_VERSION): Bump.
+	* gettext-tools/libgettextpo/gettext-po.in.h (LIBGETTEXTPO_VERSION): Bump.
+	* libtextstyle/version.sh: Update VERSION_NUMBER, RELEASE_DATE.
+	* gettext-tools/configure.ac (ARCHIVE_VERSION): Bump to 0.22.5.
+	* gettext-tools/misc/autopoint.in: Allow version 0.22.5.
+
+	Update after gnulib changed.
+	* gettext-runtime/intl/configure.ac: Update list of symbols to rename,
+	from modules 'localename-unsafe', 'localename', and 'setlocale-null-unlocked'.
+
+2024-02-21  Bruno Haible  <bruno@clisp.org>
+
+	intl: Annotate *printf functions with __attribute__ __format__.
+	Reported by Pierre Ossman <ossman@cendio.se> at
+	<https://savannah.gnu.org/bugs/?64384>.
+
+	* gettext-runtime/intl/libgnuintl.in.h (_INTL_ATTRIBUTE_FORMAT,
+	_INTL_ATTRIBUTE_SPEC_PRINTF_STANDARD, _INTL_ATTRIBUTE_FORMAT_PRINTF_STANDARD):
+	New macros.
+	(fprintf, vfprintf, printf, vprintf, sprintf, vsprintf, snprintf, vsnprintf,
+	asprintf, vasprintf): Annotate with _INTL_ATTRIBUTE_FORMAT_PRINTF_STANDARD.
+	* gettext-runtime/intl/printf.c: Update comment.
+	* gettext-runtime/NEWS: Mention this change.
+	* NEWS: Likewise.
+
+2023-11-19  Bruno Haible  <bruno@clisp.org>
+
+	Prepare for 0.22.3 release.
+	* gettext-runtime/intl/libgnuintl.in.h (LIBINTL_VERSION): Bump.
+	* gettext-tools/libgettextpo/gettext-po.in.h (LIBGETTEXTPO_VERSION): Bump.
+	* libtextstyle/version.sh: Update VERSION_NUMBER, RELEASE_DATE.
+	* gettext-tools/configure.ac (ARCHIVE_VERSION): Bump to 0.22.4.
+	* gettext-tools/misc/autopoint.in: Allow version 0.22.4.
+
+2023-10-04  Bruno Haible  <bruno@clisp.org>
+
+	Prepare for 0.22.3 release.
+	* gettext-runtime/intl/libgnuintl.in.h (LIBINTL_VERSION): Bump.
+	* gettext-tools/libgettextpo/gettext-po.in.h (LIBGETTEXTPO_VERSION): Bump.
+	* libtextstyle/version.sh: Update VERSION_NUMBER, RELEASE_DATE.
+	* gettext-tools/configure.ac (ARCHIVE_VERSION): Bump to 0.22.3.
+	* gettext-tools/misc/autopoint.in: Allow version 0.22.3.
+
+2023-09-19  Bruno Haible  <bruno@clisp.org>
+
+	Prepare for 0.22.2 release.
+	* gettext-runtime/intl/libgnuintl.in.h (LIBINTL_VERSION): Bump.
+	* gettext-tools/libgettextpo/gettext-po.in.h (LIBGETTEXTPO_VERSION): Bump.
+	* libtextstyle/version.sh: Update VERSION_NUMBER, RELEASE_DATE.
+	* gettext-tools/configure.ac (ARCHIVE_VERSION): Bump to 0.22.2.
+	* gettext-tools/misc/autopoint.in: Allow version 0.22.2.
+
+2023-09-19  Bruno Haible  <bruno@clisp.org>
+
+	intl: Fix list of exported symbols (regression 2021-06-19).
+	Reported by <fxcoudert@gcc.gnu.org>
+	and Christian Weisgerber <naddy@mips.inka.de>
+	in <https://savannah.gnu.org/bugs/?64323>
+	and <https://lists.gnu.org/archive/html/bug-gettext/2023-07/msg00005.html>.
+	Analyzed by Christian Weisgerber <naddy@mips.inka.de> and
+	Tijl Coosemans <tijl@FreeBSD.org>.
+
+	* gettext-runtime/intl/Makefile.am (AM_CPPFLAGS): Set BUILDING_DLL.
+	* gettext-runtime/intl/intl-compat.c: Update comments.
+
+2023-09-19  Bruno Haible  <bruno@clisp.org>
+
+	Prepare for 0.22.1 release.
+	* gettext-runtime/intl/Makefile.am (LTV_*): Bump to 12:0:4.
+	* gettext-runtime/intl/libgnuintl.in.h (LIBINTL_VERSION): Bump.
+	* gettext-tools/libgettextpo/gettext-po.in.h (LIBGETTEXTPO_VERSION): Bump.
+	* libtextstyle/version.sh: Update VERSION_NUMBER, RELEASE_DATE.
+	* libtextstyle/lib/Makefile.am (LTV_*): Bump to 2:1:2.
+	* gettext-tools/libgettextpo/Makefile.am (LTV_*): Bump to 5:10:5.
+	* gettext-tools/configure.ac (ARCHIVE_VERSION): Bump to 0.22.1.
+	* gettext-tools/misc/autopoint.in: Allow version 0.22.1.
+
+	intl: Don't export the symbol 'rpl_isnanf' on MSVC.
+	* gettext-runtime/intl/configure.ac: Define rpl_isnanf to _libintl_isnanf.
+
+	intl: Don't export the symbol 'mbszero' on Windows platforms.
+	* gettext-runtime/intl/configure.ac: Define mbszero to _libintl_mbszero.
+
+2023-09-19  Bruno Haible  <bruno@clisp.org>
+
+	intl: Fix a build error on Android.
+	The declaration in Android's <math.h>
+	  long double frexpl(long double, int*) __RENAME_LDBL(frexp, 3, 21);
+	has the effect that frexpl.o defines the symbol _libintl_frexp, not
+	_libintl_frexpl, if config.h contains
+	  #define frexp _libintl_frexp
+	  #define frexpl _libintl_frexpl
+
+	* gettext-runtime/intl/configure.ac:
+	If REPLACE_FREXP is 1, don't redirect frexp to _libintl_frexp.
+	If REPLACE_FREXPL is 1, don't redirect frexpl to _libintl_frexp.
+
+2023-09-19  Bruno Haible  <bruno@clisp.org>
+
+	intl: Don't export symbols from static MSVC .obj files.
+	* gettext-runtime/intl/intl-compat.c (DLL_EXPORTED): Set to empty on MSVC when
+	DLL_EXPORT is not defined.
+	* gettext-runtime/intl/printf.c (DLL_EXPORTED): Likewise.
+	* gettext-runtime/intl/setlocale.c (DLL_EXPORTED): Likewise.
+
+2023-06-17  Bruno Haible  <bruno@clisp.org>
+
+	Prepare for 0.22 release.
+	* gettext-runtime/doc/matrix.texi: Update from TP.
+	* gettext-runtime/doc/nls.texi (STATUS): Update.
+	* gettext-runtime/intl/libgnuintl.in.h (LIBINTL_VERSION): Bump.
+	* gettext-tools/libgettextpo/gettext-po.in.h (LIBGETTEXTPO_VERSION): Bump.
+	* libtextstyle/version.sh: Update VERSION_NUMBER, RELEASE_DATE.
+	* gettext-runtime/po/Makefile.in.in: Bump Origin version.
+	* gettext-runtime/m4/gettext.m4: Update version at the first line.
+	* gettext-runtime/m4/intl.m4: Likewise.
+	* NEWS, libtextstyle/NEWS: Update.
+	* libtextstyle/lib/Makefile.am (LTV_*): Bump to 2:0:2.
+	* gettext-tools/libgettextpo/Makefile.am (LTV_*): Bump to 5:9:5.
+	* gettext-tools/emacs/po-mode.el (po-mode-version-string): Bump.
+	* gettext-tools/configure.ac (ARCHIVE_VERSION): Bump to 0.22.
+	* gettext-tools/misc/autopoint.in: Allow version 0.22.
+
+2023-06-17  Bruno Haible  <bruno@clisp.org>
+
+	intl: Fix translation lookup failure when wbindtextdomain is used.
+	Reported by Luca Bacci <luca.bacci@outlook.com> at
+	<https://savannah.gnu.org/bugs/index.php?64311>.
+
+	The bug showed up when a call to bindtextdomain() with an absolute directory
+	and a call to wbindtextdomain() for a different domain was in effect.
+	Translations in the first referenced domain worked, translations in the second
+	referenced domain did not.
+
+	* gettext-runtime/intl/loadinfo.h (struct loaded_l10nfile, _nl_make_l10nflist):
+	Improve comments.
+	* gettext-runtime/intl/finddomain.c (_nl_loaded_domains): Likewise.
+	* gettext-runtime/intl/l10nflist.c (_nl_make_l10nflist): Fix code that looks up
+	the loaded_l10nfile in the given list, and make it more maintainable.
+	* gettext-tools/tests/intl-6: Improve comments.
+	* gettext-tools/tests/intl-6-prg.c (main): Restructure.
+	* gettext-tools/tests/intl-7: New file, based on gettext-tools/tests/intl-6.
+	* gettext-tools/tests/intl-6-prg.c: New file, based on
+	gettext-tools/tests/intl-6-prg.c.
+	* gettext-tools/tests/Makefile.am (TESTS): Add intl-7.
+	(check_PROGRAMS): Add intl-7-prg.
+	(intl_7_prg_SOURCES, intl_7_prg_LDADD): New variables.
+
+2023-06-05  Bruno Haible  <bruno@clisp.org>
+
+	Fix libintl exports.
+	On mingw, rpl_mbrtowc, rpl_mbsinit, hard_locale were exported.
+	On Cygwin, rpl_mbrtowc, rpl_vasnprintf were exported.
+
+	* gettext-runtime/intl/configure.ac: Map more rpl_* symbols to _libintl_*.
+
+2023-06-04  Bruno Haible  <bruno@clisp.org>
+
+	build: Take advantage of gcc warning options not included in -Wall.
+	* autogen.sh (GNULIB_MODULES_RUNTIME_OTHER, GNULIB_MODULES_LIBINTL,
+	GNULIB_MODULES_LIBASPRINTF, GNULIB_MODULES_TOOLS_OTHER): Add manywarnings.
+	* m4/more-warnings.m4: New file.
+
+	* libtextstyle/autogen.sh (GNULIB_MODULES): Add manywarnings.
+	Copy also more-warnings.m4.
+	* gnulib-local/modules/libxml (Makefile.am): New variable libxml_rpl_la_CFLAGS.
+	* libtextstyle/gnulib-local/modules/libcroco (Makefile.am): New variable
+	libcroco_rpl_la_CFLAGS.
+	* libtextstyle/gnulib-local/modules/libglib (Makefile.am): New variable
+	libglib_rpl_la_CFLAGS.
+	* libtextstyle/configure.ac: Invoke gt_MORE_WARNINGS, gl_CC_INHIBIT_WARNINGS.
+	* libtextstyle/lib/Makefile.am (AM_CFLAGS): Set to WARN_CFLAGS.
+	(config.h): Do the compilations with GL_CFLAG_INHIBIT_WARNINGS.
+
+	* gettext-runtime/configure.ac: Invoke gt_MORE_WARNINGS.
+	* gettext-runtime/src/Makefile.am (AM_CFLAGS): Set to WARN_CFLAGS.
+	* gnulib-local/modules/gettext-runtime-misc (Makefile.am): Add WARN_CFLAGS to
+	AM_CFLAGS.
+
+	* gettext-runtime/intl/configure.ac: Invoke gt_MORE_WARNINGS.
+	* gettext-runtime/intl/Makefile.am (AM_CFLAGS): Add WARN_CFLAGS.
+	* gnulib-local/modules/gettext-runtime-intl-misc (Makefile.am): Add WARN_CFLAGS
+	to AM_CFLAGS.
+
+	* gettext-runtime/libasprintf/configure.ac: Invoke gt_MORE_WARNINGS.
+	* gettext-runtime/libasprintf/Makefile.am (AM_CFLAGS): Set to WARN_CFLAGS.
+
+	* gettext-tools/configure.ac: Invoke gt_MORE_WARNINGS, gl_CC_INHIBIT_WARNINGS.
+	* gettext-tools/gnulib-lib/Makefile.am (AM_CFLAGS): Set to WARN_CFLAGS.
+	* gettext-tools/libgrep/Makefile.am (AM_CFLAGS): Set to WARN_CFLAGS.
+	* gettext-tools/src/Makefile.am (AM_CFLAGS): Set to WARN_CFLAGS.
+	* gettext-tools/libgettextpo/Makefile.am (AM_CFLAGS): Set to WARN_CFLAGS.
+	(config.h): Do the compilations with GL_CFLAG_INHIBIT_WARNINGS.
+
+2023-06-03  Bruno Haible  <bruno@clisp.org>
+
+	intl: Silence warnings "no previous prototype" and "nested extern declaration".
+	* gettext-runtime/intl/gettextP.h (_nl_log_untranslated): New declaration.
+	* gettext-runtime/intl/dcigettext.c: Remove nested declaration of _nl_log_untranslated.
+	* gettext-runtime/intl/log.c: Include gettextP.h.
+
+	intl: Silence a "no previous prototype" warning.
+	* gettext-runtime/intl/langprefs.c: Include gettextP.h.
+
+	intl: Improve declaration of 'struct binding'.
+	* autogen.sh (GNULIB_MODULES_LIBINTL): Add flexmember.
+	* gettext-runtime/intl/gettextP.h (struct binding): Use FLEXIBLE_ARRAY_MEMBER
+	instead of ZERO.
+	* gettext-runtime/intl/bindtextdom.c: Include flexmember.h.
+	(offsetof): Remove fallback definition.
+	(set_binding_values): Use FLEXNSIZEOF.
+
+2023-05-27  Bruno Haible  <bruno@clisp.org>
+
+	intl: Support bison ≥ 3.7 better.
+	* gettext-runtime/intl/Makefile.am (generate-plural): Renamed from
+	$(srcdir)/plural.c.
+	(plural.c, plural.h): New parallel-safe rules.
+	(BUILT_SOURCES): Add plural.c, plural.h.
+
+	build: Make bison rules more reliable.
+	* gettext-runtime/intl/Makefile.am ($(srcdir)/plural.c): Fix sed expressions.
+	* gettext-tools/src/Makefile.am (po-gram-gen.c, cldr-plural.c): Likewise.
+
+	intl: Silence a gcc warning.
+	* gettext-runtime/intl/localealias.c (read_alias_file): Silence a bogus
+	-Wuse-after-free warning.
+
+	build: Improve autoconf quoting.
+	* gettext-runtime/intl/configure.ac: Fix quoting of AS_HELP_STRING argument.
+	* gettext-tools/configure.ac: Likewise.
+
+2023-03-17  Bruno Haible  <bruno@clisp.org>
+
+	intl: Simplify use of vasnprintf from Gnulib.
+	* autogen.sh (GNULIB_MODULES_LIBINTL): Use vasnprintf-posix instead of vasnprintf.
+	* gettext-runtime/intl/vasnprintf.h: Remove file, moved to gnulib.
+	* gettext-runtime/intl/Makefile.am (EXTRA_DIST): Remove vasnprintf.h.
+	(printf.lo): Simplify dependencies accordingly.
+
+	intl: Fix bug in the exported *wprintf functions.
+	* autogen.sh (GNULIB_MODULES_LIBINTL): Add vasnwprintf-posix.
+	* gettext-runtime/intl/configure.ac: Hide the symbols from the gnulib modules
+	isnand-nolibm, isnanl-nolibm, printf-frexp, printf-frexpl, signbit, vasnwprintf,
+	frexp-nolibm, frexpl-nolibm.
+	* gettext-runtime/intl/printf.c: Don't instantiate the vasnwprintf code here.
+	* gettext-runtime/intl/wprintf-parse.h: Remove file, moved to gnulib.
+	* gettext-runtime/intl/vasnwprintf.h: Remove file, moved to gnulib.
+	* gettext-runtime/intl/Makefile.am (EXTRA_DIST): Remove wprintf-parse.h,
+	vasnwprintf.h.
+	(printf.lo): Simplify dependencies accordingly.
+
+2023-03-06  Bruno Haible  <bruno@clisp.org>
+
+	intl: Fix many warnings like "warning: "glthread_lock_init" redefined".
+	* gettext-runtime/intl/configure.ac: Move the renamings to the bottom of the
+	config.h file. Make the glthread*_lock* renamings conditional so that they
+	don't occur when these symbols are macros.
+
+2023-02-19  Bruno Haible  <bruno@clisp.org>
+
+	Fix a comment.
+	* gettext-runtime/intl/printf.c: Fix a typo in comment.
+
+2023-02-12  Bruno Haible  <bruno@clisp.org>
+
+	intl: Simplify function prefixes.
+	* gettext-runtime/intl/configure.ac: Remove macro definitions of
+	_nl_locale_name_canonicalize, _nl_locale_name_from_win32_LANGID,
+	_nl_locale_name_from_win32_LCID, _nl_locale_name_thread_unsafe,
+	_nl_locale_name_posix, _nl_locale_name_default.
+	* gettext-runtime/intl/gettextP.h: Update declarations.
+	* gettext-runtime/intl/langprefs.c: Likewise.
+	(_nl_language_preferences_win32_mui, _nl_language_preferences_win32_ME,
+	_nl_language_preferences_win32_95, _nl_language_preferences_default): Use
+	gl_ prefixed symbols instead.
+	* gettext-runtime/intl/dcigettext.c (DCIGETTEXT, guess_category_value):
+	Likewise.
+
+	intl: Remove most of the exported _nl_* symbols, also on AIX and Solaris.
+	* gettext-runtime/intl/configure.ac: Map most of the _nl_* symbols to
+	_libintl_* symbols, so that they are not exported from libintl.
+
+	AM_GNU_GETTEXT: Define localedir_c and localedir_c_make.
+	* gettext-runtime/m4/gettext.m4 (AM_GNU_GETTEXT): Define and substitute
+	localedir_c and localedir_c_make.
+	* gettext-runtime/src/Makefile.am (AM_CPPFLAGS): Use $(localedir_c_make)
+	instead of $(localedir). This is useful in native Windows environments.
+	* gettext-runtime/intl/Makefile.am (AM_CPPFLAGS): Likewise.
+	* gettext-tools/src/Makefile.am (AM_CPPFLAGS): Likewise.
+	* gettext-tools/tests/Makefile.am (AM_CPPFLAGS): Likewise.
+	* gettext-tools/doc/gettext.texi (AM_GNU_GETTEXT): Small updates. Mention
+	localedir_c and localedir_c_make.
+	* NEWS: Mention the change.
+
+	Fix compilation errors with ISO C 23 compilers.
+	* gettext-runtime/intl/dcigettext.c (getwd, getcwd): Assume a declaration in the
+	system header files.
+	* gettext-runtime/intl/gettextP.h (SWAP): Drop K&C compatibility.
+
+2023-02-11  Bruno Haible  <bruno@clisp.org>
+
+	Update after gnulib changed.
+	* gettext-runtime/intl/configure.ac: Test also REPLACE_TWALK.
+	* gettext-tools/src/po-xerror.c: Don't include "getprogname.h".
+	* gnulib-local/lib/xerror.c: Likewise.
+	* gnulib-local/lib/error-progname.c: Include <stdlib.h> instead of
+	getprogname.h.
+	* gnulib-local/lib/error.in.h.diff: Renamed from gnulib-local/lib/error.h.diff.
+	* gnulib-local/Makefile.am (EXTRA_DIST): Update.
+	* gnulib-local/modules/gettext-tools-misc (Makefile.am): Update comment.
+
+	intl: Fix generation of libgnuintl.h (regression from 2022-07-17).
+	* gettext-runtime/intl/Makefile.am (libgnuintl.h): Use a syntax that does not
+	require GNU sed.
+
+2023-02-11  Bruno Haible  <bruno@clisp.org>
+
+	Fix libintl exports after build system changes in gettext-runtime/intl/ (regression 2021-06-20).
+	On several platforms, rpl_free was exported.
+	On AIX 7, also rpl_newlocale, rpl_duplocale, rpl_freelocale.
+
+	* gettext-runtime/intl/configure.ac: Map more rpl_* symbols to _libintl_*.
+
+2022-10-10  Bruno Haible  <bruno@clisp.org>
+
+	Merge from 0.21.x branch: Prepare for 0.21.1 release.
+	* gettext-runtime/doc/matrix.texi: Update from TP.
+	* gettext-runtime/doc/nls.texi (STATUS): Update.
+	* gettext-runtime/intl/libgnuintl.in.h (LIBINTL_VERSION): Bump.
+	* gettext-tools/libgettextpo/gettext-po.in.h (LIBGETTEXTPO_VERSION): Bump.
+	* libtextstyle/version.sh: Update VERSION_NUMBER, RELEASE_DATE.
+	* NEWS, gettext-runtime/NEWS: Update.
+	* libtextstyle/lib/Makefile.am (LTV_*): Bump to 1:2:1.
+	* gettext-runtime/intl/Makefile.am (LTV_*): Bump to 11:0:3.
+	* gettext-tools/libgettextpo/Makefile.am (LTV_*): Bump to 5:8:5.
+	* gettext-runtime/src/envsubst.c: Update copyright years of the --version output.
+	* gettext-runtime/src/gettext.c: Likewise.
+	* gettext-runtime/src/gettext.sh.in: Likewise.
+	* gettext-runtime/src/ngettext.c: Likewise.
+	* gettext-tools/misc/autopoint.in: Likewise.
+	* gettext-tools/misc/convert-archive.in: Likewise.
+	* gettext-tools/misc/gettextize.in: Likewise.
+	* gettext-tools/src/cldr-plurals.c: Likewise.
+	* gettext-tools/src/hostname.c: Likewise.
+	* gettext-tools/src/msgattrib.c: Likewise.
+	* gettext-tools/src/msgcat.c: Likewise.
+	* gettext-tools/src/msgcmp.c: Likewise.
+	* gettext-tools/src/msgcomm.c: Likewise.
+	* gettext-tools/src/msgconv.c: Likewise.
+	* gettext-tools/src/msgen.c: Likewise.
+	* gettext-tools/src/msgexec.c: Likewise.
+	* gettext-tools/src/msgfilter.c: Likewise.
+	* gettext-tools/src/msgfmt.c: Likewise.
+	* gettext-tools/src/msggrep.c: Likewise.
+	* gettext-tools/src/msginit.c: Likewise.
+	* gettext-tools/src/msgmerge.c: Likewise.
+	* gettext-tools/src/msgunfmt.c: Likewise.
+	* gettext-tools/src/msguniq.c: Likewise.
+	* gettext-tools/src/recode-sr-latin.c: Likewise.
+	* gettext-tools/src/urlget.c: Likewise.
+	* gettext-tools/src/xgettext.c: Likewise.
+	* gettext-tools/configure.ac (ARCHIVE_VERSION): Bump to 0.21.1.
+	* gettext-tools/misc/autopoint.in: Allow version 0.21.1.
+
+2022-09-25  Bruno Haible  <bruno@clisp.org>
+
+	Fix a link error on MSVC/clang in --enable-shared mode.
+	* gettext-runtime/intl/printf.c: Include libgnuintl.h. This ensures that the
+	LIBINTL_DLL_EXPORTED marker from the libintl_*printf function declarations is
+	seen when the functions get defined.
+	* gettext-runtime/intl/Makefile.am: Update comment.
+
+2022-07-17  Bruno Haible  <bruno@clisp.org>
+
+	Fix "make distcheck" failure (regression from 2022-07-03).
+	* gettext-runtime/intl/export.h: Add a copyright notice.
+	* gettext-runtime/intl/Makefile.am (libgnuintl.h): Eliminate this copyright
+	notice when including export.h.
+
+2022-07-03  Bruno Haible  <bruno@clisp.org>
+
+	build: Fix link error for tstgettext.exe on mingw.
+	* gettext-runtime/intl/export.h: Treat mingw like MSVC. In static builds. don't
+	use __declspec(dllexport). In shared builds, use also __declspec(dllimport).
+
+2022-06-25  Johannes Schindelin  <johannes.schindelin@gmx.de>
+
+	intl: On native Windows, actually define the *wprintf functions.
+	In dcaf8c4d7 (Cygwin portability., 2003-09-17), the *wprintf() family of
+	functions in `gettext-runtime/intl/printf.c` were no longer guarded by
+	the constant `HAVE_WPRINTF`, but instead by `HAVE_FWPRINTF`.
+
+	This apparently worked even if the corresponding part in
+	`gettext-runtime/intl/libgnuintl.h.in` uses `HAVE_WPRINTF` to guard the
+	declarations of those functions.
+
+	However, in d84f20745 (Make sure that libintl.h declares the *wprintf
+	overrides on Windows., 2019-04-08), gettext introduced a change where it
+	would look for `wprintf()` instead of `fwprintf()`. As a consequence it
+	would no longer define the `HAVE_FWPRINTF` constant at all.
+
+	GCC apparently interprets `#if HAVE_FWPRINTF` as `#if 0` if the constant
+	has not even been defined.
+
+	This leads to the funny situation that previously, the *wprintf()
+	functions would be defined, but not be declared. Whereas now the
+	functions are not defined, but declared.
+
+	Also funny: Cygwin did not even export the `fwprintf()` function until
+	2009, as per Cygwin's 45e20e47ba (cygwin.din: Export wprintf,
+	fwprintf, swprintf, vwprintf, vfwprintf, vswprintf. [...] , 2009-03-06),
+	while the `wprintf()` function was exported already in 2003. So the
+	Cygwin portability patch from 2003 seems to have turned off all of the
+	*wprintf() functions in gettext.
+
+	Let's revert that "portability" patch, as it now only does harm and has
+	no benefit anymore.
+
+
+	[Bruno's summary]
+	Thank you for the analysis and explanation, Johannes!
+
+	The commits dcaf8c4d7 and f5ca7696d (2003-09-17) introduced a test for
+	fwprintf rather than wprintf. This was designed as a workaround to a
+	Cygwin problem that existed from 2003 to 2009.
+
+	The commit d84f20745 (2019-04-08) switched back from testing fwprintf
+	to testing wprintf, but did so incompletely: I forgot to modify printf.c.
+	So, since then, the *wprintf functions are declared but not defined.
+
+2022-06-21  Bruno Haible  <bruno@clisp.org>
+
+	intl: Add special hack for GCC.
+	Based on the commit
+	https://gcc.gnu.org/git/gitweb.cgi?p=gcc.git;h=4a1493f0603262a7dc1114d9827353e9810e63dc
+	by Jakub Jelinek <jakub@redhat.com>.
+
+	* gettext-runtime/intl/configure.ac: Accept option --enable-host-shared.
+	Set PICFLAG.
+	* gettext-runtime/intl/Makefile.am (AM_CFLAGS): Add the PICFLAG.
+	* gnulib-local/modules/gettext-runtime-intl-misc (Makefile.am): Add the PICFLAG
+	to AM_CFLAGS.
+
+2022-06-03  Bruno Haible  <bruno@clisp.org>
+
+	Update after Turkey changed its name.
+	* gettext-tools/doc/ISO_3166: Update country name.
+	* gettext-tools/doc/iso-3166.texi: Likewise.
+	* gettext-tools/doc/ISO_639-2: Update comments.
+	* gettext-runtime/intl/setlocale.c: Likewise.
+	* gettext-tools/src/msginit.c: Likewise.
+
+2021-12-22  Bruno Haible  <bruno@clisp.org>
+
+	Fix an interference between libintl.h and C++ (boost) header files.
+	Reported by Marc Jeanmougin <marc@jeanmougin.fr> in
+	<https://lists.gnu.org/archive/html/bug-gettext/2021-12/msg00027.html>.
+
+	* gettext-runtime/intl/libgnuintl.in.h (libintl_fprintf, libintl_vfprintf,
+	libintl_printf, libintl_vprintf, libintl_sprintf, libintl_vsprintf,
+	libintl_snprintf, libintl_vsnprintf, libintl_asprintf, libintl_vasprintf,
+	libintl_fwprintf, libintl_vfwprintf, libintl_wprintf, libintl_vwprintf,
+	libintl_swprintf, libintl_vswprintf, libintl_newlocale, libintl_duplocale,
+	libintl_freelocale, libintl_setlocale): Inject also into the C++ std namespace.
+
+2021-12-22  Bruno Haible  <bruno@clisp.org>
+
+	intl: Improve indentation of generated libintl.h file.
+	* gettext-runtime/intl/libgnuintl.in.h: Indent preprocessor directives.
+
+2021-06-20  Bruno Haible  <bruno@clisp.org>
+
+	build: Move most of intl.m4 into gettext-runtime/intl/configure.ac, part 2.
+	* gettext-runtime/intl/configure.ac: Invoke gt_GLIBC2.
+
+	Improve conflict resolution between gnulib and libintl.h.
+	* gettext-runtime/intl/libgnuintl.in.h (fprintf, vfprintf, printf, vprintf,
+	sprintf, vsprintf, snprintf, vsnprintf, asprintf, vasprintf): Use Gnulib-
+	provided macros to test more reliably whether Gnulib overrides these functions.
+
+	build: Simplify further.
+	* gettext-runtime/intl/Makefile.am: Assume BUILD_INCLUDED_LIBINTL is true.
+	* gettext-runtime/intl/configure.ac: Remove BUILD_INCLUDED_LIBINTL conditional.
+	* gettext-runtime/m4/gettext.m4 (AM_GNU_GETTEXT): Don't set
+	BUILD_INCLUDED_LIBINTL.
+
+	intl: Assume strtoul exists.
+	* gettext-runtime/intl/plural-exp.c (EXTRACT_PLURAL_EXPRESSION): Assume
+	HAVE_STRTOUL to be 1.
+	* gettext-runtime/m4/intl.m4 (gt_INTL_SUBDIR_CORE): Don't test for strtoul.
+
+	intl: Assume strdup exists.
+	* gettext-runtime/intl/bindtextdom.c (set_binding_values): Assume HAVE_STRDUP
+	to be 1.
+	* gettext-runtime/intl/finddomain.c (_nl_find_domain): Likewise.
+	* gettext-runtime/intl/textdomain.c (TEXTDOMAIN): Likewise.
+	* gettext-runtime/m4/intl.m4 (gt_INTL_SUBDIR_CORE): Don't test for strdup.
+
+	intl: Assume <limits.h> exists.
+	* gettext-runtime/intl/dcigettext.c: Include <limits.h> always.
+	* gettext-runtime/m4/intl.m4 (gt_INTL_SUBDIR_CORE): Don't test for limits.h.
+
+	build: Move most of intl.m4 into gettext-runtime/intl/configure.ac.
+	* gettext-runtime/m4/gettext.m4 (AM_GNU_GETTEXT): Don't invoke AM_INTL_SUBDIR.
+	* gettext-runtime/m4/intl.m4 (AM_INTL_SUBDIR, gt_GL_ATTRIBUTE): Remove macros.
+	(gt_INTL_SUBDIR_CORE): Test for uselocale.
+	* gnulib-local/modules/gettext-runtime-intl-misc (configure.ac): Ensure
+	LOCALENAME_ENHANCE_LOCALE_FUNCS initialization.
+	* autogen.sh (GNULIB_MODULES_LIBINTL): Add lib-symbol-visibility, localename.
+	* gettext-runtime/intl/configure.ac: Set WINDRES. Invoke gt_INTL_SUBDIR_CORE.
+	Set HAVE_POSIX_PRINTF, HAVE_ASPRINTF, HAVE_SNPRINTF, HAVE_WPRINTF,
+	HAVE_NEWLOCALE. Test for features.h, _snprintf, _snwprintf.
+	Set ENHANCE_LOCALE_FUNCS, WOE32DLL.
+
+	build: Simplify the use of gnulib in libintl.
+	* gnulib-local/lib/localename-table.h.diff: New file.
+	* gnulib-local/lib/localename.c.diff: New file.
+	* gnulib-local/lib/tsearch.c.diff: New file.
+	* gnulib-local/modules/gettext-runtime-intl-misc: New file, based on
+	gettext-runtime/intl/Makefile.am.
+	* gnulib-local/modules/tsearch.diff: New file.
+	* gnulib-local/Makefile.am (EXTRA_DIST): Add them.
+	* autogen.sh (GNULIB_MODULES_LIBINTL, GNULIB_SETLOCALE_DEPENDENCIES): New
+	variables.
+	Invoke gnulib-tool for the gettext-runtime/intl/ directory.
+	Update 'aclocal' invocation for the gettext-runtime/intl/ directory.
+	* gettext-runtime/intl/configure.ac (enable_relocatable): Set to yes always.
+	Invoke gl_EARLY and gl_INIT. Don't invoke gl_USE_SYSTEM_EXTENSIONS,
+	AM_PROG_CC_C_O, gl_COMMON, gl_RELOCATABLE_LIBRARY explicitly.
+	Define IN_LIBINTL through config.h.
+	Rename __libc* macros and symbols through config.h.
+	Invoke AC_CONFIG_FILES for gnulib-lib/Makefile.
+	* gettext-runtime/m4/intl.m4 (AM_INTL_SUBDIR): Don't rename __libc* macros and
+	symbols here.
+	(gt_INTL_SUBDIR_CORE): Don't test for tsearch.
+	* gettext-runtime/intl/arg-nonnull.h: Remove file.
+	* gettext-runtime/intl/attribute.h: Remove file.
+	* gettext-runtime/intl/filename.h: Remove file.
+	* gettext-runtime/intl/flexmember.h: Remove file.
+	* gettext-runtime/intl/localcharset.h: Remove file.
+	* gettext-runtime/intl/localcharset.c: Remove file.
+	* gettext-runtime/intl/localename.c: Remove file.
+	* gettext-runtime/intl/localename-table.in.h: Remove file.
+	* gettext-runtime/intl/localename-table.c: Remove file.
+	* gettext-runtime/intl/lock.h: Remove file.
+	* gettext-runtime/intl/lock.c: Remove file.
+	* gettext-runtime/intl/printf-args.h: Remove file.
+	* gettext-runtime/intl/printf-args.c: Remove file.
+	* gettext-runtime/intl/printf-parse.h: Remove file.
+	* gettext-runtime/intl/printf-parse.c: Remove file.
+	* gettext-runtime/intl/relocatable.h: Remove file.
+	* gettext-runtime/intl/relocatable.c: Remove file.
+	* gettext-runtime/intl/setlocale-lock.c: Remove file.
+	* gettext-runtime/intl/setlocale_null.h: Remove file.
+	* gettext-runtime/intl/setlocale_null.c: Remove file.
+	* gettext-runtime/intl/thread-optim.h: Remove file.
+	* gettext-runtime/intl/threadlib.c: Remove file.
+	* gettext-runtime/intl/tsearch.h: Remove file.
+	* gettext-runtime/intl/tsearch.c: Remove file.
+	* gettext-runtime/intl/vasnprintf.c: Remove file.
+	* gettext-runtime/intl/verify.h: Remove file.
+	* gettext-runtime/intl/windows-initguard.h: Remove file.
+	* gettext-runtime/intl/windows-mutex.h: Remove file.
+	* gettext-runtime/intl/windows-mutex.c: Remove file.
+	* gettext-runtime/intl/windows-once.h: Remove file.
+	* gettext-runtime/intl/windows-once.c: Remove file.
+	* gettext-runtime/intl/windows-recmutex.h: Remove file.
+	* gettext-runtime/intl/windows-recmutex.c: Remove file.
+	* gettext-runtime/intl/windows-rwlock.h: Remove file.
+	* gettext-runtime/intl/windows-rwlock.c: Remove file.
+	* gettext-runtime/intl/xsize.h: Remove file.
+	* gettext-runtime/intl/xsize.c: Remove file.
+	* gettext-runtime/intl/Makefile.am (ACLOCAL_AMFLAGS): Reference gnulib-m4 in
+	this directory.
+	(SUBDIRS): Add gnulib-lib.
+	(AM_CPPFLAGS): Add -I statements for the gnulib-lib directory. Don't define
+	BUILDING_DLL, IN_LIBINTL here. Don't parametrize the 'relocatable-lib-lgpl'
+	module here.
+	(EXTRA_DIST, LIBINTLSOURCES): Remove the said files.
+	(localename-table.h): Remove rule.
+	(*.lo): Remove rules and dependencies for the said files.
+	(libintl_la_LIBADD, libintl_la_DEPENDENCIES, libgnuintl_la_LIBADD,
+	libgnuintl_la_DEPENDENCIES): Add gnulib-lib/libgnu.la.
+	(OTHER_LDFLAGS): Don't export _libintl_* symbols.
+	(EXTRA_DIST): Add gnulib-m4/gnulib-cache.m4.
+	* gettext-runtime/intl/gettextP.h: Include glthread/lock.h, not lock.h.
+	(gl_locale_name_canonicalize, gl_locale_name_from_win32_LANGID,
+	gl_locale_name_from_win32_LCID, gl_locale_name_thread_unsafe,
+	gl_locale_name_thread, gl_locale_name_posix, gl_locale_name_environ,
+	gl_locale_name_default, gl_locale_name): Remove macros.
+	(_nl_locale_name_posix, _nl_locale_name_environ, _nl_locale_name_default):
+	Remove declarations.
+	* gettext-runtime/intl/plural-exp.h (FREE_EXPRESSION, PLURAL_PARSE,
+	GERMANIC_PLURAL, EXTRACT_PLURAL_EXPRESSION): Prefix these libintl-private
+	symbols with _libintl_, not libintl_.
+	* gettext-runtime/intl/bindtextdom.c: Include glthread/lock.h, not lock.h.
+	* gettext-runtime/intl/finddomain.c: Likewise.
+	* gettext-runtime/intl/loadmsgcat.c: Likewise.
+	* gettext-runtime/intl/localealias.c: Likewise.
+	* gettext-runtime/intl/log.c: Likewise.
+	* gettext-runtime/intl/textdomain.c: Likewise.
+	* gettext-runtime/intl/dcigettext.c: Include localename.h. Include
+	glthread/lock.h, not lock.h.
+	Include <search.h> always; don't include tsearch.c.
+	* gettext-runtime/intl/printf.c: Don't define libintl_vasprintf here. Instead,
+	use _libintl_vasprintf from gnulib-lib/vasnprintf.c. Define _libintl_vasnwprintf
+	instead of libintl_vasnwprintf.
+	* gettext-runtime/intl/setlocale.c: Include <errno.h>, localename.h.
+	(gl_locale_name_canonicalize): New declaration.
+	* Makefile.am (distcheck-hook): Remove the file comparisons for files in
+	gettext-runtime/intl/.
+
+	build: Add a separate configure.ac in gettext-runtime/intl/.
+	* autogen.sh (GNULIB_MODULES_RUNTIME_OTHER): Remove bison. Instead, copy
+	bison.m4 explicitly.
+	Generate configure file also in gettext-runtime/intl/.
+	Do automake invocations top-down, not bottom-up.
+	* gettext-runtime/intl/Makefile.am (ACLOCAL_AMFLAGS, SUBDIRS): New variables.
+	* gettext-runtime/m4/gettext.m4 (AM_GNU_GETTEXT): Allow 'here' as INTLSYMBOL
+	argument.
+	* gettext-runtime/intl/configure.ac: New file, based on
+	gettext-runtime/configure.ac.
+	* gettext-runtime/intl/AUTHORS: New file.
+	* gettext-runtime/intl/NEWS: New file.
+	* gettext-runtime/intl/README: New file.
+	* gettext-runtime/intl/ABOUT-NLS: New file, copied from
+	gettext-runtime/ABOUT-NLS.
+	* gettext-runtime/intl/INSTALL: New file, copied from gettext-runtime/INSTALL.
+	* gettext-runtime/configure.ac: Define WINDRES. Pass third argument to
+	AM_GNU_GETTEXT. Remove conditionals USE_INCLUDED_LIBINTL,
+	BUILD_INCLUDED_LIBINTL, PRELOADABLE_LIBINTL. Invoke AC_CONFIG_SUBDIRS([intl]).
+	Don't create intl/Makefile from here.
+	* gettext-tools/configure.ac: Define WINDRES. Redefine __libc_lock_*, for use
+	in localealias.c. Invoke gt_GLIBC2.
+
+2021-06-15  Bruno Haible  <bruno@clisp.org>
+
+	build: Simplify: Don't build libintl+libgnuintl a second time in gettext-tools.
+	* PACKAGING: Document that gettext-tools cannot be built without
+	gettext-runtime.
+	* autogen.sh: Don't create gettext-tools/intl/Makefile.am.
+	* gettext-tools/Makefile.am (SUBDIRS): Remove 'intl'.
+	* gettext-runtime/intl/Makefile.am (dist-hook): Remove.
+	(install-data-local, uninstall-local, uninstall-sources): Moved ...
+	* gettext-tools/misc/Makefile.am (install-data-local, uninstall-local,
+	uninstall-sources): ... to here.
+	* gettext-runtime/configure.ac (PACKAGE_IS_GETTEXT_TOOLS): Remove conditional.
+	* gettext-tools/configure.ac: Add 3rd argument to AM_GNU_GETTEXT invocation.
+	(PACKAGE_IS_GETTEXT_TOOLS): Remove conditional.
+	Update reference to os2compat.h.
+	Don't create intl/Makefile from intl/Makefile.in.
+	* gettext-tools/gnulib-lib/Makefile.am (AM_CPPFLAGS): Use the built header files
+	in gettext-runtime/intl/.
+	* gettext-tools/libgrep/Makefile.am (AM_CPPFLAGS): Likewise.
+	* gettext-tools/src/Makefile.am (AM_CPPFLAGS): Likewise.
+	* gettext-tools/libgettextpo/Makefile.am (AM_CPPFLAGS): Likewise.
+	* gettext-tools/gnulib-tests/Makefile.am (AM_CPPFLAGS): Likewise.
+	* gettext-tools/tests/Makefile.am (AM_CPPFLAGS): Likewise.
+	(LDADD_yes, LDADD_no): Use the built libraries in gettext-runtime/intl/.
+	* gettext-tools/tests/lang-c: Use the built header files in gettext-runtime/intl/.
+	* gettext-tools/tests/lang-c++: Likewise.
+	* gettext-tools/tests/lang-objc: Likewise.
+
+2021-01-08  Bruno Haible  <bruno@clisp.org>
+
+	Update after gnulib changed.
+	* gettext-runtime/m4/intl.m4 (AM_INTL_SUBDIR): Test
+	gt_localename_enhances_locale_funcs instead of gt_nameless_locales. Set
+	ENHANCE_LOCALE_FUNCS, not HAVE_NAMELESS_LOCALES.
+	* gettext-runtime/intl/Makefile.am (libgnuintl.h, libintl.h): Substitute
+	ENHANCE_LOCALE_FUNCS, not HAVE_NAMELESS_LOCALES.
+	* gettext-runtime/intl/libgnuintl.in.h: Test ENHANCE_LOCALE_FUNCS, not
+	HAVE_NAMELESS_LOCALES.
+	* gettext-runtime/intl/localename.c: Update from gnulib.
+	* gettext-runtime/m4/iconv.m4: Likewise.
+
+2021-01-01  Bruno Haible  <bruno@clisp.org>
+
+	Update after gnulib changed.
+	* gettext-runtime/intl/verify.h: Update copyright years.
+	* gettext-runtime/intl/xsize.h: Likewise.
+	* gettext-runtime/m4/fcntl-o.m4: Likewise.
+	* gettext-runtime/m4/flexmember.m4: Likewise.
+	* gettext-runtime/m4/iconv.m4: Likewise.
+	* gettext-runtime/m4/intlmacosx.m4: Likewise.
+	* gettext-runtime/m4/inttypes_h.m4: Likewise.
+	* gettext-runtime/m4/nls.m4: Likewise.
+	* gettext-runtime/m4/progtest.m4: Likewise.
+	* gettext-runtime/m4/size_max.m4: Likewise.
+	* gettext-runtime/m4/stdint_h.m4: Likewise.
+	* gettext-runtime/m4/xsize.m4: Likewise.
+	* Makefile.am (distcheck-hook): Update.
+
+2020-12-14  Bruno Haible  <bruno@clisp.org>
+
+	Update after gnulib changed.
+	* gettext-runtime/intl/threadlib.c: Update from gnulib.
+
+2020-12-10  Bruno Haible  <bruno@clisp.org>
+
+	intl: Support the AIX 7 locale names.
+	* gettext-runtime/intl/explodename.c (_nl_find_language): Remove function.
+	(_nl_explode_name): Inline it here. On AIX, lowercase the language and map a
+	script identifier to a modifier.
+	* NEWS: Mention it.
+
+2020-11-21  Bruno Haible  <bruno@clisp.org>
+
+	build: Remove the need for an autoconf test.
+	* gettext-runtime/intl/intl-exports.c (IMP): Use predefined preprocessor symbol
+	tests, not USER_LABEL_PREFIX_UNDERSCORE.
+	* gettext-runtime/configure.ac (INTL_EXPORTS_FLAGS): Remove variable.
+	* gnulib-local/modules/gettext-runtime-misc (Makefile.am): Don't use
+	INTL_EXPORTS_FLAGS.
+	* gettext-tools/woe32dll/export.h (IMP): Use predefined preprocessor symbol
+	tests, not USER_LABEL_PREFIX_UNDERSCORE.
+	* gettext-tools/configure.ac (GETTEXTLIB_EXPORTS_FLAGS): Don't define USER_LABEL_PREFIX_UNDERSCORE.
+
+2020-10-18  Bruno Haible  <bruno@clisp.org>
+
+	Fix "warning: implicit declaration of function 'open'/'read'/'close'".
+	* gettext-runtime/intl/loadmsgcat.c: Include <io.h>.
+	(open, read, close): New macros on native Windows.
+
+2020-10-12  Bruno Haible  <bruno@clisp.org>
+
+	Update after gnulib changed.
+	* autogen.sh: Don't copy attribute.h, as it would have the wrong copyright header.
+	* gettext-runtime/intl/attribute.h: New file, from gnulib.
+	* gettext-runtime/intl/arg-nonnull.h: Update from gnulib.
+	* gettext-runtime/intl/localename.c: Likewise.
+	* gettext-runtime/intl/vasnprintf.c: Likewise.
+	* gettext-runtime/intl/verify.h: Likewise.
+	* gettext-runtime/libasprintf/vasnprintf.c: Likewise.
+	* gettext-runtime/m4/fcntl-o.m4: Likewise.
+	* gettext-runtime/m4/iconv.m4: Likewise.
+	* gettext-runtime/intl/thread-optim.h: New file, from gnulib.
+	* gettext-runtime/intl/Makefile.am (EXTRA_DIST): Add thread-optim.h.
+	* Makefile.am (distcheck-hook): Check also thread-optim.h.
+
+2020-10-04  Bruno Haible  <bruno@clisp.org>
+
+	Fix "warning: unannotated fall-through between switch labels".
+	* autogen.sh (GNULIB_MODULES_RUNTIME_FOR_SRC, GNULIB_MODULES_TOOLS_FOR_SRC,
+	GNULIB_MODULES_LIBGETTEXTPO): Add 'attribute'.
+	* libtextstyle/autogen.sh (GNULIB_MODULES): Likewise.
+	* gettext-runtime/intl/plural.y: Include attribute.h. Use FALLTHROUGH annotated
+	empty statements instead of /* FALLTHROUGH */ comments.
+	* gettext-runtime/src/gettext.c: Likewise.
+	* gettext-runtime/src/ngettext.c: Likewise.
+	* gettext-tools/src/format-boost.c: Likewise.
+	* gettext-tools/src/read-stringtable.c: Likewise.
+	* gettext-tools/src/write-csharp.c: Likewise.
+	* gettext-tools/src/write-java.c: Likewise.
+	* gettext-tools/src/write-po.c: Likewise.
+	* gettext-tools/src/x-awk.c: Likewise.
+	* gettext-tools/src/x-c.c: Likewise.
+	* gettext-tools/src/x-csharp.c: Likewise.
+	* gettext-tools/src/x-elisp.c: Likewise.
+	* gettext-tools/src/x-java.c: Likewise.
+	* gettext-tools/src/x-javascript.c: Likewise.
+	* gettext-tools/src/x-librep.c: Likewise.
+	* gettext-tools/src/x-lisp.c: Likewise.
+	* gettext-tools/src/x-perl.c: Likewise.
+	* gettext-tools/src/x-php.c: Likewise.
+	* gettext-tools/src/x-python.c: Likewise.
+	* gettext-tools/src/x-scheme.c: Likewise.
+	* gettext-tools/src/x-sh.c: Likewise.
+	* gettext-tools/src/x-smalltalk.c: Likewise.
+	* gettext-tools/src/x-tcl.c: Likewise.
+	* gettext-tools/src/x-vala.c: Likewise.
+	* gettext-tools/src/x-ycp.c: Likewise.
+	* gettext-tools/tests/tstgettext.c: Likewise.
+	* gettext-tools/tests/tstngettext.c: Likewise.
+	* libtextstyle/gnulib-local/lib/tparm.c: Likewise.
+	* gettext-runtime/src/escapes.h: Use FALLTHROUGH annotated empty statements
+	instead of /* FALLTHROUGH */ comments.
+
+2020-08-07  Bruno Haible  <bruno@clisp.org>
+
+	Update after gnulib changed.
+	* gettext-runtime/intl/verify.h: Update from gnulib.
+	* gettext-runtime/intl/vasnprintf.c: Likewise.
+	* gettext-runtime/libasprintf/vasnprintf.c: Likewise.
+
+2020-08-01  Bruno Haible  <bruno@clisp.org>
+
+	Fix build failure with bison 3.7. Revisit bison Makefile rules.
+	* gettext-runtime/intl/Makefile.am ($(srcdir)/plural.c): Keep and distribute the
+	plural.h file. Don't use --output option.
+	* gettext-tools/src/Makefile.am (YACC): Removed unused variable.
+	(po-gram-gen.c, po-gram-gen.h): Correct the #line statements in the generated
+	files.
+	(po-gram-gen2.h): Likewise.
+	(cldr-plural.c, cldr-plural.h): Likewise.
+
 2020-07-26  Bruno Haible  <bruno@clisp.org>
 
 	Prepare for 0.21 release.

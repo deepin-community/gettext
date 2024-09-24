@@ -1,6 +1,5 @@
 ## Makefile for the gettext-tools/examples/po subdirectory of GNU gettext
-## Copyright (C) 1995-1998, 2000-2007, 2009, 2014, 2018-2020 Free Software Foundation,
-## Inc.
+## Copyright (C) 1995-2023 Free Software Foundation, Inc.
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -28,6 +27,7 @@ POTFILES = \
   hello-c-gnome3/hello.gschema.xml \
   hello-c-gnome3/hello.ui \
   hello-c++/hello.cc \
+  hello-c++20/hello.cc \
   hello-c++-qt/hello.cc \
   hello-c++-kde/hello.cc \
   hello-c++-kde/hellowindow.h \
@@ -68,6 +68,7 @@ SMALLPOTS = \
   hello-c-gnome.pot \
   hello-c-gnome3.pot \
   hello-c++.pot \
+  hello-c++20.pot \
   hello-c++-qt.pot \
   hello-c++-kde.pot \
   hello-c++-gnome.pot \
@@ -134,9 +135,8 @@ EXTRA_LOCALE_CATEGORIES =
 
 # These options get passed to msgmerge.
 # Useful options are in particular:
-#   --previous            to keep previous msgids of translated messages,
-#   --quiet               to reduce the verbosity.
-MSGMERGE_OPTIONS = --quiet
+#   --previous            to keep previous msgids of translated messages
+MSGMERGE_OPTIONS =
 
 MSGMERGE = msgmerge
 MSGMERGE_UPDATE = @MSGMERGE@ --update
@@ -253,6 +253,9 @@ hello-c-gnome3.pot : $(POTFILES_DEPS)
 hello-c++.pot : $(POTFILES_DEPS)
 	$(USE_BUILT_PROGS) $(SHELL) '$(srcdir)/xsmallpot.sh' '$(srcdir)' hello-c++
 
+hello-c++20.pot : $(POTFILES_DEPS)
+	$(USE_BUILT_PROGS) $(SHELL) '$(srcdir)/xsmallpot.sh' '$(srcdir)' hello-c++20
+
 hello-c++-qt.pot : $(POTFILES_DEPS)
 	$(USE_BUILT_PROGS) $(SHELL) '$(srcdir)/xsmallpot.sh' '$(srcdir)' hello-c++-qt
 
@@ -343,8 +346,8 @@ $(srcdir)/$(DOMAIN).pot:
 $(POFILES): $(srcdir)/$(DOMAIN).pot
 	@lang=`echo $@ | sed -e 's,.*/,,' -e 's/\.po$$//'`; \
 	test "$(srcdir)" = . && cdcmd="" || cdcmd="cd $(srcdir) && "; \
-	echo "$${cdcmd}$(MSGMERGE_UPDATE) $(MSGMERGE_OPTIONS) $${lang}.po $(DOMAIN).pot"; \
-	cd $(srcdir) && $(MSGMERGE_UPDATE) $(MSGMERGE_OPTIONS) $${lang}.po $(DOMAIN).pot
+	echo "$${cdcmd}$(MSGMERGE_UPDATE) --quiet $(MSGMERGE_OPTIONS) $${lang}.po $(DOMAIN).pot"; \
+	cd $(srcdir) && $(MSGMERGE_UPDATE) --quiet $(MSGMERGE_OPTIONS) $${lang}.po $(DOMAIN).pot
 
 
 html ID:
@@ -381,9 +384,9 @@ update-po: Makefile
 	tmpdir=`pwd`; \
 	echo "$$lang:"; \
 	test "$(srcdir)" = . && cdcmd="" || cdcmd="cd $(srcdir) && "; \
-	echo "$${cdcmd}$(MSGMERGE) $(MSGMERGE_OPTIONS) $$lang.po $(DOMAIN).pot -o $$lang.new.po"; \
+	echo "$${cdcmd}$(MSGMERGE) --quiet $(MSGMERGE_OPTIONS) $$lang.po $(DOMAIN).pot -o $$lang.new.po"; \
 	(cd $(srcdir) && \
-	 if $(MSGMERGE) $(MSGMERGE_OPTIONS) $$lang.po $(DOMAIN).pot -o $$tmpdir/$$lang.new.po; then \
+	 if $(MSGMERGE) --quiet $(MSGMERGE_OPTIONS) $$lang.po $(DOMAIN).pot -o $$tmpdir/$$lang.new.po; then \
 	   if cmp $$lang.po $$tmpdir/$$lang.new.po >/dev/null 2>&1; then \
 	     rm -f $$tmpdir/$$lang.new.po; \
 	   else \
@@ -412,6 +415,7 @@ SMALLPOFILES_FOR_lang = \
   $(srcdir)/../hello-c-gnome/po/$$lang.po \
   $(srcdir)/../hello-c-gnome3/po/$$lang.po \
   $(srcdir)/../hello-c++/po/$$lang.po \
+  $(srcdir)/../hello-c++20/po/$$lang.po \
   $(srcdir)/../hello-c++-qt/po/$$lang.po \
   $(srcdir)/../hello-c++-kde/po/$$lang.po \
   $(srcdir)/../hello-c++-gnome/po/$$lang.po \
@@ -450,6 +454,9 @@ $(srcdir)/../hello-c-gnome3/po/$(LL).po: $(srcdir)/hello-c-gnome3.pot $(srcdir)/
 
 $(srcdir)/../hello-c++/po/$(LL).po: $(srcdir)/hello-c++.pot $(srcdir)/$(LL).po
 	$(USE_BUILT_PROGS) cd $(srcdir) && $(SHELL) mmsmallpo.sh hello-c++ $(LL)
+
+$(srcdir)/../hello-c++20/po/$(LL).po: $(srcdir)/hello-c++20.pot $(srcdir)/$(LL).po
+	$(USE_BUILT_PROGS) cd $(srcdir) && $(SHELL) mmsmallpo.sh hello-c++20 $(LL)
 
 $(srcdir)/../hello-c++-qt/po/$(LL).po: $(srcdir)/hello-c++-qt.pot $(srcdir)/$(LL).po
 	$(USE_BUILT_PROGS) cd $(srcdir) && $(SHELL) mmsmallpo.sh hello-c++-qt $(LL)

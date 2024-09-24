@@ -1,5 +1,5 @@
 ## Makefile for the gettext-tools/tests subdirectory of GNU gettext
-## Copyright (C) 1995-1997, 2001-2010, 2012-2016, 2018-2020 Free Software Foundation, Inc.
+## Copyright (C) 1995-1997, 2001-2010, 2012-2016, 2018-2024 Free Software Foundation, Inc.
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ EXTRA_DIST =
 MOSTLYCLEANFILES = core *.stackdump
 
 TESTS = gettext-1 gettext-2 \
-	intl-1 intl-2 intl-3 intl-4 intl-5 intl-6 \
+	intl-1 intl-2 intl-3 intl-4 intl-5 intl-6 intl-7 \
 	intl-setlocale-1 intl-setlocale-2 \
 	intl-thread-1 intl-thread-2 intl-thread-3 \
 	intl-version \
@@ -33,6 +33,7 @@ TESTS = gettext-1 gettext-2 \
 	msgcat-1 msgcat-2 msgcat-3 msgcat-4 msgcat-5 msgcat-6 msgcat-7 \
 	msgcat-8 msgcat-9 msgcat-10 msgcat-11 msgcat-12 msgcat-13 msgcat-14 \
 	msgcat-15 msgcat-16 msgcat-17 msgcat-18 msgcat-19 msgcat-20 msgcat-21 \
+	msgcat-22 \
 	msgcat-properties-1 msgcat-properties-2 \
 	msgcat-stringtable-1 \
 	msgcmp-1 msgcmp-2 msgcmp-3 msgcmp-4 \
@@ -42,6 +43,7 @@ TESTS = gettext-1 gettext-2 \
 	msgcomm-20 msgcomm-21 msgcomm-22 msgcomm-23 msgcomm-24 msgcomm-25 \
 	msgcomm-26 msgcomm-27 msgcomm-28 \
 	msgconv-1 msgconv-2 msgconv-3 msgconv-4 msgconv-5 msgconv-6 msgconv-7 \
+	msgconv-8 \
 	msgen-1 msgen-2 msgen-3 msgen-4 \
 	msgexec-1 msgexec-2 msgexec-3 msgexec-4 msgexec-5 msgexec-6 \
 	msgfilter-1 msgfilter-2 msgfilter-3 msgfilter-4 msgfilter-5 \
@@ -49,7 +51,7 @@ TESTS = gettext-1 gettext-2 \
 	msgfilter-sr-latin-1 msgfilter-quote-1 \
 	msgfmt-1 msgfmt-2 msgfmt-3 msgfmt-4 msgfmt-5 msgfmt-6 msgfmt-7 \
 	msgfmt-8 msgfmt-9 msgfmt-10 msgfmt-11 msgfmt-12 msgfmt-13 msgfmt-14 \
-	msgfmt-15 msgfmt-16 msgfmt-17 msgfmt-18 msgfmt-19 \
+	msgfmt-15 msgfmt-16 msgfmt-17 msgfmt-18 msgfmt-19 msgfmt-20 \
 	msgfmt-properties-1 \
 	msgfmt-qt-1 msgfmt-qt-2 \
 	msgfmt-desktop-1 msgfmt-desktop-2 msgfmt-desktop-3 \
@@ -77,57 +79,100 @@ TESTS = gettext-1 gettext-2 \
 	recode-sr-latin-1 recode-sr-latin-2 \
 	xgettext-2 xgettext-3 xgettext-4 xgettext-5 xgettext-6 \
 	xgettext-7 xgettext-8 xgettext-9 xgettext-10 xgettext-11 xgettext-12 \
-	xgettext-13 xgettext-14 xgettext-15 \
+	xgettext-13 xgettext-14 xgettext-15 xgettext-16 xgettext-17 \
+	xgettext-18 \
+	xgettext-combine-1 xgettext-combine-2 xgettext-combine-3 \
 	xgettext-appdata-1 \
-	xgettext-awk-1 xgettext-awk-2 \
+	xgettext-awk-1 xgettext-awk-2 xgettext-awk-3 \
+	xgettext-awk-stackovfl-1 xgettext-awk-stackovfl-2 \
 	xgettext-c-2 xgettext-c-3 xgettext-c-4 xgettext-c-5 xgettext-c-6 \
+	xgettext-c-7 xgettext-c-8 \
 	xgettext-c-comment-1 xgettext-c-comment-2 xgettext-c-comment-3 \
 	xgettext-c-comment-4 xgettext-c-comment-5 xgettext-c-comment-6 \
 	xgettext-c-escape-1 xgettext-c-escape-2 xgettext-c-escape-3 \
 	xgettext-c-format-1 xgettext-c-format-2 xgettext-c-format-3 \
-	xgettext-c-format-4 xgettext-c-format-5 \
+	xgettext-c-format-4 xgettext-c-format-5 xgettext-c-format-6 \
 	xgettext-c-ctxt-1 xgettext-c-ctxt-2 xgettext-c-ctxt-3 \
 	xgettext-c-c++-1 xgettext-c-c++-2 \
+	xgettext-c-stackovfl-1 xgettext-c-stackovfl-2 \
 	xgettext-csharp-1 xgettext-csharp-2 xgettext-csharp-3 \
 	xgettext-csharp-4 xgettext-csharp-5 xgettext-csharp-6 \
-	xgettext-csharp-7 xgettext-csharp-8 \
+	xgettext-csharp-7 xgettext-csharp-8 xgettext-csharp-9 \
+	xgettext-csharp-stackovfl-1 xgettext-csharp-stackovfl-2 \
+	xgettext-csharp-stackovfl-3 xgettext-csharp-stackovfl-4 \
 	xgettext-desktop-1 xgettext-desktop-2 \
-	xgettext-elisp-1 xgettext-elisp-2 \
+	xgettext-elisp-1 xgettext-elisp-2 xgettext-elisp-3 \
+	xgettext-elisp-stackovfl-1 xgettext-elisp-stackovfl-2 \
+	xgettext-elisp-stackovfl-3 xgettext-elisp-stackovfl-4 \
 	xgettext-glade-1 xgettext-glade-2 xgettext-glade-3 xgettext-glade-4 \
 	xgettext-glade-5 xgettext-glade-6 xgettext-glade-7 \
 	xgettext-gsettings-1 \
 	xgettext-its-1 xgettext-its-2 \
 	xgettext-java-1 xgettext-java-2 xgettext-java-3 xgettext-java-4 \
 	xgettext-java-5 xgettext-java-6 xgettext-java-7 \
+	xgettext-java-stackovfl-1 xgettext-java-stackovfl-2 \
+	xgettext-java-stackovfl-3 xgettext-java-stackovfl-4 \
 	xgettext-javascript-1 xgettext-javascript-2 xgettext-javascript-3 \
 	xgettext-javascript-4 xgettext-javascript-5 xgettext-javascript-6 \
-	xgettext-javascript-7 \
-	xgettext-librep-1 xgettext-librep-2 \
-	xgettext-lisp-1 xgettext-lisp-2 \
-	xgettext-lua-1 xgettext-lua-2 \
+	xgettext-javascript-7 xgettext-javascript-8 xgettext-javascript-9 \
+	xgettext-javascript-10 xgettext-javascript-11 xgettext-javascript-12 \
+	xgettext-javascript-stackovfl-1 xgettext-javascript-stackovfl-2 \
+	xgettext-javascript-stackovfl-3 xgettext-javascript-stackovfl-4 \
+	xgettext-javascript-stackovfl-5 xgettext-javascript-stackovfl-6 \
+	xgettext-javascript-stackovfl-7 xgettext-javascript-stackovfl-8 \
+	xgettext-librep-1 xgettext-librep-2 xgettext-librep-3 \
+	xgettext-librep-stackovfl-1 xgettext-librep-stackovfl-2 \
+	xgettext-lisp-1 xgettext-lisp-2 xgettext-lisp-3 xgettext-lisp-4 \
+	xgettext-lisp-5 xgettext-lisp-6 \
+	xgettext-lisp-stackovfl-1 xgettext-lisp-stackovfl-2 \
+	xgettext-lua-1 xgettext-lua-2 xgettext-lua-3 \
+	xgettext-lua-stackovfl-1 xgettext-lua-stackovfl-2 \
+	xgettext-lua-stackovfl-3 xgettext-lua-stackovfl-4 \
 	xgettext-objc-1 xgettext-objc-2 \
 	xgettext-perl-1 xgettext-perl-2 xgettext-perl-3 xgettext-perl-4 \
 	xgettext-perl-5 xgettext-perl-6 xgettext-perl-7 xgettext-perl-8 \
+	xgettext-perl-9 xgettext-perl-10 \
+	xgettext-perl-stackovfl-1 xgettext-perl-stackovfl-2 \
+	xgettext-perl-stackovfl-3 xgettext-perl-stackovfl-4 \
+	xgettext-perl-stackovfl-5 \
 	xgettext-php-1 xgettext-php-2 xgettext-php-3 xgettext-php-4 \
-	xgettext-po-1 xgettext-po-2 \
+	xgettext-php-5 \
+	xgettext-php-stackovfl-1 xgettext-php-stackovfl-2 \
+	xgettext-php-stackovfl-3 xgettext-php-stackovfl-4 \
+	xgettext-po-1 xgettext-po-2 xgettext-po-3 xgettext-po-4 \
 	xgettext-properties-1 xgettext-properties-2 xgettext-properties-3 \
 	xgettext-properties-4 \
 	xgettext-rst-1 xgettext-rst-2 \
 	xgettext-python-1 xgettext-python-2 xgettext-python-3 \
-	xgettext-python-4 \
+	xgettext-python-4 xgettext-python-5 xgettext-python-6 \
+	xgettext-python-7 \
+	xgettext-python-stackovfl-1 xgettext-python-stackovfl-2 \
+	xgettext-python-stackovfl-3 xgettext-python-stackovfl-4 \
 	xgettext-ruby-1 \
 	xgettext-scheme-1 xgettext-scheme-2 xgettext-scheme-3 \
-	xgettext-scheme-4 \
+	xgettext-scheme-4 xgettext-scheme-5 xgettext-scheme-6 \
+	xgettext-scheme-stackovfl-1 xgettext-scheme-stackovfl-2 \
 	xgettext-sh-1 xgettext-sh-2 xgettext-sh-3 xgettext-sh-4 xgettext-sh-5 \
-	xgettext-sh-6 xgettext-sh-7 \
+	xgettext-sh-6 xgettext-sh-7 xgettext-sh-8 \
+	xgettext-sh-stackovfl-1 xgettext-sh-stackovfl-2 \
+	xgettext-sh-stackovfl-3 xgettext-sh-stackovfl-4 \
+	xgettext-sh-stackovfl-5 \
 	xgettext-smalltalk-1 xgettext-smalltalk-2 \
 	xgettext-stringtable-1 \
 	xgettext-tcl-1 xgettext-tcl-2 xgettext-tcl-3 xgettext-tcl-4 \
-	xgettext-vala-1 xgettext-vala-2 \
+	xgettext-tcl-5 \
+	xgettext-tcl-stackovfl-1 xgettext-tcl-stackovfl-2 \
+	xgettext-tcl-stackovfl-3 xgettext-tcl-stackovfl-4 \
+	xgettext-vala-1 xgettext-vala-2 xgettext-vala-3 xgettext-vala-4 \
+	xgettext-vala-5 xgettext-vala-6 \
+	xgettext-vala-stackovfl-1 xgettext-vala-stackovfl-2 \
 	xgettext-ycp-1 xgettext-ycp-2 xgettext-ycp-3 xgettext-ycp-4 \
+	xgettext-ycp-stackovfl-1 xgettext-ycp-stackovfl-2 \
+	xgettext-ycp-stackovfl-3 xgettext-ycp-stackovfl-4 \
 	format-awk-1 format-awk-2 \
 	format-boost-1 format-boost-2 \
 	format-c-1 format-c-2 format-c-3 format-c-4 format-c-5 \
+	format-c++-brace-1 format-c++-brace-2 \
 	format-csharp-1 format-csharp-2 \
 	format-elisp-1 format-elisp-2 \
 	format-gcc-internal-1 format-gcc-internal-2 \
@@ -157,7 +202,7 @@ TESTS = gettext-1 gettext-2 \
 	plural-1 plural-2 \
 	gettextpo-1 sentence-1 \
 	lang-po \
-	lang-c lang-c++ lang-objc \
+	lang-c lang-c++ lang-c++20 lang-objc \
 	lang-python-1 lang-python-2 \
 	lang-java \
 	lang-csharp \
@@ -192,7 +237,10 @@ EXTRA_DIST += init.sh init.cfg $(TESTS) \
 	gettextpo-1.de.po \
 	xgettext-1 \
 	xgettext-c-1 xg-c-comment-6.c xg-c-escape-3.c xg-vala-2.vala \
-	common/supplemental/plurals.xml
+	common/supplemental/plurals.xml \
+	testdata/xg-el-so-3.el testdata/xg-el-so-4.el \
+	testdata/xg-pl-so-5.pl \
+	testdata/xg-po-3.po testdata/xg-po-4.po
 
 XGETTEXT = ../src/xgettext
 
@@ -242,14 +290,14 @@ xg-c-1.ok.po: $(top_srcdir)/src/xgettext.c $(top_srcdir)/src/msgfmt.c
 AM_CPPFLAGS = \
   -I.. \
   -I../gnulib-lib -I$(top_srcdir)/gnulib-lib \
-  -I../intl
-DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
+  -I../../gettext-runtime/intl
+DEFS = -DLOCALEDIR=$(localedir_c_make) @DEFS@
 # INTL_MACOSX_LIBS is needed because the programs depend on libintl.la
 # but libtool doesn't put -Wl,-framework options into .la files.
 LDADD = $(LDADD_@USE_INCLUDED_LIBINTL@) @INTL_MACOSX_LIBS@
-LDADD_yes = ../intl/libintl.la @LTLIBTHREAD@
-LDADD_no = ../intl/libgnuintl.la @LTLIBTHREAD@ @LTLIBINTL@
-check_PROGRAMS = tstgettext tstngettext testlocale intl-1-prg intl-3-prg intl-4-prg intl-5-prg intl-6-prg intl-setlocale-1-prg intl-setlocale-2-prg intl-thread-1-prg intl-thread-2-prg intl-thread-3-prg intl-version-prg cake fc3 fc4 fc5 gettextpo-1-prg sentence-1-prg
+LDADD_yes = ../../gettext-runtime/intl/libintl.la @LTLIBTHREAD@
+LDADD_no = ../../gettext-runtime/intl/libgnuintl.la @LTLIBTHREAD@ @LTLIBINTL@
+check_PROGRAMS = tstgettext tstngettext testlocale intl-1-prg intl-3-prg intl-4-prg intl-5-prg intl-6-prg intl-7-prg intl-setlocale-1-prg intl-setlocale-2-prg intl-thread-1-prg intl-thread-2-prg intl-thread-3-prg intl-version-prg cake fc3 fc4 fc5 gettextpo-1-prg sentence-1-prg
 tstgettext_SOURCES = \
   tstgettext.c ../../gettext-runtime/src/escapes.h \
   setlocale.c
@@ -269,6 +317,8 @@ intl_5_prg_SOURCES = intl-5-prg.c
 intl_5_prg_LDADD = ../gnulib-lib/libgettextlib.la $(LDADD)
 intl_6_prg_SOURCES = intl-6-prg.c
 intl_6_prg_LDADD = ../gnulib-lib/libgettextlib.la $(LDADD)
+intl_7_prg_SOURCES = intl-7-prg.c
+intl_7_prg_LDADD = ../gnulib-lib/libgettextlib.la $(LDADD)
 intl_setlocale_1_prg_SOURCES = intl-setlocale-1-prg.c
 intl_setlocale_1_prg_LDADD = ../gnulib-lib/libgettextlib.la $(LDADD)
 intl_setlocale_2_prg_SOURCES = intl-setlocale-2-prg.c

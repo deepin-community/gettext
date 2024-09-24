@@ -1,5 +1,5 @@
-# iswdigit.m4 serial 1
-dnl Copyright (C) 2020 Free Software Foundation, Inc.
+# iswdigit.m4 serial 6
+dnl Copyright (C) 2020-2024 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
@@ -12,6 +12,7 @@ AC_DEFUN([gl_FUNC_ISWDIGIT],
   AC_REQUIRE([gt_LOCALE_JA])
   AC_REQUIRE([gt_LOCALE_FR_UTF8])
   AC_REQUIRE([gt_LOCALE_ZH_CN])
+  AC_REQUIRE([AC_CANONICAL_HOST])
 
   if test $HAVE_ISWCNTRL = 0 || test $REPLACE_ISWCNTRL = 1; then
     dnl <wctype.h> redefines iswdigit already.
@@ -25,7 +26,7 @@ AC_DEFUN([gl_FUNC_ISWDIGIT],
 changequote(,)dnl
        case "$host_os" in
          # Guess no on FreeBSD, NetBSD, Solaris, native Windows.
-         freebsd* | dragonfly* | netbsd* | solaris* | mingw*)
+         freebsd* | dragonfly* | netbsd* | solaris* | mingw* | windows*)
            gl_cv_func_iswdigit_works="guessing no" ;;
          # Guess yes otherwise.
          *) gl_cv_func_iswdigit_works="guessing yes" ;;
@@ -37,13 +38,6 @@ changequote([,])dnl
 #include <locale.h>
 #include <stdlib.h>
 #include <string.h>
-/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
-   <wchar.h>.
-   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be
-   included before <wchar.h>.  */
-#include <stddef.h>
-#include <stdio.h>
-#include <time.h>
 #include <wchar.h>
 #include <wctype.h>
 
@@ -70,7 +64,8 @@ main (int argc, char *argv[])
   int is;
   int result = 0;
 
-  if (setlocale (LC_ALL, "$LOCALE_FR") != NULL)
+  if (strcmp ("$LOCALE_FR", "none") != 0
+      && setlocale (LC_ALL, "$LOCALE_FR") != NULL)
     {
       /* This fails on mingw, MSVC 14.  */
       /* U+00B2 SUPERSCRIPT TWO */
@@ -78,7 +73,8 @@ main (int argc, char *argv[])
       if (!(is == 0))
         result |= 1;
     }
-  if (setlocale (LC_ALL, "$LOCALE_JA") != NULL)
+  if (strcmp ("$LOCALE_JA", "none") != 0
+      && setlocale (LC_ALL, "$LOCALE_JA") != NULL)
     {
       /* This fails on NetBSD 8.0.  */
       /* U+FF11 FULLWIDTH DIGIT ONE */
@@ -86,20 +82,22 @@ main (int argc, char *argv[])
       if (!(is == 0))
         result |= 2;
     }
-  if (setlocale (LC_ALL, "$LOCALE_FR_UTF8") != NULL)
+  if (strcmp ("$LOCALE_FR_UTF8", "none") != 0
+      && setlocale (LC_ALL, "$LOCALE_FR_UTF8") != NULL)
     {
-      /* This fails on FreeBSD 12, NetBSD 8.0, MSVC 14.  */
+      /* This fails on FreeBSD 13.0, NetBSD 8.0, MSVC 14.  */
       /* U+0663 ARABIC-INDIC DIGIT THREE */
       is = for_character ("\331\243", 2);
       if (!(is == 0))
         result |= 4;
-      /* This fails on FreeBSD 12, NetBSD 8.0, MSVC 14.  */
+      /* This fails on FreeBSD 13.0, NetBSD 8.0, MSVC 14.  */
       /* U+FF11 FULLWIDTH DIGIT ONE */
       is = for_character ("\357\274\221", 3);
       if (!(is == 0))
         result |= 8;
     }
-  if (setlocale (LC_ALL, "$LOCALE_ZH_CN") != NULL)
+  if (strcmp ("$LOCALE_ZH_CN", "none") != 0
+      && setlocale (LC_ALL, "$LOCALE_ZH_CN") != NULL)
     {
       /* This fails on NetBSD 8.0, Solaris 10, Solaris 11.4.  */
       /* U+FF11 FULLWIDTH DIGIT ONE */

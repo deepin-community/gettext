@@ -1,7 +1,7 @@
-This is libtextstyle.info, produced by makeinfo version 6.3 from
+This is libtextstyle.info, produced by makeinfo version 6.8 from
 libtextstyle.texi.
 
-   Copyright (C) 2018-2019 Free Software Foundation, Inc.
+   Copyright (C) 2018-2020 Free Software Foundation, Inc.
 
    This manual is free documentation.  It is dually licensed under the
 GNU FDL and the GNU GPL. This means that you can redistribute this
@@ -34,7 +34,7 @@ File: libtextstyle.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU libtextstyle
 ****************
 
-   This manual documents the GNU libtextstyle library, version 0.21.
+   This manual documents the GNU libtextstyle library, version 0.22.5.
 
 * Menu:
 
@@ -725,7 +725,9 @@ we mean is:
      by virtue of a simple assignment.  No cast is needed.
    * The opposite conversion, from 'ostream_t' to 'some_ostream_t', can
      also be performed, provided that the object is actually an instance
-     of 'some_ostream_t'.
+     of 'some_ostream_t'.  You can test whether an object is an instance
+     of 'some_ostream_t' by invoking the method 'bool
+     is_instance_of_some_ostream (ostream_t stream)'.
    * Every method 'ostream_FOOBAR' exists also as a method
      'some_ostream_FOOBAR' with compatible argument types and a
      compatible return type.
@@ -736,6 +738,7 @@ we mean is:
 * The styled_ostream class::
 * ostream subclasses without styling::
 * styled_ostream subclasses::
+* Accessors::
 
 
 File: libtextstyle.info,  Node: The ostream class,  Next: The styled_ostream class,  Up: The output stream hierarchy
@@ -1112,7 +1115,7 @@ methods.
      be closed.
 
 
-File: libtextstyle.info,  Node: styled_ostream subclasses,  Prev: ostream subclasses without styling,  Up: The output stream hierarchy
+File: libtextstyle.info,  Node: styled_ostream subclasses,  Next: Accessors,  Prev: ostream subclasses without styling,  Up: The output stream hierarchy
 
 3.5.4 Concrete 'styled_ostream' subclasses
 ------------------------------------------
@@ -1214,6 +1217,81 @@ styling operations, however, do nothing.  Its type is
 
      Note: If 'PASS_OWNERSHIP' is 'false', the resulting stream must be
      closed before 'DESTINATION' can be closed.
+
+
+File: libtextstyle.info,  Node: Accessors,  Prev: styled_ostream subclasses,  Up: The output stream hierarchy
+
+3.5.5 Accessor functions
+------------------------
+
+   The various concrete stream classes have methods that allow you to
+retrieve the arguments passed to the respective constructor function.
+
+   Note: While these methods allow you to retrieve the underlying
+destination stream of various kinds of stream, it is not recommended to
+operate on both the stream and its underlying destination stream at the
+same time.  Doing so can lead to undesired interactions between the two
+streams.
+
+   The 'file_ostream' class has this accessor method:
+
+ -- Function: FILE * file_ostream_get_stdio_stream
+          (file_ostream_t STREAM)
+
+   The 'fd_ostream' class has these accessor methods:
+
+ -- Function: int fd_ostream_get_descriptor (fd_ostream_t STREAM)
+ -- Function: const char * fd_ostream_get_filename (fd_ostream_t STREAM)
+ -- Function: bool fd_ostream_is_buffered (fd_ostream_t STREAM)
+
+   The 'term_ostream' class has these accessor methods:
+
+ -- Function: int term_ostream_get_descriptor (term_ostream_t STREAM)
+ -- Function: const char * term_ostream_get_filename
+          (term_ostream_t STREAM)
+ -- Function: ttyctl_t term_ostream_get_tty_control
+          (term_ostream_t STREAM)
+ -- Function: ttyctl_t term_ostream_get_effective_tty_control
+          (term_ostream_t STREAM)
+     Returns the effective tty control of the stream (not
+     'TTYCTL_AUTO').
+
+   The 'iconv_ostream' class has these accessor methods:
+
+ -- Function: const char * iconv_ostream_get_from_encoding
+          (iconv_ostream_t STREAM)
+ -- Function: const char * iconv_ostream_get_to_encoding
+          (iconv_ostream_t STREAM)
+ -- Function: ostream_t iconv_ostream_get_destination
+          (iconv_ostream_t STREAM)
+
+   The 'html_ostream' class has this accessor method:
+
+ -- Function: ostream_t html_ostream_get_destination
+          (html_ostream_t STREAM)
+
+   The 'term_styled_ostream' class has these accessor methods:
+
+ -- Function: term_ostream_t term_styled_ostream_get_destination
+          (term_styled_ostream_t STREAM)
+ -- Function: const char * term_styled_ostream_get_css_filename
+          (term_styled_ostream_t STREAM)
+
+   The 'html_styled_ostream' class has these accessor methods:
+
+ -- Function: ostream_t html_styled_ostream_get_destination
+          (html_styled_ostream_t STREAM)
+ -- Function: html_ostream_t html_styled_ostream_get_html_destination
+          (html_styled_ostream_t STREAM)
+ -- Function: const char * html_styled_ostream_get_css_filename
+          (html_styled_ostream_t STREAM)
+
+   The 'noop_styled_ostream' class has these accessor methods:
+
+ -- Function: ostream_t noop_styled_ostream_get_destination
+          (noop_styled_ostream_t STREAM)
+ -- Function: bool noop_styled_ostream_is_owning_destination
+          (noop_styled_ostream_t STREAM)
 
 
 File: libtextstyle.info,  Node: Debugging the styling code,  Next: What to document,  Prev: The output stream hierarchy,  Up: The programmer's view
@@ -2491,94 +2569,128 @@ Function Index
  [index ]
 * Menu:
 
-* fd_ostream_create:                     The fd_ostream class.
-                                                              (line  12)
+* fd_ostream_create:                     The fd_ostream class. (line 12)
+* fd_ostream_get_descriptor:             Accessors.            (line 22)
+* fd_ostream_get_filename:               Accessors.            (line 23)
+* fd_ostream_is_buffered:                Accessors.            (line 24)
 * file_ostream_create:                   The file_ostream class.
-                                                              (line  12)
-* handle_color_option:                   Command-line options.
-                                                              (line  27)
-* handle_style_option:                   Command-line options.
-                                                              (line  32)
+                                                               (line 12)
+* file_ostream_get_stdio_stream:         Accessors.            (line 17)
+* handle_color_option:                   Command-line options. (line 27)
+* handle_style_option:                   Command-line options. (line 32)
 * html_ostream_begin_span:               The html_ostream class.
-                                                              (line  24)
+                                                               (line 24)
 * html_ostream_create:                   The html_ostream class.
-                                                              (line  11)
+                                                               (line 11)
 * html_ostream_end_span:                 The html_ostream class.
-                                                              (line  31)
+                                                               (line 30)
 * html_ostream_flush_to_current_style:   The html_ostream class.
-                                                              (line  61)
+                                                               (line 58)
+* html_ostream_get_destination:          Accessors.            (line 49)
 * html_ostream_get_hyperlink_ref:        The html_ostream class.
-                                                              (line  39)
+                                                               (line 37)
 * html_ostream_set_hyperlink_ref:        The html_ostream class.
-                                                              (line  48)
+                                                               (line 45)
 * html_styled_ostream_create:            The html_styled_ostream class.
-                                                              (line  12)
+                                                               (line 12)
+* html_styled_ostream_get_css_filename:  Accessors.            (line 65)
+* html_styled_ostream_get_destination:   Accessors.            (line 61)
+* html_styled_ostream_get_html_destination: Accessors.         (line 63)
 * iconv_ostream_create:                  The iconv_ostream class.
-                                                              (line  12)
+                                                               (line 12)
+* iconv_ostream_get_destination:         Accessors.            (line 44)
+* iconv_ostream_get_from_encoding:       Accessors.            (line 40)
+* iconv_ostream_get_to_encoding:         Accessors.            (line 42)
+* is_instance_of_fd_ostream:             The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_file_ostream:           The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_html_ostream:           The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_html_styled_ostream:    The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_iconv_ostream:          The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_memory_ostream:         The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_noop_styled_ostream:    The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_styled_ostream:         The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_term_ostream:           The output stream hierarchy.
+                                                               (line 27)
+* is_instance_of_term_styled_ostream:    The output stream hierarchy.
+                                                               (line 27)
 * memory_ostream_contents:               The memory_ostream class.
-                                                              (line  17)
+                                                               (line 17)
 * memory_ostream_create:                 The memory_ostream class.
-                                                              (line  11)
+                                                               (line 11)
 * noop_styled_ostream_create:            The noop_styled_ostream class.
-                                                              (line  13)
-* ostream_flush:                         The ostream class.   (line  27)
-* ostream_free:                          The ostream class.   (line  32)
-* ostream_printf:                        The ostream class.   (line  18)
-* ostream_vprintf:                       The ostream class.   (line  20)
-* ostream_write_mem:                     The ostream class.   (line  10)
-* ostream_write_str:                     The ostream class.   (line  14)
-* print_color_test:                      Command-line options.
-                                                              (line  36)
+                                                               (line 13)
+* noop_styled_ostream_get_destination:   Accessors.            (line 70)
+* noop_styled_ostream_is_owning_destination: Accessors.        (line 72)
+* ostream_flush:                         The ostream class.    (line 27)
+* ostream_free:                          The ostream class.    (line 31)
+* ostream_printf:                        The ostream class.    (line 18)
+* ostream_vprintf:                       The ostream class.    (line 20)
+* ostream_write_mem:                     The ostream class.    (line 10)
+* ostream_write_str:                     The ostream class.    (line 14)
+* print_color_test:                      Command-line options. (line 36)
 * styled_ostream_begin_use_class:        The styled_ostream class.
-                                                              (line   9)
+                                                               (line  9)
 * styled_ostream_create:                 The term_styled_ostream class.
-                                                              (line  34)
+                                                               (line 33)
 * styled_ostream_end_use_class:          The styled_ostream class.
-                                                              (line  15)
+                                                               (line 15)
 * styled_ostream_flush_to_current_style: The styled_ostream class.
-                                                              (line  55)
+                                                               (line 53)
 * styled_ostream_get_hyperlink_id:       The styled_ostream class.
-                                                              (line  30)
+                                                               (line 29)
 * styled_ostream_get_hyperlink_ref:      The styled_ostream class.
-                                                              (line  21)
+                                                               (line 21)
 * styled_ostream_set_hyperlink:          The styled_ostream class.
-                                                              (line  39)
-* style_file_prepare:                    Command-line options.
-                                                              (line  40)
+                                                               (line 37)
+* style_file_prepare:                    Command-line options. (line 40)
 * term_ostream_create:                   The term_ostream class.
-                                                              (line  12)
+                                                               (line 12)
 * term_ostream_flush_to_current_style:   The term_ostream class.
-                                                              (line 104)
+                                                               (line 95)
 * term_ostream_get_bgcolor:              The term_ostream class.
-                                                              (line  40)
+                                                               (line 39)
 * term_ostream_get_color:                The term_ostream class.
-                                                              (line  33)
+                                                               (line 33)
+* term_ostream_get_descriptor:           Accessors.            (line 28)
+* term_ostream_get_effective_tty_control: Accessors.           (line 33)
+* term_ostream_get_filename:             Accessors.            (line 29)
 * term_ostream_get_hyperlink_id:         The term_ostream class.
-                                                              (line  78)
+                                                               (line 71)
 * term_ostream_get_hyperlink_ref:        The term_ostream class.
-                                                              (line  69)
+                                                               (line 63)
 * term_ostream_get_posture:              The term_ostream class.
-                                                              (line  54)
+                                                               (line 51)
+* term_ostream_get_tty_control:          Accessors.            (line 31)
 * term_ostream_get_underline:            The term_ostream class.
-                                                              (line  61)
+                                                               (line 57)
 * term_ostream_get_weight:               The term_ostream class.
-                                                              (line  47)
+                                                               (line 45)
 * term_ostream_rgb_to_color:             The term_ostream class.
-                                                              (line  28)
+                                                               (line 28)
 * term_ostream_set_bgcolor:              The term_ostream class.
-                                                              (line  42)
+                                                               (line 41)
 * term_ostream_set_color:                The term_ostream class.
-                                                              (line  35)
+                                                               (line 35)
 * term_ostream_set_hyperlink:            The term_ostream class.
-                                                              (line  87)
+                                                               (line 79)
 * term_ostream_set_posture:              The term_ostream class.
-                                                              (line  56)
+                                                               (line 53)
 * term_ostream_set_underline:            The term_ostream class.
-                                                              (line  64)
+                                                               (line 59)
 * term_ostream_set_weight:               The term_ostream class.
-                                                              (line  49)
+                                                               (line 47)
 * term_styled_ostream_create:            The term_styled_ostream class.
-                                                              (line  13)
+                                                               (line 13)
+* term_styled_ostream_get_css_filename:  Accessors.            (line 56)
+* term_styled_ostream_get_destination:   Accessors.            (line 54)
 
 
 File: libtextstyle.info,  Node: Variable Index,  Next: Index,  Prev: Function Index,  Up: Top
@@ -2624,47 +2736,53 @@ General Index
 
 Tag Table:
 Node: Top1338
-Node: Introduction1747
-Node: Style definitions2421
-Node: Built-in versus separate styling5065
-Node: The user's view6251
-Node: The TERM variable7235
-Node: Terminal emulators8333
-Node: Consoles10540
-Node: The NO_COLOR variable10911
-Node: The NO_TERM_HYPERLINKS variable11498
-Node: Emacs12196
-Node: The --color option12558
-Node: The --style option14491
-Node: Style rules15310
-Node: Debugging style files18141
-Node: The programmer's view19151
-Node: Basic use20387
-Node: Hyperlinks21859
-Node: Include files23149
-Node: Link options23387
-Node: Command-line options25196
-Node: The output stream hierarchy27915
-Node: The ostream class29411
-Node: The styled_ostream class30524
-Node: ostream subclasses without styling33374
-Node: The file_ostream class34018
-Node: The fd_ostream class34617
-Node: The term_ostream class35341
-Node: The html_ostream class39549
-Node: The memory_ostream class42387
-Node: The iconv_ostream class43365
-Node: styled_ostream subclasses44132
-Node: The term_styled_ostream class44547
-Node: The html_styled_ostream class46236
-Node: The noop_styled_ostream class47088
-Node: Debugging the styling code48092
-Node: What to document48693
-Node: Licenses49721
-Node: GNU GPL51314
-Node: GNU FDL88844
-Node: Function Index113950
-Node: Variable Index120234
-Node: Index120963
+Node: Introduction1749
+Node: Style definitions2423
+Node: Built-in versus separate styling5067
+Node: The user's view6253
+Node: The TERM variable7237
+Node: Terminal emulators8335
+Node: Consoles10542
+Node: The NO_COLOR variable10913
+Node: The NO_TERM_HYPERLINKS variable11500
+Node: Emacs12198
+Node: The --color option12560
+Node: The --style option14493
+Node: Style rules15312
+Node: Debugging style files18143
+Node: The programmer's view19153
+Node: Basic use20389
+Node: Hyperlinks21861
+Node: Include files23151
+Node: Link options23389
+Node: Command-line options25198
+Node: The output stream hierarchy27917
+Node: The ostream class29582
+Node: The styled_ostream class30695
+Node: ostream subclasses without styling33545
+Node: The file_ostream class34189
+Node: The fd_ostream class34788
+Node: The term_ostream class35512
+Node: The html_ostream class39720
+Node: The memory_ostream class42558
+Node: The iconv_ostream class43536
+Node: styled_ostream subclasses44303
+Node: The term_styled_ostream class44736
+Node: The html_styled_ostream class46425
+Node: The noop_styled_ostream class47277
+Node: Accessors48281
+Node: Debugging the styling code51157
+Node: What to document51758
+Node: Licenses52786
+Node: GNU GPL54379
+Node: GNU FDL91909
+Node: Function Index117015
+Node: Variable Index125801
+Node: Index126530
 
 End Tag Table
+
+
+Local Variables:
+coding: utf-8
+End:
