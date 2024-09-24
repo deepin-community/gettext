@@ -1,5 +1,5 @@
 /* xgettext JavaScript backend.
-   Copyright (C) 2002-2003, 2005-2009, 2013-2014, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2003, 2005-2009, 2013-2014, 2018-2023 Free Software Foundation, Inc.
 
    This file was written by Andreas Stricker <andy@knitter.ch>, 2010
    It's based on x-python from Bruno Haible.
@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "rc-str-list.h"
 #include "xgettext.h"
@@ -54,8 +55,6 @@
 #include "gettext.h"
 
 #define _(s) gettext(s)
-
-#define max(a,b) ((a) > (b) ? (a) : (b))
 
 #define SIZEOF(a) (sizeof(a) / sizeof(a[0]))
 
@@ -213,8 +212,8 @@ phase1_ungetc (int c)
 
 static lexical_context_ty lexical_context;
 
-/* Maximum used, length of "<![CDATA[" tag minus one.  */
-static int phase2_pushback[8];
+/* Maximum used, length of "<![CDATA[" tag.  */
+static int phase2_pushback[9];
 static int phase2_pushback_length;
 
 /* Read the next Unicode UCS-4 character from the input file.  */
@@ -249,11 +248,14 @@ phase2_getc ()
          interactive behaviour when fp is connected to an interactive tty.  */
       unsigned char buf[MAX_PHASE1_PUSHBACK];
       size_t bufcount;
-      int c = phase1_getc ();
-      if (c == EOF)
-        return UEOF;
-      buf[0] = (unsigned char) c;
-      bufcount = 1;
+
+      {
+        int c = phase1_getc ();
+        if (c == EOF)
+          return UEOF;
+        buf[0] = (unsigned char) c;
+        bufcount = 1;
+      }
 
       for (;;)
         {
@@ -439,7 +441,7 @@ Please specify the source encoding through --from-code\n"),
     }
 }
 
-/* Supports max (9, UNINAME_MAX + 3) pushback characters.  */
+/* Supports 9 pushback characters.  */
 static void
 phase2_ungetc (int c)
 {
@@ -601,7 +603,7 @@ phase3_getc ()
                           comment_line_end (2);
                           break;
                         }
-                      /* FALLTHROUGH */
+                      FALLTHROUGH;
 
                     default:
                       last_was_star = false;
@@ -1017,19 +1019,25 @@ new_brace_depth_level (void)
 static int xml_element_depth;
 static bool inside_embedded_js_in_xml;
 
-static bool
+/* Parses some XML markup.
+   Returns 0 for an XML comment,
+           1 for a CDATA,
+           2 for an XML Processing Instruction,
+   or -1 when none of them was recognized.  */
+static int
 phase5_scan_xml_markup (token_ty *tp)
 {
   struct
-  {
-    const char *start;
-    const char *end;
-  } markers[] =
-      {
-        { "!--", "--" },
-        { "![CDATA[", "]]" },
-        { "?", "?" }
-      };
+    {
+      const char *start;
+      const char *end;
+    }
+  markers[] =
+    {
+      { "!--", "--" },
+      { "![CDATA[", "]]" },
+      { "?", "?" }
+    };
   int i;
 
   for (i = 0; i < SIZEOF (markers); i++)
@@ -1103,13 +1111,13 @@ phase5_scan_xml_markup (token_ty *tp)
                            logical_file_name, line_number,
                            end);
                     error_with_progname = true;
-                    return false;
+                    return -1;
                   }
-                return true;
+                return i;
               }
           }
     }
-  return false;
+  return -1;
 
  eof:
   error_with_progname = false;
@@ -1117,7 +1125,7 @@ phase5_scan_xml_markup (token_ty *tp)
          _("%s:%d: warning: unterminated XML markup"),
          logical_file_name, line_number);
   error_with_progname = true;
-  return false;
+  return -1;
 }
 
 static void
@@ -1146,7 +1154,7 @@ phase5_get (token_ty *tp)
         case '\n':
           if (last_non_comment_line > last_comment_line)
             savable_comment_reset ();
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case ' ':
         case '\t':
         case '\f':
@@ -1169,7 +1177,7 @@ phase5_get (token_ty *tp)
                 return;
               }
           }
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
         case 'G': case 'H': case 'I': case 'J': case 'K': case 'L':
         case 'M': case 'N': case 'O': case 'P': case 'Q': case 'R':
@@ -1348,12 +1356,25 @@ phase5_get (token_ty *tp)
                 || (!inside_embedded_js_in_xml
                     && ! is_after_expression ()))
               {
-                /* Comments, PI, or CDATA.  */
-                if (phase5_scan_xml_markup (tp))
-                  /* BUG: *tp is not filled in here!  */
-                  return;
-                c = phase2_getc ();
+                /* Recognize XML markup: XML comment, CDATA, Processing
+                   Instruction.  */
+                int xml_markup_type = phase5_scan_xml_markup (tp);
+                if (xml_markup_type >= 0)
+                  {
+                    /* Ignore them all, since they are not part of JSX.
+                       But warn about CDATA.  */
+                    if (xml_markup_type == 1)
+                      {
+                        error_with_progname = false;
+                        error (0, 0,
+                               _("%s:%d: warning: ignoring CDATA section"),
+                               logical_file_name, line_number);
+                        error_with_progname = true;
+                      }
+                    continue;
+                  }
 
+                c = phase2_getc ();
                 if (c == '/')
                   {
                     /* Closing tag.  */
@@ -1578,6 +1599,16 @@ x_javascript_lex (token_ty *tp)
 static flag_context_list_table_ty *flag_context_list_table;
 
 
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depths.  */
+static int paren_nesting_depth;
+static int bracket_nesting_depth;
+static int brace_nesting_depth;
+static int xml_element_nesting_depth;
+
+
 /* The file is broken into tokens.  Scan the token stream, looking for
    a keyword, followed by a left paren, followed by a string.  When we
    see this sequence, we have something to remember.  We assume we are
@@ -1652,6 +1683,12 @@ extract_balanced (message_list_ty *mlp,
           continue;
 
         case token_type_lparen:
+          if (++paren_nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open parentheses"),
+                     logical_file_name, line_number);
+            }
           if (extract_balanced (mlp, token_type_rparen,
                                 inner_context, next_context_iter,
                                 arglist_parser_alloc (mlp,
@@ -1660,6 +1697,7 @@ extract_balanced (message_list_ty *mlp,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          paren_nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -1685,6 +1723,12 @@ extract_balanced (message_list_ty *mlp,
           continue;
 
         case token_type_lbracket:
+          if (++bracket_nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open brackets"),
+                     logical_file_name, line_number);
+            }
           if (extract_balanced (mlp, token_type_rbracket,
                                 null_context, null_context_list_iterator,
                                 arglist_parser_alloc (mlp, NULL)))
@@ -1692,6 +1736,7 @@ extract_balanced (message_list_ty *mlp,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          bracket_nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -1707,6 +1752,12 @@ extract_balanced (message_list_ty *mlp,
           continue;
 
         case token_type_lbrace:
+          if (++brace_nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open braces"),
+                     logical_file_name, line_number);
+            }
           if (extract_balanced (mlp, token_type_rbrace,
                                 null_context, null_context_list_iterator,
                                 arglist_parser_alloc (mlp, NULL)))
@@ -1714,6 +1765,7 @@ extract_balanced (message_list_ty *mlp,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          brace_nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -1756,6 +1808,12 @@ extract_balanced (message_list_ty *mlp,
           continue;
 
         case token_type_xml_element_start:
+          if (++xml_element_nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open XML elements"),
+                     logical_file_name, line_number);
+            }
           if (extract_balanced (mlp, token_type_xml_element_end,
                                 null_context, null_context_list_iterator,
                                 arglist_parser_alloc (mlp, NULL)))
@@ -1763,6 +1821,7 @@ extract_balanced (message_list_ty *mlp,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          xml_element_nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -1807,9 +1866,9 @@ extract_balanced (message_list_ty *mlp,
 
 void
 extract_javascript (FILE *f,
-                const char *real_filename, const char *logical_filename,
-                flag_context_list_table_ty *flag_table,
-                msgdomain_list_ty *mdlp)
+                    const char *real_filename, const char *logical_filename,
+                    flag_context_list_table_ty *flag_table,
+                    msgdomain_list_ty *mdlp)
 {
   message_list_ty *mlp = mdlp->item[0]->messages;
 
@@ -1850,6 +1909,10 @@ extract_javascript (FILE *f,
   inside_embedded_js_in_xml = false;
 
   flag_context_list_table = flag_table;
+  paren_nesting_depth = 0;
+  bracket_nesting_depth = 0;
+  brace_nesting_depth = 0;
+  xml_element_nesting_depth = 0;
 
   init_keywords ();
 

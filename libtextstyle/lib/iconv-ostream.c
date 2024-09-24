@@ -5,7 +5,7 @@
 #endif
 #line 1 "iconv-ostream.oo.c"
 /* Output stream that converts the output to another encoding.
-   Copyright (C) 2006-2007, 2010, 2019 Free Software Foundation, Inc.
+   Copyright (C) 2006-2007, 2010, 2019-2020 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
    This program is free software: you can redistribute it and/or modify
@@ -81,7 +81,7 @@ iconv_ostream__write_mem (iconv_ostream_t stream, const void *data, size_t len)
             if (n > 0)
               {
                 memcpy (inbuffer + inbufcount, data, n);
-                data = (char *) data + n;
+                data = (const char *) data + n;
                 inbufcount += n;
                 len -= n;
               }
@@ -222,6 +222,34 @@ iconv_ostream_create (const char *from_encoding, const char *to_encoding,
   return stream;
 }
 
+/* Accessors.  */
+
+static const char *
+iconv_ostream__get_from_encoding (iconv_ostream_t stream)
+{
+  return stream->from_encoding;
+}
+
+static const char *
+iconv_ostream__get_to_encoding (iconv_ostream_t stream)
+{
+  return stream->to_encoding;
+}
+
+static ostream_t
+iconv_ostream__get_destination (iconv_ostream_t stream)
+{
+  return stream->destination;
+}
+
+/* Instanceof test.  */
+
+bool
+is_instance_of_iconv_ostream (ostream_t stream)
+{
+  return IS_INSTANCE (stream, ostream, iconv_ostream);
+}
+
 #else
 
 static void
@@ -242,9 +270,37 @@ iconv_ostream__free (iconv_ostream_t stream)
   abort ();
 }
 
+/* Accessors.  */
+
+static const char *
+iconv_ostream__get_from_encoding (iconv_ostream_t stream)
+{
+  abort ();
+}
+
+static const char *
+iconv_ostream__get_to_encoding (iconv_ostream_t stream)
+{
+  abort ();
+}
+
+static ostream_t
+iconv_ostream__get_destination (iconv_ostream_t stream)
+{
+  abort ();
+}
+
+/* Instanceof test.  */
+
+bool
+is_instance_of_iconv_ostream (ostream_t stream)
+{
+  return false;
+}
+
 #endif /* HAVE_ICONV */
 
-#line 248 "iconv-ostream.c"
+#line 304 "iconv-ostream.c"
 
 const struct iconv_ostream_implementation iconv_ostream_vtable =
 {
@@ -254,6 +310,9 @@ const struct iconv_ostream_implementation iconv_ostream_vtable =
   iconv_ostream__write_mem,
   iconv_ostream__flush,
   iconv_ostream__free,
+  iconv_ostream__get_from_encoding,
+  iconv_ostream__get_to_encoding,
+  iconv_ostream__get_destination,
 };
 
 #if !HAVE_INLINE
@@ -282,6 +341,30 @@ iconv_ostream_free (iconv_ostream_t first_arg)
   const struct iconv_ostream_implementation *vtable =
     ((struct iconv_ostream_representation_header *) (struct iconv_ostream_representation *) first_arg)->vtable;
   vtable->free (first_arg);
+}
+
+const char *
+iconv_ostream_get_from_encoding (iconv_ostream_t first_arg)
+{
+  const struct iconv_ostream_implementation *vtable =
+    ((struct iconv_ostream_representation_header *) (struct iconv_ostream_representation *) first_arg)->vtable;
+  return vtable->get_from_encoding (first_arg);
+}
+
+const char *
+iconv_ostream_get_to_encoding (iconv_ostream_t first_arg)
+{
+  const struct iconv_ostream_implementation *vtable =
+    ((struct iconv_ostream_representation_header *) (struct iconv_ostream_representation *) first_arg)->vtable;
+  return vtable->get_to_encoding (first_arg);
+}
+
+ostream_t
+iconv_ostream_get_destination (iconv_ostream_t first_arg)
+{
+  const struct iconv_ostream_implementation *vtable =
+    ((struct iconv_ostream_representation_header *) (struct iconv_ostream_representation *) first_arg)->vtable;
+  return vtable->get_destination (first_arg);
 }
 
 #endif

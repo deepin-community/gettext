@@ -1,5 +1,12 @@
 #!/bin/sh
-# Copyright (C) 2003-2020 Free Software Foundation, Inc.
+# Convenience script for regenerating all autogeneratable files that are
+# omitted from the version control repository. In particular, this script
+# also regenerates all aclocal.m4, config.h.in, Makefile.in, configure files
+# with new versions of autoconf or automake.
+#
+# This script requires autoconf-2.64..2.71 and automake-1.13..1.16 in the PATH.
+
+# Copyright (C) 2003-2023 Free Software Foundation, Inc.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,23 +21,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# This script populates the build infrastructure in the source tree
-# checked-out from VCS.
-#
-# This script requires:
-#   - Autoconf
-#   - Automake >= 1.13
-#   - Wget
-#   - XZ Utils
-# If not used from a released tarball, it also requires either
+# Prerequisite (if not used from a released tarball): either
 #   - the GNULIB_SRCDIR environment variable pointing to a gnulib checkout, or
-#   - a preceding invocation of './gitsub.sh pull'.
-#
-# In addition, it fetches the archive.dir.tar.gz file, which contains
-# data files used by the autopoint program.  If you already have the
-# file, place it under gettext-tools/misc, before running this script.
+#   - a preceding invocation of './autopull.sh'.
 #
 # Usage: ./autogen.sh [--skip-gnulib]
+#
+# Options:
+#   --skip-gnulib       Avoid fetching files from Gnulib.
+#                       This option is useful
+#                       - when you are working from a released tarball (possibly
+#                         with modifications), or
+#                       - as a speedup, if the set of gnulib modules did not
+#                         change since the last time you ran this script.
 
 # Nuisances.
 (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
@@ -70,6 +73,7 @@ if ! $skip_gnulib; then
   # In gettext-runtime:
   GNULIB_MODULES_RUNTIME_FOR_SRC='
     atexit
+    attribute
     basename-lgpl
     binary-io
     closeout
@@ -95,33 +99,48 @@ if ! $skip_gnulib; then
   GNULIB_MODULES_RUNTIME_OTHER='
     gettext-runtime-misc
     ansi-c++-opt
-    bison
     csharpcomp-script
     java
     javacomp-script
+    manywarnings
   '
   $GNULIB_TOOL --dir=gettext-runtime --lib=libgrt --source-base=gnulib-lib --m4-base=gnulib-m4 --no-libtool --local-dir=gnulib-local --local-symlink \
     --import $GNULIB_MODULES_RUNTIME_FOR_SRC $GNULIB_MODULES_RUNTIME_OTHER || exit $?
-  $GNULIB_TOOL --copy-file lib/attribute.h gettext-runtime/intl/attribute.h
+  $GNULIB_TOOL --copy-file m4/build-to-host.m4 gettext-runtime/m4/build-to-host.m4 || exit $?
+  # In gettext-runtime/intl:
+  GNULIB_MODULES_LIBINTL='
+    gettext-runtime-intl-misc
+    attribute
+    bison
+    filename
+    flexmember
+    havelib
+    lib-symbol-visibility
+    localcharset
+    localename
+    lock
+    manywarnings
+    relocatable-lib-lgpl
+    tsearch
+    vasnprintf-posix
+    vasnwprintf-posix
+  '
+  GNULIB_SETLOCALE_DEPENDENCIES=`$GNULIB_TOOL --extract-dependencies setlocale | sed -e 's/ .*//'`
+  $GNULIB_TOOL --dir=gettext-runtime/intl --source-base=gnulib-lib --m4-base=gnulib-m4 --lgpl=2 --libtool --local-dir=gnulib-local --local-symlink \
+    --import $GNULIB_MODULES_LIBINTL $GNULIB_SETLOCALE_DEPENDENCIES || exit $?
   # In gettext-runtime/libasprintf:
   GNULIB_MODULES_LIBASPRINTF='
     alloca
-    attribute
-    errno
-    verify
-    xsize
+    manywarnings
+    vasnprintf
   '
-  GNULIB_MODULES_LIBASPRINTF_OTHER='
-  '
-  $GNULIB_TOOL --dir=gettext-runtime/libasprintf --source-base=. --m4-base=gnulib-m4 --lgpl=2 --makefile-name=Makefile.gnulib --libtool --local-dir=gnulib-local --local-symlink \
-    --import $GNULIB_MODULES_LIBASPRINTF $GNULIB_MODULES_LIBASPRINTF_OTHER || exit $?
-  $GNULIB_TOOL --copy-file m4/intmax_t.m4 gettext-runtime/libasprintf/gnulib-m4/intmax_t.m4 || exit $?
-  $GNULIB_TOOL --copy-file m4/wchar_t.m4 gettext-runtime/libasprintf/gnulib-m4/wchar_t.m4 || exit $?
-  $GNULIB_TOOL --copy-file m4/wint_t.m4 gettext-runtime/libasprintf/gnulib-m4/wint_t.m4 || exit $?
+  $GNULIB_TOOL --dir=gettext-runtime/libasprintf --source-base=gnulib-lib --m4-base=gnulib-m4 --lgpl=2 --libtool --local-dir=gnulib-local --local-symlink \
+    --import $GNULIB_MODULES_LIBASPRINTF || exit $?
   # In gettext-tools:
   GNULIB_MODULES_TOOLS_FOR_SRC='
     alloca-opt
     atexit
+    attribute
     backupfile
     basename-lgpl
     binary-io
@@ -144,12 +163,15 @@ if ! $skip_gnulib; then
     execute
     filename
     findprog
+    flexmember
     fnmatch
     fopen
+    free-posix
     fstrcmp
     full-write
     fwriteerror
     gcd
+    getaddrinfo
     getline
     getopt-gnu
     gettext
@@ -196,6 +218,7 @@ if ! $skip_gnulib; then
     strchrnul
     strcspn
     strerror
+    string-desc
     strpbrk
     strtol
     strtoul
@@ -269,6 +292,7 @@ if ! $skip_gnulib; then
     java
     javacomp-script
     javaexec-script
+    manywarnings
     stdint
   '
   GNULIB_MODULES_TOOLS_LIBUNISTRING_TESTS='
@@ -279,8 +303,11 @@ if ! $skip_gnulib; then
     uniwidth/width-tests
   '
   $GNULIB_TOOL --dir=gettext-tools --lib=libgettextlib --source-base=gnulib-lib --m4-base=gnulib-m4 --tests-base=gnulib-tests --makefile-name=Makefile.gnulib --libtool --with-tests --local-dir=gnulib-local --local-symlink \
-    --import --avoid=fdutimensat-tests --avoid=futimens-tests --avoid=utime-tests --avoid=utimens-tests --avoid=utimensat-tests \
-    `for m in $GNULIB_MODULES_TOOLS_LIBUNISTRING_TESTS; do echo --avoid=$m; done` $GNULIB_MODULES_TOOLS_FOR_SRC $GNULIB_MODULES_TOOLS_FOR_SRC_COMMON_DEPENDENCIES $GNULIB_MODULES_TOOLS_OTHER || exit $?
+    --import \
+    --avoid=fdutimensat-tests --avoid=futimens-tests --avoid=utime-tests --avoid=utimens-tests --avoid=utimensat-tests \
+    --avoid=array-list-tests --avoid=linked-list-tests --avoid=linkedhash-list-tests \
+    `for m in $GNULIB_MODULES_TOOLS_LIBUNISTRING_TESTS; do echo --avoid=$m; done` \
+    $GNULIB_MODULES_TOOLS_FOR_SRC $GNULIB_MODULES_TOOLS_FOR_SRC_COMMON_DEPENDENCIES $GNULIB_MODULES_TOOLS_OTHER || exit $?
   $GNULIB_TOOL --copy-file m4/libtextstyle.m4 gettext-tools/gnulib-m4/libtextstyle.m4 || exit $?
   # In gettext-tools/libgrep:
   GNULIB_MODULES_TOOLS_FOR_LIBGREP='
@@ -288,10 +315,20 @@ if ! $skip_gnulib; then
     regex
   '
   $GNULIB_TOOL --dir=gettext-tools --macro-prefix=grgl --lib=libgrep --source-base=libgrep --m4-base=libgrep/gnulib-m4 --witness-c-macro=IN_GETTEXT_TOOLS_LIBGREP --makefile-name=Makefile.gnulib --local-dir=gnulib-local --local-symlink \
-    --import `for m in $GNULIB_MODULES_TOOLS_FOR_SRC_COMMON_DEPENDENCIES; do if test \`$GNULIB_TOOL --extract-applicability $m\` != all; then echo --avoid=$m; fi; done` $GNULIB_MODULES_TOOLS_FOR_LIBGREP || exit $?
+    --import \
+    `for m in $GNULIB_MODULES_TOOLS_FOR_SRC_COMMON_DEPENDENCIES; do \
+       if test \`$GNULIB_TOOL --extract-applicability $m\` != all; then \
+         case $m in \
+           locale | stdbool | stddef | stdint | stdlib | unistd | wchar | wctype-h) ;; \
+           *) echo --avoid=$m ;; \
+         esac; \
+       fi; \
+     done` \
+    $GNULIB_MODULES_TOOLS_FOR_LIBGREP || exit $?
   # In gettext-tools/libgettextpo:
-  # This is a subset of the GNULIB_MODULES_FOR_SRC.
+  # This is a subset of the GNULIB_MODULES_TOOLS_FOR_SRC.
   GNULIB_MODULES_LIBGETTEXTPO='
+    attribute
     basename-lgpl
     close
     c-ctype
@@ -301,6 +338,7 @@ if ! $skip_gnulib; then
     error-progname
     filename
     fopen
+    free-posix
     fstrcmp
     fwriteerror
     gcd
@@ -322,6 +360,7 @@ if ! $skip_gnulib; then
     stpncpy
     strchrnul
     strerror
+    string-desc
     unictype/ctype-space
     unilbrk/ulc-width-linebreaks
     unistr/u8-mbtouc
@@ -367,47 +406,32 @@ if ! $skip_gnulib; then
   $GNULIB_TOOL --copy-file build-aux/vc-list-files || exit $?
   $GNULIB_TOOL --copy-file top/GNUmakefile . || exit $?
   $GNULIB_TOOL --copy-file top/maint.mk . || exit $?
-fi
 
-# Fetch config.guess, config.sub.
-if test -n "$GNULIB_TOOL"; then
+  # Fetch config.guess, config.sub.
   for file in config.guess config.sub; do
     $GNULIB_TOOL --copy-file build-aux/$file && chmod a+x build-aux/$file || exit $?
   done
-else
-  for file in config.guess config.sub; do
-    echo "$0: getting $file..."
-    wget -q --timeout=5 -O build-aux/$file.tmp "https://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=blob_plain;f=build-aux/${file};hb=HEAD" \
-      && mv build-aux/$file.tmp build-aux/$file \
-      && chmod a+x build-aux/$file
-    retval=$?
-    rm -f build-aux/$file.tmp
-    test $retval -eq 0 || exit $retval
-  done
-fi
-
-# Fetch gettext-tools/misc/archive.dir.tar.
-if ! test -f gettext-tools/misc/archive.dir.tar; then
-  if ! test -f gettext-tools/misc/archive.dir.tar.xz; then
-    echo "$0: getting gettext-tools/misc/archive.dir.tar..."
-    wget -q --timeout=5 -O gettext-tools/misc/archive.dir.tar.xz-t "https://alpha.gnu.org/gnu/gettext/archive.dir-latest.tar.xz" \
-      && mv gettext-tools/misc/archive.dir.tar.xz-t gettext-tools/misc/archive.dir.tar.xz
-    retval=$?
-    rm -f gettext-tools/misc/archive.dir.tar.xz-t
-    test $retval -eq 0 || exit $retval
-  fi
-  xz -d -c < gettext-tools/misc/archive.dir.tar.xz > gettext-tools/misc/archive.dir.tar-t \
-    && mv gettext-tools/misc/archive.dir.tar-t gettext-tools/misc/archive.dir.tar
-  retval=$?
-  rm -f gettext-tools/misc/archive.dir.tar-t
-  test $retval -eq 0 || exit $retval
 fi
 
 # Make sure we get new versions of files brought in by automake.
 (cd build-aux && rm -f ar-lib compile depcomp install-sh mdate-sh missing test-driver ylwrap)
 
 # Generate configure script in each subdirectories.
+# The aclocal and autoconf invocations need to be done bottom-up
+# (subdirs first), so that 'configure --help' shows also the options
+# that matter for the subdirs.
 dir0=`pwd`
+
+echo "$0: generating configure in gettext-runtime/intl..."
+cd gettext-runtime/intl
+aclocal -I ../../m4 -I ../m4 -I gnulib-m4 \
+  && autoconf \
+  && autoheader && touch config.h.in \
+  && touch ChangeLog \
+  && automake --add-missing --copy \
+  && rm -rf autom4te.cache \
+  || exit $?
+cd "$dir0"
 
 echo "$0: generating configure in gettext-runtime/libasprintf..."
 cd gettext-runtime/libasprintf
@@ -425,7 +449,7 @@ cd gettext-runtime
 aclocal -I m4 -I ../m4 -I gnulib-m4 \
   && autoconf \
   && autoheader && touch config.h.in \
-  && touch ChangeLog intl/ChangeLog \
+  && touch ChangeLog \
   && automake --add-missing --copy \
   && rm -rf autom4te.cache \
   || exit $?
@@ -473,24 +497,28 @@ for file in po.m4; do
 done
 
 echo "$0: generating configure in gettext-tools..."
-mkdir -p gettext-tools/intl
-cp -p gettext-runtime/intl/Makefile.am gettext-tools/intl/Makefile.am
 cd gettext-tools
 aclocal -I m4 -I ../gettext-runtime/m4 -I ../m4 -I gnulib-m4 -I libgrep/gnulib-m4 -I libgettextpo/gnulib-m4 \
   && autoconf \
   && autoheader && touch config.h.in \
   && touch ChangeLog \
-  && { test -d intl || mkdir intl; } \
   && automake --add-missing --copy \
   && rm -rf autom4te.cache \
   || exit $?
 cd "$dir0"
 
+echo "$0: generating configure at the top-level..."
 aclocal -I m4 \
   && autoconf \
   && touch ChangeLog \
   && automake --add-missing --copy \
-  && rm -rf autom4te.cache gettext-runtime/autom4te.cache gettext-tools/autom4te.cache \
+  && rm -rf autom4te.cache \
+            gettext-runtime/autom4te.cache \
+            gettext-runtime/intl/autom4te.cache \
+            gettext-runtime/libasprintf/autom4te.cache \
+            libtextstyle/autom4te.cache \
+            gettext-tools/autom4te.cache \
+            gettext-tools/examples/autom4te.cache \
   || exit $?
 
 echo "$0: done.  Now you can run './configure'."

@@ -1,5 +1,5 @@
 /* Initializes a new PO file.
-   Copyright (C) 2001-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2023 Free Software Foundation, Inc.
    Written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
    This program is free software: you can redistribute it and/or modify
@@ -271,7 +271,7 @@ License GPLv3+: GNU GPL version 3 or later <%s>\n\
 This is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n\
 "),
-              "2001-2020", "https://gnu.org/licenses/gpl.html");
+              "2001-2023", "https://gnu.org/licenses/gpl.html");
       printf (_("Written by %s.\n"), proper_name ("Bruno Haible"));
       exit (EXIT_SUCCESS);
     }
@@ -745,7 +745,7 @@ catalogname_for_locale (const char *locale)
     "tl_PH",    /* Tagalog      Philippines */
     "to_TO",    /* Tonga        Tonga */
     "tpi_PG",   /* Tok Pisin    Papua New Guinea */
-    "tr_TR",    /* Turkish      Turkey */
+    "tr_TR",    /* Turkish      Türkiye */
     "tum_MW",   /* Tumbuka      Malawi */
     "ug_CN",    /* Uighur       China */
     "uk_UA",    /* Ukrainian    Ukraine */
@@ -924,7 +924,7 @@ project_id (const char *header)
   {
     const char *gettextlibdir;
     char *prog;
-    char *argv[3];
+    const char *argv[3];
     pid_t child;
     int fd[1];
     FILE *fp;
@@ -943,8 +943,8 @@ project_id (const char *header)
     argv[0] = BOURNE_SHELL;
     argv[1] = prog;
     argv[2] = NULL;
-    child = create_pipe_in (prog, BOURNE_SHELL, argv, DEV_NULL, false, true,
-                            false, fd);
+    child = create_pipe_in (prog, BOURNE_SHELL, argv, NULL,
+                            DEV_NULL, false, true, false, fd);
     if (child == -1)
       goto failed;
 
@@ -1006,7 +1006,7 @@ project_id_version (const char *header)
   {
     const char *gettextlibdir;
     char *prog;
-    char *argv[4];
+    const char *argv[4];
     pid_t child;
     int fd[1];
     FILE *fp;
@@ -1026,8 +1026,8 @@ project_id_version (const char *header)
     argv[1] = prog;
     argv[2] = "yes";
     argv[3] = NULL;
-    child = create_pipe_in (prog, BOURNE_SHELL, argv, DEV_NULL, false, true,
-                            false, fd);
+    child = create_pipe_in (prog, BOURNE_SHELL, argv, NULL,
+                            DEV_NULL, false, true, false, fd);
     if (child == -1)
       goto failed;
 
@@ -1178,7 +1178,7 @@ get_user_email ()
 #if !(defined _WIN32 && ! defined __CYGWIN__)
   {
     const char *prog = relocate (LIBDIR "/gettext/user-email");
-    char *argv[4];
+    const char *argv[4];
     pid_t child;
     int fd[1];
     FILE *fp;
@@ -1189,14 +1189,14 @@ get_user_email ()
 
     /* Ask the user for his email address.  */
     argv[0] = BOURNE_SHELL;
-    argv[1] = (char *) prog;
-    argv[2] = (char *) _("\
+    argv[1] = prog;
+    argv[2] = _("\
 The new message catalog should contain your email address, so that users can\n\
 give you feedback about the translations, and so that maintainers can contact\n\
 you in case of unexpected technical problems.\n");
     argv[3] = NULL;
-    child = create_pipe_in (prog, BOURNE_SHELL, argv, DEV_NULL, false, true,
-                            false, fd);
+    child = create_pipe_in (prog, BOURNE_SHELL, argv, NULL,
+                            DEV_NULL, false, true, false, fd);
     if (child == -1)
       goto failed;
 
@@ -1284,25 +1284,26 @@ language_team_address ()
 #if !(defined _WIN32 && ! defined __CYGWIN__)
   {
     const char *prog = relocate (PROJECTSDIR "/team-address");
-    char *argv[7];
+    const char *argv[7];
     pid_t child;
     int fd[1];
     FILE *fp;
     char *line;
     size_t linesize;
     size_t linelen;
+    const char *result;
     int exitstatus;
 
     /* Call the team-address shell script.  */
     argv[0] = BOURNE_SHELL;
-    argv[1] = (char *) prog;
-    argv[2] = (char *) relocate (PROJECTSDIR);
-    argv[3] = (char *) relocate (LIBDIR "/gettext");
-    argv[4] = (char *) catalogname;
-    argv[5] = (char *) language;
+    argv[1] = prog;
+    argv[2] = relocate (PROJECTSDIR);
+    argv[3] = relocate (LIBDIR "/gettext");
+    argv[4] = catalogname;
+    argv[5] = language;
     argv[6] = NULL;
-    child = create_pipe_in (prog, BOURNE_SHELL, argv, DEV_NULL, false, true,
-                            false, fd);
+    child = create_pipe_in (prog, BOURNE_SHELL, argv, NULL,
+                            DEV_NULL, false, true, false, fd);
     if (child == -1)
       goto failed;
 
@@ -1317,9 +1318,13 @@ language_team_address ()
     line = NULL; linesize = 0;
     linelen = getline (&line, &linesize, fp);
     if (linelen == (size_t)(-1))
-      line = "";
-    else if (linelen > 0 && line[linelen - 1] == '\n')
-      line[linelen - 1] = '\0';
+      result = "";
+    else
+      {
+        if (linelen > 0 && line[linelen - 1] == '\n')
+          line[linelen - 1] = '\0';
+        result = line;
+      }
 
     fclose (fp);
 
@@ -1332,7 +1337,7 @@ language_team_address ()
         goto failed;
       }
 
-    return line;
+    return result;
   }
 
 failed:
@@ -1434,8 +1439,9 @@ plural_forms ()
   if (gettextcldrdir != NULL && gettextcldrdir[0] != '\0')
     {
       const char *gettextlibdir;
-      char *dirs[3], *last_dir;
-      char *argv[4];
+      const char *dirs[3];
+      char *last_dir;
+      const char *argv[4];
       pid_t child;
       int fd[1];
       FILE *fp;
@@ -1466,12 +1472,11 @@ plural_forms ()
          because on Cygwin in a build with --enable-shared, the libtool
          wrapper of cldr-plurals.exe apparently needs this.  */
       argv[0] = prog;
-      argv[1] = (char *) language;
+      argv[1] = language;
       argv[2] = last_dir;
       argv[3] = NULL;
-      child = create_pipe_in (prog, prog, argv, DEV_NULL,
-                              false, true, false,
-                              fd);
+      child = create_pipe_in (prog, prog, argv, NULL,
+                              DEV_NULL, false, true, false, fd);
       free (last_dir);
       if (child == -1)
         goto failed;

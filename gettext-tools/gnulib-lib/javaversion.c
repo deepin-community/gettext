@@ -1,10 +1,10 @@
 /* Determine the Java version supported by javaexec.
-   Copyright (C) 2006-2020 Free Software Foundation, Inc.
+   Copyright (C) 2006-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -21,7 +21,6 @@
 #include "javaversion.h"
 
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -35,7 +34,7 @@
 #include "javaexec.h"
 #include "spawn-pipe.h"
 #include "wait-process.h"
-#include "error.h"
+#include <error.h>
 #include "gettext.h"
 
 #define _(str) gettext (str)
@@ -52,7 +51,7 @@ struct locals
 
 static bool
 execute_and_read_line (const char *progname,
-                       const char *prog_path, char **prog_argv,
+                       const char *prog_path, const char * const *prog_argv,
                        void *private_data)
 {
   struct locals *l = (struct locals *) private_data;
@@ -65,8 +64,8 @@ execute_and_read_line (const char *progname,
   int exitstatus;
 
   /* Open a pipe to the JVM.  */
-  child = create_pipe_in (progname, prog_path, prog_argv, DEV_NULL, false,
-                          true, false, fd);
+  child = create_pipe_in (progname, prog_path, prog_argv, NULL,
+                          DEV_NULL, false, true, false, fd);
 
   if (child == -1)
     return false;

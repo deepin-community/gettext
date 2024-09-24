@@ -1,5 +1,5 @@
 /* xgettext Python backend.
-   Copyright (C) 2002-2003, 2005-2011, 2013-2014, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2002-2003, 2005-2011, 2013-2014, 2018-2023 Free Software Foundation, Inc.
 
    This file was written by Bruno Haible <haible@clisp.cons.org>, 2002.
 
@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "rc-str-list.h"
 #include "xgettext.h"
@@ -56,6 +57,7 @@
 
 #define _(s) gettext(s)
 
+#undef max /* clean up after MSVC's <stdlib.h> */
 #define max(a,b) ((a) > (b) ? (a) : (b))
 
 #define SIZEOF(a) (sizeof(a) / sizeof(a[0]))
@@ -291,11 +293,14 @@ as specified in https://www.python.org/peps/pep-0263.html.\n")));
          interactive behaviour when fp is connected to an interactive tty.  */
       unsigned char buf[MAX_PHASE1_PUSHBACK];
       size_t bufcount;
-      int c = phase1_getc ();
-      if (c == EOF)
-        return UEOF;
-      buf[0] = (unsigned char) c;
-      bufcount = 1;
+
+      {
+        int c = phase1_getc ();
+        if (c == EOF)
+          return UEOF;
+        buf[0] = (unsigned char) c;
+        bufcount = 1;
+      }
 
       for (;;)
         {
@@ -1223,7 +1228,7 @@ phase5_get (token_ty *tp)
                 return;
               }
           }
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
         case 'G': case 'H': case 'I': case 'J': case 'K': case 'L':
         case 'M': case 'N': case 'O': case 'P': case 'Q':
@@ -1509,6 +1514,14 @@ x_python_lex (token_ty *tp)
 static flag_context_list_table_ty *flag_context_list_table;
 
 
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depths.  */
+static int paren_nesting_depth;
+static int bracket_nesting_depth;
+
+
 /* The file is broken into tokens.  Scan the token stream, looking for
    a keyword, followed by a left paren, followed by a string.  When we
    see this sequence, we have something to remember.  We assume we are
@@ -1583,6 +1596,12 @@ extract_balanced (message_list_ty *mlp,
           continue;
 
         case token_type_lparen:
+          if (++paren_nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open parentheses"),
+                     logical_file_name, line_number);
+            }
           if (extract_balanced (mlp, token_type_rparen,
                                 inner_context, next_context_iter,
                                 arglist_parser_alloc (mlp,
@@ -1591,6 +1610,7 @@ extract_balanced (message_list_ty *mlp,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          paren_nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -1616,6 +1636,12 @@ extract_balanced (message_list_ty *mlp,
           continue;
 
         case token_type_lbracket:
+          if (++bracket_nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open brackets"),
+                     logical_file_name, line_number);
+            }
           if (extract_balanced (mlp, token_type_rbracket,
                                 null_context, null_context_list_iterator,
                                 arglist_parser_alloc (mlp, NULL)))
@@ -1623,6 +1649,7 @@ extract_balanced (message_list_ty *mlp,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          bracket_nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -1723,6 +1750,8 @@ extract_python (FILE *f,
   phase5_pushback_length = 0;
 
   flag_context_list_table = flag_table;
+  paren_nesting_depth = 0;
+  bracket_nesting_depth = 0;
 
   init_keywords ();
 

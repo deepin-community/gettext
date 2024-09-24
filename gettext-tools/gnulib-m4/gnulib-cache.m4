@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2020 Free Software Foundation, Inc.
+# Copyright (C) 2002-2024 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
+# the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
 # This file is distributed in the hope that it will be useful,
@@ -44,6 +44,9 @@
 #  --avoid=utime-tests \
 #  --avoid=utimens-tests \
 #  --avoid=utimensat-tests \
+#  --avoid=array-list-tests \
+#  --avoid=linked-list-tests \
+#  --avoid=linkedhash-list-tests \
 #  --avoid=unilbrk/u8-possible-linebreaks-tests \
 #  --avoid=unilbrk/ulc-width-linebreaks-tests \
 #  --avoid=unistr/u8-mbtouc-tests \
@@ -52,6 +55,7 @@
 #  alloca-opt \
 #  ansi-c++-opt \
 #  atexit \
+#  attribute \
 #  backupfile \
 #  basename-lgpl \
 #  binary-io \
@@ -77,12 +81,15 @@
 #  extensions \
 #  filename \
 #  findprog \
+#  flexmember \
 #  fnmatch \
 #  fopen \
+#  free-posix \
 #  fstrcmp \
 #  full-write \
 #  fwriteerror \
 #  gcd \
+#  getaddrinfo \
 #  getline \
 #  getopt-gnu \
 #  gettext \
@@ -103,6 +110,7 @@
 #  localtime \
 #  lock \
 #  malloc-posix \
+#  manywarnings \
 #  mbrtowc \
 #  mbsinit \
 #  mem-hash-map \
@@ -146,6 +154,7 @@
 #  strcspn \
 #  streq \
 #  strerror \
+#  string-desc \
 #  strpbrk \
 #  strtol \
 #  strtoul \
@@ -193,6 +202,7 @@ gl_MODULES([
   alloca-opt
   ansi-c++-opt
   atexit
+  attribute
   backupfile
   basename-lgpl
   binary-io
@@ -218,12 +228,15 @@ gl_MODULES([
   extensions
   filename
   findprog
+  flexmember
   fnmatch
   fopen
+  free-posix
   fstrcmp
   full-write
   fwriteerror
   gcd
+  getaddrinfo
   getline
   getopt-gnu
   gettext
@@ -244,6 +257,7 @@ gl_MODULES([
   localtime
   lock
   malloc-posix
+  manywarnings
   mbrtowc
   mbsinit
   mem-hash-map
@@ -287,6 +301,7 @@ gl_MODULES([
   strcspn
   streq
   strerror
+  string-desc
   strpbrk
   strtol
   strtoul
@@ -328,7 +343,7 @@ gl_MODULES([
   xstriconveh
   xvasprintf
 ])
-gl_AVOID([ fdutimensat-tests futimens-tests utime-tests utimens-tests utimensat-tests unilbrk/u8-possible-linebreaks-tests unilbrk/ulc-width-linebreaks-tests unistr/u8-mbtouc-tests unistr/u8-mbtouc-unsafe-tests uniwidth/width-tests])
+gl_AVOID([ fdutimensat-tests futimens-tests utime-tests utimens-tests utimensat-tests array-list-tests linked-list-tests linkedhash-list-tests unilbrk/u8-possible-linebreaks-tests unilbrk/ulc-width-linebreaks-tests unistr/u8-mbtouc-tests unistr/u8-mbtouc-unsafe-tests uniwidth/width-tests])
 gl_SOURCE_BASE([gnulib-lib])
 gl_M4_BASE([gnulib-m4])
 gl_PO_BASE([])

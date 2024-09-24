@@ -76,7 +76,8 @@ init_flag_table_ruby (void)
 /* ========================= Extracting strings.  ========================== */
 
 void
-extract_ruby (const char *real_filename, const char *logical_filename,
+extract_ruby (const char *found_in_dir, const char *real_filename,
+              const char *logical_filename,
               flag_context_list_table_ty *flag_table,
               msgdomain_list_ty *mdlp)
 {
@@ -94,7 +95,7 @@ extract_ruby (const char *real_filename, const char *logical_filename,
   mdlp2 = msgdomain_list_alloc (true);
   for (pass = 0; pass < 2; pass++)
     {
-      char *argv[4];
+      const char *argv[4];
       unsigned int i;
       pid_t child;
       int fd[1];
@@ -102,20 +103,20 @@ extract_ruby (const char *real_filename, const char *logical_filename,
       int exitstatus;
 
       /* Prepare arguments.  */
-      argv[0] = (char *) progname;
+      argv[0] = progname;
       i = 1;
 
       if (pass > 0)
-        argv[i++] = (char *) "--add-comments=xgettext:";
+        argv[i++] = "--add-comments=xgettext:";
       else
         {
           if (add_all_comments)
-            argv[i++] = (char *) "--add-comments";
+            argv[i++] = "--add-comments";
           else if (comment_tag != NULL)
             argv[i++] = xasprintf ("--add-comments=%s", comment_tag);
         }
 
-      argv[i++] = (char *) real_filename;
+      argv[i++] = logical_filename;
 
       argv[i] = NULL;
 
@@ -126,7 +127,7 @@ extract_ruby (const char *real_filename, const char *logical_filename,
           free (command);
         }
 
-      child = create_pipe_in (progname, progname, argv,
+      child = create_pipe_in (progname, progname, argv, found_in_dir,
                               DEV_NULL, false, true, true, fd);
 
       fp = fdopen (fd[0], "r");

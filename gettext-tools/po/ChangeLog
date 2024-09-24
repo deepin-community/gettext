@@ -1,3 +1,70 @@
+2024-02-21  Bruno Haible  <bruno@clisp.org>
+
+	Update translations.
+
+2023-09-19  Bruno Haible  <bruno@clisp.org>
+
+	Update translations from TP.
+
+2023-06-17  Bruno Haible  <bruno@clisp.org>
+
+	Update translations from TP.
+	* gettext-runtime/po/*.po: Update from TP.
+	* gettext-runtime/po/LINGUAS: Add ka.
+	* gettext-tools/po/*.po: Update from TP.
+	* gettext-tools/po/LINGUAS: Add hr.
+	* gettext-tools/examples/po/*.po: Update from TP.
+
+	Update POTFILES.in.
+	* gettext-runtime/po/POTFILES.in: Update.
+	* gettext-tools/po/POTFILES.in: Update.
+
+2023-03-14  Bruno Haible  <bruno@clisp.org>
+
+	po: In the Makefiles, enable --quiet by default when possible.
+	This is possible because msgmerge became faster
+	- through an index-based fuzzy search (msgl-fsearch.c) in 2006,
+	- through OpenMP parallelization in 2006,
+	- through processor speedups over the years.
+	The only case where msgmerge is still slow is when a compendium is in use.
+
+	Suggested by Marcus Müller <marcus_savannah@hostalia.de> in
+	<https://lists.gnu.org/archive/html/bug-gnulib/2023-03/msg00034.html>.
+
+	* gettext-runtime/po/Makefile.in.in ($(POFILES), update-po): If msgmerge has
+	version ≥ 0.11, pass option --quiet.
+	* gettext-runtime/po/Makevars (MSGMERGE_OPTIONS): Don't suggest --quiet any
+	more.
+	* gettext-tools/po/Makevars (MSGMERGE_OPTIONS): Likewise.
+	* gettext-tools/examples/hello-*/po/Makevars (MSGMERGE_OPTIONS): Likewise.
+	* gettext-tools/examples/hello-*/po/Makefile.am ($(POFILES), update-po): If
+	msgmerge has version ≥ 0.11, pass option --quiet.
+	(MSGMERGE_OPTIONS): Don't suggest --quiet any more.
+	* gettext-tools/examples/hello-objc-gnustep/po/GNUmakefile: Likewise.
+	* gettext-tools/examples/po/Makefile.am ($(POFILES), update-po): Pass option
+	--quiet to msgmerge.
+	(MSGMERGE_OPTIONS): Don't suggest --quiet any more.
+
+2022-10-10  Bruno Haible  <bruno@clisp.org>
+
+	Merge from 0.21.x branch: Prepare for 0.21.1 release: Update translations.
+	* gettext-runtime/po/*.po: Update from TP.
+	* gettext-tools/po/*.po: Likewise.
+	* gettext-tools/examples/po/*.po: Likewise.
+	* gettext-tools/examples/po/LINGUAS: Add 'ka'.
+	* gettext-tools/examples/hello-*/po/LINGUAS: Likewise.
+	* gettext-tools/examples/Makefile.am (EXAMPLESPOFILES): Add ka.po.
+
+2022-09-13  Bruno Haible  <bruno@clisp.org>
+
+	Update after gnulib changed.
+	* gettext-tools/po/POTFILES.in: Update.
+
+2020-12-04  Bruno Haible  <bruno@clisp.org>
+
+	Update after gnulib changed.
+	* gettext-tools/po/POTFILES.in: Update.
+
 2020-07-26  Bruno Haible  <bruno@clisp.org>
 
 	Update translations (from the TP).

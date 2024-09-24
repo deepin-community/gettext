@@ -1,5 +1,5 @@
 /* Substitution of environment variables in shell format strings.
-   Copyright (C) 2003-2007, 2012, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2007, 2012, 2018-2023 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software: you can redistribute it and/or modify
@@ -112,7 +112,7 @@ License GPLv3+: GNU GPL version 3 or later <%s>\n\
 This is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n\
 "),
-              "2003-2020", "https://gnu.org/licenses/gpl.html");
+              "2003-2023", "https://gnu.org/licenses/gpl.html");
       printf (_("Written by %s.\n"), proper_name ("Bruno Haible"));
       exit (EXIT_SUCCESS);
     }
@@ -343,8 +343,8 @@ string_list_append (string_list_ty *slp, const char *s)
 static int
 cmp_string (const void *pstr1, const void *pstr2)
 {
-  const char *str1 = *(const char **)pstr1;
-  const char *str2 = *(const char **)pstr2;
+  const char *str1 = *(const char * const *)pstr1;
+  const char *str2 = *(const char * const *)pstr2;
 
   return strcmp (str1, str2);
 }

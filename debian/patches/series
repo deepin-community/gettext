@@ -1,4 +1,2 @@
-01-use-system-help2man.patch
-02-library-dependencies.patch
-03-disable-libtextstyle.patch
-04-fix-powerpc-ftbfs.patch
+01-autopoint-3-fix-typo.patch
+02-autopoint-3-remove-autom4te-cache.patch

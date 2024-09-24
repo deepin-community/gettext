@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.6.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -84,7 +84,7 @@ extern DLL_VARIABLE int po_gram_debug;
 #if ! defined PO_GRAM_STYPE && ! defined PO_GRAM_STYPE_IS_DECLARED
 union PO_GRAM_STYPE
 {
-#line 103 "./po-gram-gen.y"
+#line 103 "po-gram-gen.y"
 
   struct { char *string; lex_pos_ty pos; bool obsolete; } string;
   struct { string_list_ty stringlist; lex_pos_ty pos; bool obsolete; } stringlist;
@@ -94,7 +94,7 @@ union PO_GRAM_STYPE
   struct { char *prev_ctxt; char *prev_id; char *prev_id_plural; char *ctxt; lex_pos_ty pos; bool obsolete; } message_intro;
   struct { struct msgstr_def rhs; lex_pos_ty pos; bool obsolete; } rhs;
 
-#line 98 "po-gram-gen.tab.h"
+#line 98 "po-gram-gen2.h"
 
 };
 typedef union PO_GRAM_STYPE PO_GRAM_STYPE;
@@ -105,6 +105,8 @@ typedef union PO_GRAM_STYPE PO_GRAM_STYPE;
 
 extern DLL_VARIABLE PO_GRAM_STYPE po_gram_lval;
 
+
 int po_gram_parse (void);
+
 
 #endif /* !YY_PO_GRAM_PO_GRAM_GEN_TAB_H_INCLUDED  */

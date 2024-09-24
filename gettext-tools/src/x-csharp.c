@@ -1,5 +1,5 @@
 /* xgettext C# backend.
-   Copyright (C) 2003-2009, 2011, 2014, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2009, 2011, 2014, 2018-2023 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "rc-str-list.h"
 #include "xgettext.h"
@@ -235,11 +236,14 @@ phase2_getc ()
          interactive behaviour when fp is connected to an interactive tty.  */
       unsigned char buf[MAX_PHASE1_PUSHBACK];
       size_t bufcount;
-      int c = phase1_getc ();
-      if (c == EOF)
-        return UEOF;
-      buf[0] = (unsigned char) c;
-      bufcount = 1;
+
+      {
+        int c = phase1_getc ();
+        if (c == EOF)
+          return UEOF;
+        buf[0] = (unsigned char) c;
+        bufcount = 1;
+      }
 
       for (;;)
         {
@@ -444,7 +448,7 @@ phase2_ungetc (int c)
 /* Line number defined in terms of phase3.  */
 static int logical_line_number;
 
-static int phase3_pushback[9];
+static int phase3_pushback[10];
 static int phase3_pushback_length;
 
 /* Read the next Unicode UCS-4 character from the input file, mapping
@@ -620,7 +624,7 @@ phase4_getc ()
                   comment_line_end (2);
                   break;
                 }
-              /* FALLTHROUGH */
+              FALLTHROUGH;
 
             default:
               last_was_star = false;
@@ -1496,7 +1500,7 @@ phase6_get (token_ty *tp)
         case UNL:
           if (last_non_comment_line > last_comment_line)
             savable_comment_reset ();
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case ' ':
         case '\t':
         case '\f':
@@ -1536,7 +1540,7 @@ phase6_get (token_ty *tp)
               tp->type = token_type_dot;
               return;
             }
-          /* FALLTHROUGH */
+          FALLTHROUGH;
 
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
@@ -1651,7 +1655,7 @@ phase6_get (token_ty *tp)
               tp->type = token_type_string_literal;
               return;
             }
-          /* FALLTHROUGH, so that @identifier is recognized.  */
+          FALLTHROUGH; /* so that @identifier is recognized.  */
 
         default:
           if (c == '\\')
@@ -1793,6 +1797,14 @@ x_csharp_unlex (token_ty *tp)
 static flag_context_list_table_ty *flag_context_list_table;
 
 
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depths.  */
+static int paren_nesting_depth;
+static int brace_nesting_depth;
+
+
 /* The file is broken into tokens.  Scan the token stream, looking for
    a keyword, followed by a left paren, followed by a string.  When we
    see this sequence, we have something to remember.  We assume we are
@@ -1928,6 +1940,12 @@ extract_parenthesized (message_list_ty *mlp, token_type_ty terminator,
           }
 
         case token_type_lparen:
+          if (++paren_nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open parentheses"),
+                     logical_file_name, line_number);
+            }
           if (extract_parenthesized (mlp, token_type_rparen,
                                      inner_context, next_context_iter,
                                      arglist_parser_alloc (mlp,
@@ -1936,6 +1954,7 @@ extract_parenthesized (message_list_ty *mlp, token_type_ty terminator,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          paren_nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -1959,6 +1978,12 @@ extract_parenthesized (message_list_ty *mlp, token_type_ty terminator,
           continue;
 
         case token_type_lbrace:
+          if (++brace_nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open braces"),
+                     logical_file_name, line_number);
+            }
           if (extract_parenthesized (mlp, token_type_rbrace,
                                      null_context, null_context_list_iterator,
                                      arglist_parser_alloc (mlp, NULL)))
@@ -1966,6 +1991,7 @@ extract_parenthesized (message_list_ty *mlp, token_type_ty terminator,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          brace_nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -2074,6 +2100,8 @@ extract_csharp (FILE *f,
   phase7_pushback_length = 0;
 
   flag_context_list_table = flag_table;
+  paren_nesting_depth = 0;
+  brace_nesting_depth = 0;
 
   init_keywords ();
 

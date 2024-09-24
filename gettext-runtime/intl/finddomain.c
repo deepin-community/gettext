@@ -1,5 +1,5 @@
 /* Handle list of needed message catalogs
-   Copyright (C) 1995-2020 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@gnu.org>, 1995.
 
    This program is free software: you can redistribute it and/or modify
@@ -43,11 +43,15 @@
 # define gl_rwlock_wrlock __libc_rwlock_wrlock
 # define gl_rwlock_unlock __libc_rwlock_unlock
 #else
-# include "lock.h"
+# include "glthread/lock.h"
 #endif
 
 /* @@ end of prolog @@ */
-/* List of already loaded domains.  */
+/* List of already loaded domains.
+   On most platforms, it is sorted in decreasing order of ->filename.
+   On native Windows platforms, the elements with ->filename != NULL
+   are sorted in decreasing order of ->filename, and the elements with
+   ->wfilename != NULL are sorted in decreasing order of ->wfilename.  */
 static struct loaded_l10nfile *_nl_loaded_domains;
 
 /* Lock that protects the access to _NL_LOADED_DOMAINS.  */
@@ -136,18 +140,9 @@ _nl_find_domain (const char *dirname,
   alias_value = _nl_expand_alias (locale);
   if (alias_value != NULL)
     {
-#if defined _LIBC || defined HAVE_STRDUP
       locale = strdup (alias_value);
       if (locale == NULL)
 	return NULL;
-#else
-      size_t len = strlen (alias_value) + 1;
-      locale = (char *) malloc (len);
-      if (locale == NULL)
-	return NULL;
-
-      memcpy (locale, alias_value, len);
-#endif
     }
 
   /* Now we determine the single parts of the locale name.  First

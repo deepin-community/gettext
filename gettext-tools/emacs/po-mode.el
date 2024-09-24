@@ -1,7 +1,6 @@
 ;;; po-mode.el --- major mode for GNU gettext PO files
 
-;; Copyright (C) 1995-2002, 2005-2008, 2010, 2013-2017, 2019-2020 Free Software
-;; Foundation, Inc.
+;; Copyright (C) 1995-2002, 2005-2008, 2010, 2013-2017, 2019-2020, 2023 Free Software Foundation, Inc.
 
 ;; Authors: François Pinard <pinard@iro.umontreal.ca>
 ;;          Greg McGary <gkm@magilla.cichlid.com>
@@ -63,7 +62,7 @@
 
 ;;; Code:
 
-(defconst po-mode-version-string "2.27" "\
+(defconst po-mode-version-string "2.28" "\
 Version number of this version of po-mode.el.")
 
 ;;; Emacs portability matters - part I.
@@ -909,7 +908,7 @@ M-S  Ignore path          M-A  Ignore PO file      *M-L  Ignore lexicon
 (defconst po-font-lock-keywords
   '(
     ("^# .*\\|^#[:,]?" . font-lock-comment-face)
-    ("^#:\\(.*\\)" 1 font-lock-reference-face)
+    ("^#:\\(.*\\)" 1 font-lock-constant-face)
     ("^#,\\(.*\\)" 1 font-lock-function-name-face)
     ("^\\(\\(msg\\(ctxt\\|id\\(_plural\\)?\\|str\\(\\[[0-9]\\]\\)?\\)\\) \\)?\"\\|\"$"
      . font-lock-keyword-face)

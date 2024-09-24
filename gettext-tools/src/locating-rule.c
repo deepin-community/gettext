@@ -1,5 +1,5 @@
 /* XML resource locating rules
-   Copyright (C) 2015, 2019-2020 Free Software Foundation, Inc.
+   Copyright (C) 2015, 2019-2020, 2023 Free Software Foundation, Inc.
 
    This file was written by Daiki Ueno <ueno@gnu.org>, 2015.
 
@@ -43,7 +43,6 @@
 #include "filename.h"
 #include <fnmatch.h>
 #include "gettext.h"
-#include "mem-hash-map.h"
 #include <libxml/parser.h>
 #include <libxml/uri.h>
 #include "xalloc.h"
@@ -90,6 +89,12 @@ get_attribute (xmlNode *node, const char *attr)
   char *result;
 
   value = xmlGetProp (node, BAD_CAST attr);
+  if (!value)
+    {
+      error (0, 0, _("cannot find attribute %s on %s"), attr, node->name);
+      return NULL;
+    }
+
   result = xstrdup ((const char *) value);
   xmlFree (value);
 
@@ -103,6 +108,13 @@ document_locating_rule_match (struct document_locating_rule_ty *rule,
   xmlNode *root;
 
   root = xmlDocGetRootElement (doc);
+  if (!root)
+    {
+      error (0, 0, _("cannot locate root element"));
+      xmlFreeDoc (doc);
+      return NULL;
+    }
+
   if (rule->ns != NULL)
     {
       if (root->ns == NULL
@@ -311,6 +323,13 @@ locating_rule_list_add_from_file (struct locating_rule_list_ty *rules,
     }
 
   root = xmlDocGetRootElement (doc);
+  if (!root)
+    {
+      error (0, 0, _("cannot locate root element"));
+      xmlFreeDoc (doc);
+      return false;
+    }
+
   if (!(xmlStrEqual (root->name, BAD_CAST "locatingRules")
 #if 0
         && root->ns
@@ -423,7 +442,7 @@ locating_rule_list_alloc (void)
   return result;
 }
 
-void
+static void
 locating_rule_list_destroy (struct locating_rule_list_ty *rules)
 {
   while (rules->nitems-- > 0)

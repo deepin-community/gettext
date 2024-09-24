@@ -1,8 +1,8 @@
-/* A Bison parser, made by GNU Bison 3.6.4.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -45,11 +45,11 @@
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
 
-/* Identify Bison output.  */
-#define YYBISON 1
+/* Identify Bison output, and Bison version.  */
+#define YYBISON 30802
 
-/* Bison version.  */
-#define YYBISON_VERSION "3.6.4"
+/* Bison version string.  */
+#define YYBISON_VERSION "3.8.2"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -135,7 +135,7 @@ do_callback_message (char *msgctxt,
     free ((value).ctxt);
 
 
-#line 139 "po-gram-gen.tab.c"
+#line 139 "po-gram-gen.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -158,81 +158,7 @@ do_callback_message (char *msgctxt,
 #  endif
 # endif
 
-/* Use api.header.include to #include this header
-   instead of duplicating it here.  */
-#ifndef YY_PO_GRAM_PO_GRAM_GEN_TAB_H_INCLUDED
-# define YY_PO_GRAM_PO_GRAM_GEN_TAB_H_INCLUDED
-/* Debug traces.  */
-#ifndef PO_GRAM_DEBUG
-# if defined YYDEBUG
-#if YYDEBUG
-#   define PO_GRAM_DEBUG 1
-#  else
-#   define PO_GRAM_DEBUG 0
-#  endif
-# else /* ! defined YYDEBUG */
-#  define PO_GRAM_DEBUG 0
-# endif /* ! defined YYDEBUG */
-#endif  /* ! defined PO_GRAM_DEBUG */
-#if PO_GRAM_DEBUG
-extern int po_gram_debug;
-#endif
-
-/* Token kinds.  */
-#ifndef PO_GRAM_TOKENTYPE
-# define PO_GRAM_TOKENTYPE
-  enum po_gram_tokentype
-  {
-    PO_GRAM_EMPTY = -2,
-    PO_GRAM_EOF = 0,               /* "end of file"  */
-    PO_GRAM_error = 256,           /* error  */
-    PO_GRAM_UNDEF = 257,           /* "invalid token"  */
-    COMMENT = 258,                 /* COMMENT  */
-    DOMAIN = 259,                  /* DOMAIN  */
-    JUNK = 260,                    /* JUNK  */
-    PREV_MSGCTXT = 261,            /* PREV_MSGCTXT  */
-    PREV_MSGID = 262,              /* PREV_MSGID  */
-    PREV_MSGID_PLURAL = 263,       /* PREV_MSGID_PLURAL  */
-    PREV_STRING = 264,             /* PREV_STRING  */
-    MSGCTXT = 265,                 /* MSGCTXT  */
-    MSGID = 266,                   /* MSGID  */
-    MSGID_PLURAL = 267,            /* MSGID_PLURAL  */
-    MSGSTR = 268,                  /* MSGSTR  */
-    NAME = 269,                    /* NAME  */
-    NUMBER = 270,                  /* NUMBER  */
-    STRING = 271                   /* STRING  */
-  };
-  typedef enum po_gram_tokentype po_gram_token_kind_t;
-#endif
-
-/* Value type.  */
-#if ! defined PO_GRAM_STYPE && ! defined PO_GRAM_STYPE_IS_DECLARED
-union PO_GRAM_STYPE
-{
-#line 103 "po-gram-gen.y"
-
-  struct { char *string; lex_pos_ty pos; bool obsolete; } string;
-  struct { string_list_ty stringlist; lex_pos_ty pos; bool obsolete; } stringlist;
-  struct { long number; lex_pos_ty pos; bool obsolete; } number;
-  struct { lex_pos_ty pos; bool obsolete; } pos;
-  struct { char *ctxt; char *id; char *id_plural; lex_pos_ty pos; bool obsolete; } prev;
-  struct { char *prev_ctxt; char *prev_id; char *prev_id_plural; char *ctxt; lex_pos_ty pos; bool obsolete; } message_intro;
-  struct { struct msgstr_def rhs; lex_pos_ty pos; bool obsolete; } rhs;
-
-#line 223 "po-gram-gen.tab.c"
-
-};
-typedef union PO_GRAM_STYPE PO_GRAM_STYPE;
-# define PO_GRAM_STYPE_IS_TRIVIAL 1
-# define PO_GRAM_STYPE_IS_DECLARED 1
-#endif
-
-
-extern PO_GRAM_STYPE po_gram_lval;
-
-int po_gram_parse (void);
-
-#endif /* !YY_PO_GRAM_PO_GRAM_GEN_TAB_H_INCLUDED  */
+#include "po-gram-gen.h"
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -312,6 +238,18 @@ typedef __INT_LEAST16_TYPE__ yytype_int16;
 typedef int_least16_t yytype_int16;
 #else
 typedef short yytype_int16;
+#endif
+
+/* Work around bug in HP-UX 11.23, which defines these macros
+   incorrectly for preprocessor constants.  This workaround can likely
+   be removed in 2023, as HPE has promised support for HP-UX 11.23
+   (aka HP-UX 11i v2) only through the end of 2022; see Table 2 of
+   <https://h20195.www2.hpe.com/V2/getpdf.aspx/4AA4-7673ENW.pdf>.  */
+#ifdef __hpux
+# undef UINT_LEAST8_MAX
+# undef UINT_LEAST16_MAX
+# define UINT_LEAST8_MAX 255
+# define UINT_LEAST16_MAX 65535
 #endif
 
 #if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
@@ -411,17 +349,23 @@ typedef int yy_state_fast_t;
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define YY_USE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define YY_USE(E) /* empty */
 #endif
 
-#if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
+#if defined __GNUC__ && ! defined __ICC && 406 <= __GNUC__ * 100 + __GNUC_MINOR__
+# if __GNUC__ * 100 + __GNUC_MINOR__ < 407
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
+    _Pragma ("GCC diagnostic push")                                     \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")
+# else
+#  define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                           \
     _Pragma ("GCC diagnostic push")                                     \
     _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+# endif
 # define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
     _Pragma ("GCC diagnostic pop")
 #else
@@ -591,6 +535,7 @@ union yyalloc
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  46
 
+/* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   271
 
 
@@ -636,7 +581,7 @@ static const yytype_int8 yytranslate[] =
 };
 
 #if PO_GRAM_DEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
+/* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
        0,   129,   129,   130,   131,   132,   133,   138,   146,   154,
@@ -674,16 +619,6 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
-   (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
-{
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269,    91,    93,   270,   271
-};
-#endif
-
 #define YYPACT_NINF (-26)
 
 #define yypact_value_is_default(Yyn) \
@@ -694,8 +629,8 @@ static const yytype_int16 yytoknum[] =
 #define yytable_value_is_error(Yyn) \
   0
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
-     STATE-NUM.  */
+/* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+   STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
      -26,     2,   -26,   -26,   -26,    -8,     5,   -26,     0,   -26,
@@ -705,9 +640,9 @@ static const yytype_int8 yypact[] =
       15,   -26,    26,    22,     0,    12
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
-     means the default is an error.  */
+/* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE does not specify something else to do.  Zero
+   means the default is an error.  */
 static const yytype_int8 yydefact[] =
 {
        2,     0,     1,     6,     7,     0,     0,    20,     0,    18,
@@ -717,23 +652,23 @@ static const yytype_int8 yydefact[] =
       10,    25,    23,     0,     0,    26
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
+/* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
      -26,   -26,   -26,   -26,   -26,   -26,   -26,    23,   -26,   -26,
      -26,     9,   -25,   -13,   -15
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
+/* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     1,    10,    11,    12,    13,    14,    15,    16,    31,
+       0,     1,    10,    11,    12,    13,    14,    15,    16,    31,
       35,    32,    33,    21,    19
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
-     positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
+/* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+   positive, shift that token.  If negative, reduce the rule whose
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
       22,    24,     2,     3,    27,     4,     5,    41,     6,     7,
@@ -752,8 +687,8 @@ static const yytype_int8 yycheck[] =
       31
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
-     symbol of state STATE-NUM.  */
+/* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
+   state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
        0,    20,     0,     1,     3,     4,     6,     7,    10,    11,
@@ -763,7 +698,7 @@ static const yytype_int8 yystos[] =
       30,    31,    33,    17,    16,    32
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
+/* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
        0,    19,    20,    20,    20,    20,    20,    21,    22,    23,
@@ -772,7 +707,7 @@ static const yytype_int8 yyr1[] =
       33
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
+/* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr2[] =
 {
        0,     2,     0,     2,     2,     2,     2,     1,     2,     4,
@@ -790,6 +725,7 @@ enum { YYENOMEM = -2 };
 #define YYACCEPT        goto yyacceptlab
 #define YYABORT         goto yyabortlab
 #define YYERROR         goto yyerrorlab
+#define YYNOMEM         goto yyexhaustedlab
 
 
 #define YYRECOVERING()  (!!yyerrstatus)
@@ -830,10 +766,7 @@ do {                                            \
     YYFPRINTF Args;                             \
 } while (0)
 
-/* This macro is provided for backward compatibility. */
-# ifndef YY_LOCATION_PRINT
-#  define YY_LOCATION_PRINT(File, Loc) ((void) 0)
-# endif
+
 
 
 # define YY_SYMBOL_PRINT(Title, Kind, Value, Location)                    \
@@ -857,15 +790,11 @@ yy_symbol_value_print (FILE *yyo,
                        yysymbol_kind_t yykind, YYSTYPE const * const yyvaluep)
 {
   FILE *yyoutput = yyo;
-  YYUSE (yyoutput);
+  YY_USE (yyoutput);
   if (!yyvaluep)
     return;
-# ifdef YYPRINT
-  if (yykind < YYNTOKENS)
-    YYPRINT (yyo, yytoknum[yykind], *yyvaluep);
-# endif
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
@@ -979,18 +908,18 @@ static void
 yydestruct (const char *yymsg,
             yysymbol_kind_t yykind, YYSTYPE *yyvaluep)
 {
-  YYUSE (yyvaluep);
+  YY_USE (yyvaluep);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yykind, yyvaluep, yylocationp);
 
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yykind);
+  YY_USE (yykind);
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
-/* The lookahead symbol.  */
+/* Lookahead token kind.  */
 int yychar;
 
 /* The semantic value of the lookahead symbol.  */
@@ -1008,34 +937,30 @@ int yynerrs;
 int
 yyparse (void)
 {
-    yy_state_fast_t yystate;
+    yy_state_fast_t yystate = 0;
     /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
+    int yyerrstatus = 0;
 
-    /* The stacks and their tools:
-       'yyss': related to states.
-       'yyvs': related to semantic values.
-
-       Refer to the stacks through separate pointers, to allow yyoverflow
+    /* Refer to the stacks through separate pointers, to allow yyoverflow
        to reallocate them elsewhere.  */
 
     /* Their size.  */
-    YYPTRDIFF_T yystacksize;
+    YYPTRDIFF_T yystacksize = YYINITDEPTH;
 
-    /* The state stack.  */
+    /* The state stack: array, bottom, top.  */
     yy_state_t yyssa[YYINITDEPTH];
-    yy_state_t *yyss;
-    yy_state_t *yyssp;
+    yy_state_t *yyss = yyssa;
+    yy_state_t *yyssp = yyss;
 
-    /* The semantic value stack.  */
+    /* The semantic value stack: array, bottom, top.  */
     YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
+    YYSTYPE *yyvs = yyvsa;
+    YYSTYPE *yyvsp = yyvs;
 
   int yyn;
   /* The return value of yyparse.  */
   int yyresult;
-  /* Lookahead token as an internal (translated) token number.  */
+  /* Lookahead symbol kind.  */
   yysymbol_kind_t yytoken = YYSYMBOL_YYEMPTY;
   /* The variables used to return semantic value and location from the
      action routines.  */
@@ -1049,18 +974,10 @@ yyparse (void)
      Keep to zero when no symbol should be popped.  */
   int yylen = 0;
 
-  yynerrs = 0;
-  yystate = 0;
-  yyerrstatus = 0;
-
-  yystacksize = YYINITDEPTH;
-  yyssp = yyss = yyssa;
-  yyvsp = yyvs = yyvsa;
-
-
   YYDPRINTF ((stderr, "Starting parse\n"));
 
   yychar = PO_GRAM_EMPTY; /* Cause a token to be read.  */
+
   goto yysetstate;
 
 
@@ -1086,7 +1003,7 @@ yysetstate:
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
-    goto yyexhaustedlab;
+    YYNOMEM;
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
@@ -1114,7 +1031,7 @@ yysetstate:
 # else /* defined YYSTACK_RELOCATE */
       /* Extend the stack our own way.  */
       if (YYMAXDEPTH <= yystacksize)
-        goto yyexhaustedlab;
+        YYNOMEM;
       yystacksize *= 2;
       if (YYMAXDEPTH < yystacksize)
         yystacksize = YYMAXDEPTH;
@@ -1125,7 +1042,7 @@ yysetstate:
           YY_CAST (union yyalloc *,
                    YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
         if (! yyptr)
-          goto yyexhaustedlab;
+          YYNOMEM;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
         YYSTACK_RELOCATE (yyvs_alloc, yyvs);
 #  undef YYSTACK_RELOCATE
@@ -1146,6 +1063,7 @@ yysetstate:
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
+
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1258,23 +1176,23 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 7:
+  case 7: /* comment: COMMENT  */
 #line 139 "po-gram-gen.y"
                 {
                   po_callback_comment_dispatcher ((yyvsp[0].string).string);
                 }
-#line 1267 "po-gram-gen.tab.c"
+#line 1185 "po-gram-gen.c"
     break;
 
-  case 8:
+  case 8: /* domain: DOMAIN STRING  */
 #line 147 "po-gram-gen.y"
                 {
                    po_callback_domain ((yyvsp[0].string).string);
                 }
-#line 1275 "po-gram-gen.tab.c"
+#line 1193 "po-gram-gen.c"
     break;
 
-  case 9:
+  case 9: /* message: message_intro string_list MSGSTR string_list  */
 #line 155 "po-gram-gen.y"
                 {
                   char *string2 = string_list_concat_destroy (&(yyvsp[-2].stringlist).stringlist);
@@ -1296,10 +1214,10 @@ yyreduce:
                       free (string4);
                     }
                 }
-#line 1300 "po-gram-gen.tab.c"
+#line 1218 "po-gram-gen.c"
     break;
 
-  case 10:
+  case 10: /* message: message_intro string_list msgid_pluralform pluralform_list  */
 #line 176 "po-gram-gen.y"
                 {
                   char *string2 = string_list_concat_destroy (&(yyvsp[-2].stringlist).stringlist);
@@ -1321,10 +1239,10 @@ yyreduce:
                       free ((yyvsp[0].rhs).rhs.msgstr);
                     }
                 }
-#line 1325 "po-gram-gen.tab.c"
+#line 1243 "po-gram-gen.c"
     break;
 
-  case 11:
+  case 11: /* message: message_intro string_list msgid_pluralform  */
 #line 197 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-2].message_intro), (yyvsp[-1].stringlist));
@@ -1334,10 +1252,10 @@ yyreduce:
                   string_list_destroy (&(yyvsp[-1].stringlist).stringlist);
                   free ((yyvsp[0].string).string);
                 }
-#line 1338 "po-gram-gen.tab.c"
+#line 1256 "po-gram-gen.c"
     break;
 
-  case 12:
+  case 12: /* message: message_intro string_list pluralform_list  */
 #line 206 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-2].message_intro), (yyvsp[-1].stringlist));
@@ -1347,10 +1265,10 @@ yyreduce:
                   string_list_destroy (&(yyvsp[-1].stringlist).stringlist);
                   free ((yyvsp[0].rhs).rhs.msgstr);
                 }
-#line 1351 "po-gram-gen.tab.c"
+#line 1269 "po-gram-gen.c"
     break;
 
-  case 13:
+  case 13: /* message: message_intro string_list  */
 #line 215 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-1].message_intro), (yyvsp[0].stringlist));
@@ -1358,10 +1276,10 @@ yyreduce:
                   free_message_intro ((yyvsp[-1].message_intro));
                   string_list_destroy (&(yyvsp[0].stringlist).stringlist);
                 }
-#line 1362 "po-gram-gen.tab.c"
+#line 1280 "po-gram-gen.c"
     break;
 
-  case 14:
+  case 14: /* message_intro: msg_intro  */
 #line 226 "po-gram-gen.y"
                 {
                   (yyval.message_intro).prev_ctxt = NULL;
@@ -1371,10 +1289,10 @@ yyreduce:
                   (yyval.message_intro).pos = (yyvsp[0].string).pos;
                   (yyval.message_intro).obsolete = (yyvsp[0].string).obsolete;
                 }
-#line 1375 "po-gram-gen.tab.c"
+#line 1293 "po-gram-gen.c"
     break;
 
-  case 15:
+  case 15: /* message_intro: prev msg_intro  */
 #line 235 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-1].prev), (yyvsp[0].string));
@@ -1385,10 +1303,10 @@ yyreduce:
                   (yyval.message_intro).pos = (yyvsp[0].string).pos;
                   (yyval.message_intro).obsolete = (yyvsp[0].string).obsolete;
                 }
-#line 1389 "po-gram-gen.tab.c"
+#line 1307 "po-gram-gen.c"
     break;
 
-  case 16:
+  case 16: /* prev: prev_msg_intro prev_string_list  */
 #line 249 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-1].string), (yyvsp[0].stringlist));
@@ -1398,10 +1316,10 @@ yyreduce:
                   (yyval.prev).pos = (yyvsp[-1].string).pos;
                   (yyval.prev).obsolete = (yyvsp[-1].string).obsolete;
                 }
-#line 1402 "po-gram-gen.tab.c"
+#line 1320 "po-gram-gen.c"
     break;
 
-  case 17:
+  case 17: /* prev: prev_msg_intro prev_string_list prev_msgid_pluralform  */
 #line 258 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-2].string), (yyvsp[-1].stringlist));
@@ -1412,20 +1330,20 @@ yyreduce:
                   (yyval.prev).pos = (yyvsp[-2].string).pos;
                   (yyval.prev).obsolete = (yyvsp[-2].string).obsolete;
                 }
-#line 1416 "po-gram-gen.tab.c"
+#line 1334 "po-gram-gen.c"
     break;
 
-  case 18:
+  case 18: /* msg_intro: MSGID  */
 #line 272 "po-gram-gen.y"
                 {
                   (yyval.string).string = NULL;
                   (yyval.string).pos = (yyvsp[0].pos).pos;
                   (yyval.string).obsolete = (yyvsp[0].pos).obsolete;
                 }
-#line 1426 "po-gram-gen.tab.c"
+#line 1344 "po-gram-gen.c"
     break;
 
-  case 19:
+  case 19: /* msg_intro: MSGCTXT string_list MSGID  */
 #line 278 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-2].pos), (yyvsp[-1].stringlist));
@@ -1434,20 +1352,20 @@ yyreduce:
                   (yyval.string).pos = (yyvsp[0].pos).pos;
                   (yyval.string).obsolete = (yyvsp[0].pos).obsolete;
                 }
-#line 1438 "po-gram-gen.tab.c"
+#line 1356 "po-gram-gen.c"
     break;
 
-  case 20:
+  case 20: /* prev_msg_intro: PREV_MSGID  */
 #line 289 "po-gram-gen.y"
                 {
                   (yyval.string).string = NULL;
                   (yyval.string).pos = (yyvsp[0].pos).pos;
                   (yyval.string).obsolete = (yyvsp[0].pos).obsolete;
                 }
-#line 1448 "po-gram-gen.tab.c"
+#line 1366 "po-gram-gen.c"
     break;
 
-  case 21:
+  case 21: /* prev_msg_intro: PREV_MSGCTXT prev_string_list PREV_MSGID  */
 #line 295 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-2].pos), (yyvsp[-1].stringlist));
@@ -1456,10 +1374,10 @@ yyreduce:
                   (yyval.string).pos = (yyvsp[0].pos).pos;
                   (yyval.string).obsolete = (yyvsp[0].pos).obsolete;
                 }
-#line 1460 "po-gram-gen.tab.c"
+#line 1378 "po-gram-gen.c"
     break;
 
-  case 22:
+  case 22: /* msgid_pluralform: MSGID_PLURAL string_list  */
 #line 307 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-1].pos), (yyvsp[0].stringlist));
@@ -1468,10 +1386,10 @@ yyreduce:
                   (yyval.string).pos = (yyvsp[-1].pos).pos;
                   (yyval.string).obsolete = (yyvsp[-1].pos).obsolete;
                 }
-#line 1472 "po-gram-gen.tab.c"
+#line 1390 "po-gram-gen.c"
     break;
 
-  case 23:
+  case 23: /* prev_msgid_pluralform: PREV_MSGID_PLURAL prev_string_list  */
 #line 318 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-1].pos), (yyvsp[0].stringlist));
@@ -1479,18 +1397,18 @@ yyreduce:
                   (yyval.string).pos = (yyvsp[-1].pos).pos;
                   (yyval.string).obsolete = (yyvsp[-1].pos).obsolete;
                 }
-#line 1483 "po-gram-gen.tab.c"
+#line 1401 "po-gram-gen.c"
     break;
 
-  case 24:
+  case 24: /* pluralform_list: pluralform  */
 #line 329 "po-gram-gen.y"
                 {
                   (yyval.rhs) = (yyvsp[0].rhs);
                 }
-#line 1491 "po-gram-gen.tab.c"
+#line 1409 "po-gram-gen.c"
     break;
 
-  case 25:
+  case 25: /* pluralform_list: pluralform_list pluralform  */
 #line 333 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-1].rhs), (yyvsp[0].rhs));
@@ -1503,10 +1421,10 @@ yyreduce:
                   (yyval.rhs).pos = (yyvsp[-1].rhs).pos;
                   (yyval.rhs).obsolete = (yyvsp[-1].rhs).obsolete;
                 }
-#line 1507 "po-gram-gen.tab.c"
+#line 1425 "po-gram-gen.c"
     break;
 
-  case 26:
+  case 26: /* pluralform: MSGSTR '[' NUMBER ']' string_list  */
 #line 348 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-4].pos), (yyvsp[-3].pos));
@@ -1526,10 +1444,10 @@ yyreduce:
                   (yyval.rhs).pos = (yyvsp[-4].pos).pos;
                   (yyval.rhs).obsolete = (yyvsp[-4].pos).obsolete;
                 }
-#line 1530 "po-gram-gen.tab.c"
+#line 1448 "po-gram-gen.c"
     break;
 
-  case 27:
+  case 27: /* string_list: STRING  */
 #line 371 "po-gram-gen.y"
                 {
                   string_list_init (&(yyval.stringlist).stringlist);
@@ -1538,10 +1456,10 @@ yyreduce:
                   (yyval.stringlist).pos = (yyvsp[0].string).pos;
                   (yyval.stringlist).obsolete = (yyvsp[0].string).obsolete;
                 }
-#line 1542 "po-gram-gen.tab.c"
+#line 1460 "po-gram-gen.c"
     break;
 
-  case 28:
+  case 28: /* string_list: string_list STRING  */
 #line 379 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-1].stringlist), (yyvsp[0].string));
@@ -1551,10 +1469,10 @@ yyreduce:
                   (yyval.stringlist).pos = (yyvsp[-1].stringlist).pos;
                   (yyval.stringlist).obsolete = (yyvsp[-1].stringlist).obsolete;
                 }
-#line 1555 "po-gram-gen.tab.c"
+#line 1473 "po-gram-gen.c"
     break;
 
-  case 29:
+  case 29: /* prev_string_list: PREV_STRING  */
 #line 391 "po-gram-gen.y"
                 {
                   string_list_init (&(yyval.stringlist).stringlist);
@@ -1563,10 +1481,10 @@ yyreduce:
                   (yyval.stringlist).pos = (yyvsp[0].string).pos;
                   (yyval.stringlist).obsolete = (yyvsp[0].string).obsolete;
                 }
-#line 1567 "po-gram-gen.tab.c"
+#line 1485 "po-gram-gen.c"
     break;
 
-  case 30:
+  case 30: /* prev_string_list: prev_string_list PREV_STRING  */
 #line 399 "po-gram-gen.y"
                 {
                   check_obsolete ((yyvsp[-1].stringlist), (yyvsp[0].string));
@@ -1576,11 +1494,11 @@ yyreduce:
                   (yyval.stringlist).pos = (yyvsp[-1].stringlist).pos;
                   (yyval.stringlist).obsolete = (yyvsp[-1].stringlist).obsolete;
                 }
-#line 1580 "po-gram-gen.tab.c"
+#line 1498 "po-gram-gen.c"
     break;
 
 
-#line 1584 "po-gram-gen.tab.c"
+#line 1502 "po-gram-gen.c"
 
       default: break;
     }
@@ -1662,6 +1580,7 @@ yyerrorlab:
      label yyerrorlab therefore never appears in user code.  */
   if (0)
     YYERROR;
+  ++yynerrs;
 
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYERROR.  */
@@ -1722,7 +1641,7 @@ yyerrlab1:
 `-------------------------------------*/
 yyacceptlab:
   yyresult = 0;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
 /*-----------------------------------.
@@ -1730,24 +1649,22 @@ yyacceptlab:
 `-----------------------------------*/
 yyabortlab:
   yyresult = 1;
-  goto yyreturn;
+  goto yyreturnlab;
 
 
-#if !defined yyoverflow
-/*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
-`-------------------------------------------------*/
+/*-----------------------------------------------------------.
+| yyexhaustedlab -- YYNOMEM (memory exhaustion) comes here.  |
+`-----------------------------------------------------------*/
 yyexhaustedlab:
   yyerror (YY_("memory exhausted"));
   yyresult = 2;
-  /* Fall through.  */
-#endif
+  goto yyreturnlab;
 
 
-/*-----------------------------------------------------.
-| yyreturn -- parsing is finished, return the result.  |
-`-----------------------------------------------------*/
-yyreturn:
+/*----------------------------------------------------------.
+| yyreturnlab -- parsing is finished, clean up and return.  |
+`----------------------------------------------------------*/
+yyreturnlab:
   if (yychar != PO_GRAM_EMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at

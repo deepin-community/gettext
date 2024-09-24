@@ -1,5 +1,5 @@
 /* Implementation of the internal dcigettext function.
-   Copyright (C) 1995-2020 Free Software Foundation, Inc.
+   Copyright (C) 1995-2023 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as published by
@@ -87,6 +87,7 @@ extern int errno;
 
 #if !defined _LIBC
 # include "localcharset.h"
+# include "localename.h"
 #endif
 
 #include "gettextP.h"
@@ -109,7 +110,7 @@ extern int errno;
 # define gl_rwlock_wrlock __libc_rwlock_wrlock
 # define gl_rwlock_unlock __libc_rwlock_unlock
 #else
-# include "lock.h"
+# include "glthread/lock.h"
 #endif
 
 /* Alignment of types.  */
@@ -138,13 +139,10 @@ extern int errno;
 # define tfind __tfind
 #else
 # if !defined HAVE_GETCWD
-char *getwd ();
 #  define getcwd(buf, max) getwd (buf)
 # else
 #  if VMS
 #   define getcwd(buf, max) (getcwd) (buf, max, 0)
-#  else
-char *getcwd ();
 #  endif
 # endif
 # ifndef HAVE_STPCPY
@@ -155,18 +153,7 @@ static void *mempcpy (void *dest, const void *src, size_t n);
 # endif
 #endif
 
-/* Use a replacement if the system does not provide the `tsearch' function
-   family.  */
-#if defined HAVE_TSEARCH || defined _LIBC
-# include <search.h>
-#else
-# define tsearch libintl_tsearch
-# define tfind libintl_tfind
-# define tdelete libintl_tdelete
-# define twalk libintl_twalk
-# include "tsearch.h"
-#endif
-
+#include <search.h>
 #ifdef _LIBC
 # define tsearch __tsearch
 #endif
@@ -175,12 +162,7 @@ static void *mempcpy (void *dest, const void *src, size_t n);
 #define PATH_INCR 32
 
 /* The following is from pathmax.h.  */
-/* Non-POSIX BSD systems might have gcc's limits.h, which doesn't define
-   PATH_MAX but might cause redefinition warnings when sys/param.h is
-   later included (as on MORE/BSD 4.3).  */
-#if defined _POSIX_VERSION || (defined HAVE_LIMITS_H && !defined __GNUC__)
-# include <limits.h>
-#endif
+#include <limits.h>
 
 #ifndef _POSIX_PATH_MAX
 # define _POSIX_PATH_MAX 255
@@ -543,7 +525,7 @@ DCIGETTEXT (const char *domainname, const char *msgid1, const char *msgid2,
 #  else
   categoryname = category_to_name (category);
 #   define CATEGORYNAME_INITIALIZED
-  localename = _nl_locale_name_thread_unsafe (category, categoryname);
+  localename = gl_locale_name_thread_unsafe (category, categoryname);
   if (localename == NULL)
     localename = "";
 #  endif
@@ -922,10 +904,6 @@ DCIGETTEXT (const char *domainname, const char *msgid1, const char *msgid2,
 #ifndef _LIBC
   if (!ENABLE_SECURE)
     {
-      extern void _nl_log_untranslated (const char *logfilename,
-					const char *domainname,
-					const char *msgid1, const char *msgid2,
-					int plural);
       const char *logfilename = getenv ("GETTEXT_LOG_UNTRANSLATED");
 
       if (logfilename != NULL && logfilename[0] != '\0')
@@ -1624,14 +1602,14 @@ guess_category_value (int category, const char *categoryname)
 # else
   locale_defaulted = 0;
 #  if HAVE_USELOCALE
-  locale = _nl_locale_name_thread_unsafe (category, categoryname);
+  locale = gl_locale_name_thread_unsafe (category, categoryname);
   if (locale == NULL)
 #  endif
     {
-      locale = _nl_locale_name_posix (category, categoryname);
+      locale = gl_locale_name_posix (category, categoryname);
       if (locale == NULL)
 	{
-	  locale = _nl_locale_name_default ();
+	  locale = gl_locale_name_default ();
 	  locale_defaulted = 1;
 	}
     }
@@ -1746,10 +1724,6 @@ mempcpy (void *dest, const void *src, size_t n)
 {
   return (void *) ((char *) memcpy (dest, src, n) + n);
 }
-#endif
-
-#if !_LIBC && !HAVE_TSEARCH
-# include "tsearch.c"
 #endif
 
 

@@ -1,10 +1,10 @@
 /* Execute a C# program.
-   Copyright (C) 2003, 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2009-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
+   the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
@@ -18,10 +18,8 @@
 #ifndef _CSHARPEXEC_H
 #define _CSHARPEXEC_H
 
-#include <stdbool.h>
-
 typedef bool execute_fn (const char *progname,
-                         const char *prog_path, char **prog_argv,
+                         const char *prog_path, const char * const *prog_argv,
                          void *private_data);
 
 /* Execute a C# program.

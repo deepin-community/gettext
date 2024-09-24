@@ -1,5 +1,5 @@
 /* Output stream that converts the output to another encoding.
-   Copyright (C) 2006-2007, 2010, 2019 Free Software Foundation, Inc.
+   Copyright (C) 2006-2007, 2010, 2019-2020 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
    This program is free software: you can redistribute it and/or modify
@@ -81,7 +81,7 @@ iconv_ostream::write_mem (iconv_ostream_t stream, const void *data, size_t len)
             if (n > 0)
               {
                 memcpy (inbuffer + inbufcount, data, n);
-                data = (char *) data + n;
+                data = (const char *) data + n;
                 inbufcount += n;
                 len -= n;
               }
@@ -222,6 +222,34 @@ iconv_ostream_create (const char *from_encoding, const char *to_encoding,
   return stream;
 }
 
+/* Accessors.  */
+
+static const char *
+iconv_ostream::get_from_encoding (iconv_ostream_t stream)
+{
+  return stream->from_encoding;
+}
+
+static const char *
+iconv_ostream::get_to_encoding (iconv_ostream_t stream)
+{
+  return stream->to_encoding;
+}
+
+static ostream_t
+iconv_ostream::get_destination (iconv_ostream_t stream)
+{
+  return stream->destination;
+}
+
+/* Instanceof test.  */
+
+bool
+is_instance_of_iconv_ostream (ostream_t stream)
+{
+  return IS_INSTANCE (stream, ostream, iconv_ostream);
+}
+
 #else
 
 static void
@@ -240,6 +268,34 @@ static void
 iconv_ostream::free (iconv_ostream_t stream)
 {
   abort ();
+}
+
+/* Accessors.  */
+
+static const char *
+iconv_ostream::get_from_encoding (iconv_ostream_t stream)
+{
+  abort ();
+}
+
+static const char *
+iconv_ostream::get_to_encoding (iconv_ostream_t stream)
+{
+  abort ();
+}
+
+static ostream_t
+iconv_ostream::get_destination (iconv_ostream_t stream)
+{
+  abort ();
+}
+
+/* Instanceof test.  */
+
+bool
+is_instance_of_iconv_ostream (ostream_t stream)
+{
+  return false;
 }
 
 #endif /* HAVE_ICONV */

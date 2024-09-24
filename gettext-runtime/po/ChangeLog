@@ -1,3 +1,76 @@
+2024-02-21  Bruno Haible  <bruno@clisp.org>
+
+	Update translations.
+
+2023-09-19  Bruno Haible  <bruno@clisp.org>
+
+	Update translations from TP.
+
+2023-06-17  Bruno Haible  <bruno@clisp.org>
+
+	Update translations from TP.
+	* gettext-runtime/po/*.po: Update from TP.
+	* gettext-runtime/po/LINGUAS: Add ka.
+	* gettext-tools/po/*.po: Update from TP.
+	* gettext-tools/po/LINGUAS: Add hr.
+	* gettext-tools/examples/po/*.po: Update from TP.
+
+	Prepare for 0.22 release.
+	* gettext-runtime/doc/matrix.texi: Update from TP.
+	* gettext-runtime/doc/nls.texi (STATUS): Update.
+	* gettext-runtime/intl/libgnuintl.in.h (LIBINTL_VERSION): Bump.
+	* gettext-tools/libgettextpo/gettext-po.in.h (LIBGETTEXTPO_VERSION): Bump.
+	* libtextstyle/version.sh: Update VERSION_NUMBER, RELEASE_DATE.
+	* gettext-runtime/po/Makefile.in.in: Bump Origin version.
+	* gettext-runtime/m4/gettext.m4: Update version at the first line.
+	* gettext-runtime/m4/intl.m4: Likewise.
+	* NEWS, libtextstyle/NEWS: Update.
+	* libtextstyle/lib/Makefile.am (LTV_*): Bump to 2:0:2.
+	* gettext-tools/libgettextpo/Makefile.am (LTV_*): Bump to 5:9:5.
+	* gettext-tools/emacs/po-mode.el (po-mode-version-string): Bump.
+	* gettext-tools/configure.ac (ARCHIVE_VERSION): Bump to 0.22.
+	* gettext-tools/misc/autopoint.in: Allow version 0.22.
+
+	Update POTFILES.in.
+	* gettext-runtime/po/POTFILES.in: Update.
+	* gettext-tools/po/POTFILES.in: Update.
+
+2023-03-14  Bruno Haible  <bruno@clisp.org>
+
+	po: In the Makefiles, enable --quiet by default when possible.
+	This is possible because msgmerge became faster
+	- through an index-based fuzzy search (msgl-fsearch.c) in 2006,
+	- through OpenMP parallelization in 2006,
+	- through processor speedups over the years.
+	The only case where msgmerge is still slow is when a compendium is in use.
+
+	Suggested by Marcus Müller <marcus_savannah@hostalia.de> in
+	<https://lists.gnu.org/archive/html/bug-gnulib/2023-03/msg00034.html>.
+
+	* gettext-runtime/po/Makefile.in.in ($(POFILES), update-po): If msgmerge has
+	version ≥ 0.11, pass option --quiet.
+	* gettext-runtime/po/Makevars (MSGMERGE_OPTIONS): Don't suggest --quiet any
+	more.
+	* gettext-tools/po/Makevars (MSGMERGE_OPTIONS): Likewise.
+	* gettext-tools/examples/hello-*/po/Makevars (MSGMERGE_OPTIONS): Likewise.
+	* gettext-tools/examples/hello-*/po/Makefile.am ($(POFILES), update-po): If
+	msgmerge has version ≥ 0.11, pass option --quiet.
+	(MSGMERGE_OPTIONS): Don't suggest --quiet any more.
+	* gettext-tools/examples/hello-objc-gnustep/po/GNUmakefile: Likewise.
+	* gettext-tools/examples/po/Makefile.am ($(POFILES), update-po): Pass option
+	--quiet to msgmerge.
+	(MSGMERGE_OPTIONS): Don't suggest --quiet any more.
+
+2022-10-10  Bruno Haible  <bruno@clisp.org>
+
+	Merge from 0.21.x branch: Prepare for 0.21.1 release: Update translations.
+	* gettext-runtime/po/*.po: Update from TP.
+	* gettext-tools/po/*.po: Likewise.
+	* gettext-tools/examples/po/*.po: Likewise.
+	* gettext-tools/examples/po/LINGUAS: Add 'ka'.
+	* gettext-tools/examples/hello-*/po/LINGUAS: Likewise.
+	* gettext-tools/examples/Makefile.am (EXAMPLESPOFILES): Add ka.po.
+
 2020-07-26  Bruno Haible  <bruno@clisp.org>
 
 	Update translations (from the TP).

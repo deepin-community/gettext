@@ -1,5 +1,5 @@
 ## Makefile for the gettext-tools/src subdirectory of GNU gettext
-## Copyright (C) 1995-1998, 2000-2020 Free Software Foundation, Inc.
+## Copyright (C) 1995-1998, 2000-2023 Free Software Foundation, Inc.
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -33,7 +33,13 @@ recode-sr-latin
 
 noinst_PROGRAMS = hostname urlget cldr-plurals
 
+if INSTALL_PRIVATE_LIBRARIES
+# Specify that libgettextsrc should be installed in $(libdir).
 lib_LTLIBRARIES = libgettextsrc.la
+else
+# Specify that libgettextsrc should not be installed.
+noinst_LTLIBRARIES = libgettextsrc.la
+endif
 
 noinst_HEADERS = \
   pos.h message.h po-error.h po-xerror.h po-gram.h po-charset.h \
@@ -43,8 +49,8 @@ noinst_HEADERS = \
   write-catalog.h write-po.h write-properties.h write-stringtable.h \
   dir-list.h file-list.h po-gram-gen.h po-gram-gen2.h cldr-plural.h \
   cldr-plural-exp.h locating-rule.h its.h search-path.h \
-  msgl-charset.h msgl-equal.h msgl-iconv.h msgl-ascii.h msgl-cat.h msgl-header.h \
-  msgl-english.h msgl-check.h msgl-fsearch.h msgfmt.h msgunfmt.h \
+  msgl-charset.h msgl-equal.h msgl-iconv.h msgl-ascii.h msgl-ofn.h msgl-cat.h \
+  msgl-header.h msgl-english.h msgl-check.h msgl-fsearch.h msgfmt.h msgunfmt.h \
   plural-count.h plural-eval.h plural-distrib.h \
   read-mo.h write-mo.h \
   read-java.h write-java.h \
@@ -95,9 +101,9 @@ AM_CPPFLAGS = \
   -I.. -I$(top_srcdir) \
   -I$(top_srcdir)/libgrep \
   -I../gnulib-lib -I$(top_srcdir)/gnulib-lib \
-  -I../intl -I$(top_srcdir)/../gettext-runtime/intl
+  -I../../gettext-runtime/intl -I$(top_srcdir)/../gettext-runtime/intl
 DEFS = \
-  -DLOCALEDIR=\"$(localedir)\" -DBISON_LOCALEDIR=\"$(BISON_LOCALEDIR)\" \
+  -DLOCALEDIR=$(localedir_c_make) -DBISON_LOCALEDIR=\"$(BISON_LOCALEDIR)\" \
   -DLOCALE_ALIAS_PATH=\"$(aliaspath)\" \
   -DUSEJAVA=$(USEJAVA) \
   -DGETTEXTJAR=\"$(jardir)/gettext.jar\" \
@@ -105,6 +111,10 @@ DEFS = \
   -DGETTEXTDATADIR=\"$(pkgdatadir)\" \
   -DPROJECTSDIR=\"$(projectsdir)\" \
   -DEXEEXT=\"@EXEEXT@\" @DEFS@
+
+# Enable more warning options in this directory.
+AM_CFLAGS = @WARN_CFLAGS@
+
 # Ensure that <stdint.h> defines SIZE_MAX in C++ mode, like it does in C mode.
 AM_CXXFLAGS = -D__STDC_LIMIT_MACROS
 
@@ -113,7 +123,6 @@ OTHERPROGDEPENDENCIES = ../gnulib-lib/libgettextlib.la $(WOE32_LDADD)
 
 SED = sed
 BISON = @TOOLS_BISON@
-YACC = @YACC@ -d
 JAR = @JAR@
 JAVACOMP = $(SHELL) ../javacomp.sh
 CSHARPCOMP = $(SHELL) ../csharpcomp.sh
@@ -128,7 +137,7 @@ CSHARPCOMPFLAGS = @CSHARPCOMPFLAGS@
 # (read-catalog-abstract.c <--> po-gram-gen.y <--> po-lex.c) -> open-catalog.c -> dir-list.c -> str-list.c.
 # (read-catalog-abstract.c <--> po-gram-gen.y <--> po-lex.c) -> po-charset.c.
 # (read-catalog-abstract.c <--> po-gram-gen.y <--> po-lex.c) -> message.c -> str-list.c.
-COMMON_SOURCE = message.c po-error.c po-xerror.c \
+COMMON_SOURCE = message.c pos.c po-error.c po-xerror.c \
 read-catalog-abstract.c po-lex.c po-gram-gen.y po-charset.c \
 read-po.c read-properties.c read-stringtable.c open-catalog.c \
 dir-list.c str-list.c
@@ -142,6 +151,7 @@ endif
 FORMAT_SOURCE += \
   format-invalid.h \
   format-c.c format-c-parse.h \
+  format-c++-brace.c \
   format-python.c \
   format-python-brace.c \
   format-java.c \
@@ -172,13 +182,27 @@ FORMAT_SOURCE += \
 
 # libgettextsrc contains all code that is needed by at least two programs.
 libgettextsrc_la_SOURCES = \
-$(COMMON_SOURCE) read-catalog.c \
-write-catalog.c write-properties.c write-stringtable.c write-po.c \
-msgl-ascii.c msgl-iconv.c msgl-equal.c msgl-cat.c msgl-header.c msgl-english.c \
-msgl-check.c file-list.c msgl-charset.c po-time.c plural-exp.c plural-eval.c \
-plural-table.c quote.h sentence.h sentence.c \
-$(FORMAT_SOURCE) \
-read-desktop.c locating-rule.c its.c search-path.c
+  $(COMMON_SOURCE) \
+  read-catalog.c \
+  write-catalog.c write-properties.c write-stringtable.c write-po.c \
+  msgl-ascii.c \
+  msgl-ofn.c \
+  msgl-iconv.c \
+  msgl-equal.c \
+  msgl-cat.c \
+  msgl-header.c \
+  msgl-english.c \
+  msgl-check.c \
+  file-list.c \
+  msgl-charset.c \
+  po-time.c \
+  plural-exp.c plural-eval.c plural-table.c \
+  quote.h \
+  sentence.h sentence.c \
+  $(FORMAT_SOURCE) \
+  read-desktop.c \
+  locating-rule.c its.c \
+  search-path.c
 
 # msggrep needs pattern matching.
 LIBGREP = ../libgrep/libgrep.a
@@ -275,11 +299,6 @@ endif
 msginit_SOURCES = msginit.c
 msginit_SOURCES += lang-table.c plural-count.c
 msginit_SOURCES += ../../gettext-runtime/intl/localealias.c
-# This is needed because on Solaris, localealias.c requires the symbol
-# libintl_thread_in_use which is defined in lock.c. The copy of lock.c inside
-# libintl.so is not sufficient, because libintl.so doesn't export the symbol
-# libintl_thread_in_use.
-msginit_SOURCES += ../../gettext-runtime/intl/lock.c
 if !WOE32DLL
 msguniq_SOURCES = msguniq.c
 else
@@ -338,14 +357,6 @@ if RELOCATABLE_VIA_LD
 libgettextsrc_la_LDFLAGS += `$(RELOCATABLE_LDFLAGS) $(libdir)`
 endif
 
-# No need to install libgettextsrc.a, except on AIX.
-install-exec-hook: install-exec-clean
-install-exec-clean:
-	case "@host_os@" in \
-	  aix*) ;; \
-	  *) $(RM) $(DESTDIR)$(libdir)/libgettextsrc.a ;; \
-	esac
-
 # Compile-time flags for particular source files.
 msgmerge_CFLAGS = $(AM_CFLAGS) $(OPENMP_CFLAGS)
 msgmerge_CXXFLAGS = $(AM_CXXFLAGS) $(OPENMP_CFLAGS)
@@ -369,6 +380,7 @@ msgfilter_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ $(WOE32_LDADD)
 msggrep_LDADD = $(LIBGREP) libgettextsrc.la @INTL_MACOSX_LIBS@ $(WOE32_LDADD)
 msginit_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ $(WOE32_LDADD)
 msguniq_LDADD = libgettextsrc.la @INTL_MACOSX_LIBS@ $(WOE32_LDADD)
+hostname_LDADD = $(LDADD) $(GETADDRINFO_LIB)
 
 # Specify when to relink the programs.
 msgcmp_DEPENDENCIES = libgettextsrc.la ../gnulib-lib/libgettextlib.la $(WOE32_LDADD)
@@ -551,24 +563,37 @@ endif
 #     always fires and, since $(srcdir) is read-only, the commands which update
 #     (or at least touch) $(srcdir)/FILE.c and $(srcdir)/FILE.h fail.
 # Therefore we don't use ylwrap.
+#
+# Note: There is no point in using Bison's --output option, since we need to
+# postprocess the generated files and we don't want that unpostprocessed files
+# remain in place if the user interrupts the build through Ctrl-C.
 
 po-gram-gen.c po-gram-gen.h: po-gram-gen.y
 	$(AM_V_YACC)$(BISON) -d $(YFLAGS) $(AM_YFLAGS) $(srcdir)/po-gram-gen.y \
 	&& test ':' = '$(BISON)' || { \
-	  sed -e 's|".*/po-gram-gen.y"|"po-gram-gen.y"|' < po-gram-gen.tab.c > po-gram-gen.c-tmp \
-	  && rm -f po-gram-gen.tab.c \
+	  sed -e 's|".*/po-gram-gen\.y"|"po-gram-gen.y"|' \
+	      -e 's|"po-gram-gen\.tab\.c"|"po-gram-gen.c"|' \
+	      -e 's|"po-gram-gen\.tab\.h"|"po-gram-gen.h"|' \
+	      < po-gram-gen.tab.c > po-gram-gen.c-tmp \
+	  && sed -e 's|".*/po-gram-gen\.y"|"po-gram-gen.y"|' \
+	         -e 's|"po-gram-gen\.tab\.h"|"po-gram-gen.h"|' \
+	         < po-gram-gen.tab.h > po-gram-gen.h-tmp \
+	  && rm -f po-gram-gen.tab.c po-gram-gen.tab.h \
 	  && mv po-gram-gen.c-tmp $(srcdir)/po-gram-gen.c \
-	  && mv po-gram-gen.tab.h $(srcdir)/po-gram-gen.h; \
+	  && mv po-gram-gen.h-tmp $(srcdir)/po-gram-gen.h; \
 	}
 BUILT_SOURCES += po-gram-gen.c po-gram-gen.h
-MOSTLYCLEANFILES += po-gram-gen.tab.c po-gram-gen.tab.h po-gram-gen.c-tmp
+MOSTLYCLEANFILES += po-gram-gen.tab.c po-gram-gen.tab.h po-gram-gen.c-tmp po-gram-gen.h-tmp
 MAINTAINERCLEANFILES += po-gram-gen.c po-gram-gen.h
 EXTRA_DIST += po-gram-gen.c po-gram-gen.h
+
 
 # po-gram-gen2.h is generated from po-gram-gen.h and is also distributed in the
 # tarballs (just for convenience).
 po-gram-gen2.h: po-gram-gen.h
-	$(SED) -e 's/yy/po_gram_/g' -e 's/extern /extern DLL_VARIABLE /' $(srcdir)/po-gram-gen.h > po-gram-gen2.h-tmp \
+	$(SED) -e 's/yy/po_gram_/g' -e 's/extern /extern DLL_VARIABLE /' \
+	       -e 's|"po-gram-gen\.h"|"po-gram-gen2.h"|' \
+	       < $(srcdir)/po-gram-gen.h > po-gram-gen2.h-tmp \
 	&& mv po-gram-gen2.h-tmp $(srcdir)/po-gram-gen2.h
 BUILT_SOURCES += po-gram-gen2.h
 MOSTLYCLEANFILES += po-gram-gen2.h-tmp
@@ -580,13 +605,19 @@ po-lex.o po-lex.lo: po-gram-gen2.h
 cldr-plural.c cldr-plural.h: cldr-plural.y
 	$(AM_V_YACC)$(BISON) -d $(YFLAGS) $(AM_YFLAGS) $(srcdir)/cldr-plural.y \
 	&& test ':' = '$(BISON)' || { \
-	  sed -e 's|".*/cldr-plural.y"|"cldr-plural.y"|' < cldr-plural.tab.c > cldr-plural.c-tmp \
-	  && rm -f cldr-plural.tab.c \
+	  sed -e 's|".*/cldr-plural\.y"|"cldr-plural.y"|' \
+	      -e 's|"cldr-plural\.tab\.c"|"cldr-plural.c"|' \
+	      -e 's|"cldr-plural\.tab\.h"|"cldr-plural.h"|' \
+	      < cldr-plural.tab.c > cldr-plural.c-tmp \
+	  && sed -e 's|".*/cldr-plural\.y"|"cldr-plural.y"|' \
+	         -e 's|"cldr-plural\.tab\.h"|"cldr-plural.h"|' \
+	         < cldr-plural.tab.h > cldr-plural.h-tmp \
+	  && rm -f cldr-plural.tab.c cldr-plural.tab.h \
 	  && mv cldr-plural.c-tmp $(srcdir)/cldr-plural.c \
-	  && mv cldr-plural.tab.h $(srcdir)/cldr-plural.h; \
+	  && mv cldr-plural.h-tmp $(srcdir)/cldr-plural.h; \
 	}
 BUILT_SOURCES += cldr-plural.c cldr-plural.h
-MOSTLYCLEANFILES += cldr-plural.tab.c cldr-plural.tab.h cldr-plural.c-tmp
+MOSTLYCLEANFILES += cldr-plural.tab.c cldr-plural.tab.h cldr-plural.c-tmp cldr-plural.h-tmp
 MAINTAINERCLEANFILES += cldr-plural.c cldr-plural.h
 EXTRA_DIST += cldr-plural.c cldr-plural.h
 

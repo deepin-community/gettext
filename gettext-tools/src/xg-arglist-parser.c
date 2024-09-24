@@ -1,6 +1,6 @@
 /* Resolving ambiguity of argument lists: Progressive parsing of an
    argument list, keeping track of all possibilities.
-   Copyright (C) 2001-2019 Free Software Foundation, Inc.
+   Copyright (C) 2001-2023 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 
 #include "error.h"
 #include "error-progname.h"
+#include "flexmember.h"
 #include "xalloc.h"
 #include "xsize.h"
 
@@ -44,7 +45,7 @@ arglist_parser_alloc (message_list_ty *mlp, const struct callshapes *shapes)
     {
       struct arglist_parser *ap =
         (struct arglist_parser *)
-        xmalloc (offsetof (struct arglist_parser, alternative[0]));
+        xmalloc (FLEXNSIZEOF (struct arglist_parser, alternative, 0));
 
       ap->mlp = mlp;
       ap->keyword = NULL;
@@ -58,9 +59,8 @@ arglist_parser_alloc (message_list_ty *mlp, const struct callshapes *shapes)
     {
       struct arglist_parser *ap =
         (struct arglist_parser *)
-        xmalloc (xsum (sizeof (struct arglist_parser),
-                       xtimes (shapes->nshapes - 1,
-                               sizeof (struct partial_call))));
+        xmalloc (FLEXNSIZEOF (struct arglist_parser, alternative,
+                              shapes->nshapes));
       size_t i;
 
       ap->mlp = mlp;
@@ -104,8 +104,8 @@ arglist_parser_clone (struct arglist_parser *ap)
 {
   struct arglist_parser *copy =
     (struct arglist_parser *)
-    xmalloc (xsum (sizeof (struct arglist_parser) - sizeof (struct partial_call),
-                   xtimes (ap->nalternatives, sizeof (struct partial_call))));
+    xmalloc (FLEXNSIZEOF (struct arglist_parser, alternative,
+                          ap->nalternatives));
   size_t i;
 
   copy->mlp = ap->mlp;
@@ -130,7 +130,7 @@ arglist_parser_clone (struct arglist_parser *ap)
       ccp->msgctxt_pos = cp->msgctxt_pos;
       ccp->msgid = (cp->msgid != NULL ? mixed_string_clone (cp->msgid) : NULL);
       ccp->msgid_context = cp->msgid_context;
-      ccp->msgid_pos = cp->msgctxt_pos;
+      ccp->msgid_pos = cp->msgid_pos;
       ccp->msgid_comment = add_reference (cp->msgid_comment);
       ccp->msgid_comment_is_utf8 = cp->msgid_comment_is_utf8;
       ccp->msgid_plural =
@@ -147,7 +147,7 @@ void
 arglist_parser_remember (struct arglist_parser *ap,
                          int argnum, mixed_string_ty *string,
                          flag_context_ty context,
-                         char *file_name, size_t line_number,
+                         const char *file_name, size_t line_number,
                          refcounted_string_list_ty *comment,
                          bool comment_is_utf8)
 {
@@ -207,7 +207,7 @@ void
 arglist_parser_remember_msgctxt (struct arglist_parser *ap,
                                  mixed_string_ty *string,
                                  flag_context_ty context,
-                                 char *file_name, size_t line_number)
+                                 const char *file_name, size_t line_number)
 {
   bool stored_string = false;
   size_t nalternatives = ap->nalternatives;
@@ -411,8 +411,8 @@ arglist_parser_done (struct arglist_parser *ap, int argnum)
           if (recognize_qt_formatstrings ()
               && best_cp->msgid_plural == best_cp->msgid)
             {
-              msgid_context.is_format3 = yes_according_to_context;
-              msgid_plural_context.is_format3 = yes_according_to_context;
+              msgid_context.is_format4 = yes_according_to_context;
+              msgid_plural_context.is_format4 = yes_according_to_context;
             }
 
           best_msgctxt =
@@ -518,19 +518,19 @@ arglist_parser_done (struct arglist_parser *ap, int argnum)
             {
               /* Add best_cp->xcomments to mp->comment_dot, unless already
                  present.  */
-              size_t i;
+              size_t j;
 
-              for (i = 0; i < best_cp->xcomments.nitems; i++)
+              for (j = 0; j < best_cp->xcomments.nitems; j++)
                 {
-                  const char *xcomment = best_cp->xcomments.item[i];
+                  const char *xcomment = best_cp->xcomments.item[j];
                   bool found = false;
 
                   if (mp != NULL && mp->comment_dot != NULL)
                     {
-                      size_t j;
+                      size_t k;
 
-                      for (j = 0; j < mp->comment_dot->nitems; j++)
-                        if (strcmp (xcomment, mp->comment_dot->item[j]) == 0)
+                      for (k = 0; k < mp->comment_dot->nitems; k++)
+                        if (strcmp (xcomment, mp->comment_dot->item[k]) == 0)
                           {
                             found = true;
                             break;

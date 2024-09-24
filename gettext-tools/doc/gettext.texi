@@ -79,7 +79,7 @@ This file provides documentation for GNU @code{gettext} utilities.
 It also serves as a reference for the free Translation Project.
 
 @copying
-Copyright (C) 1995-1998, 2001-2020 Free Software Foundation, Inc.
+Copyright (C) 1995-1998, 2001-2023 Free Software Foundation, Inc.
 
 This manual is free documentation.  It is dually licensed under the
 GNU FDL and the GNU GPL.  This means that you can redistribute this
@@ -114,7 +114,7 @@ A copy of the license is included in @ref{GNU GPL}.
 @page
 @vskip 0pt plus 1filll
 @c @insertcopying
-Copyright (C) 1995-1998, 2001-2020 Free Software Foundation, Inc.
+Copyright (C) 1995-1998, 2001-2023 Free Software Foundation, Inc.
 
 This manual is free documentation.  It is dually licensed under the
 GNU FDL and the GNU GPL.  This means that you can redistribute this
@@ -390,6 +390,7 @@ The Translator's View
 
 * c-format::                    C Format Strings
 * objc-format::                 Objective C Format Strings
+* c++-format::                  C++ Format Strings
 * python-format::               Python Format Strings
 * java-format::                 Java Format Strings
 * csharp-format::               C# Format Strings
@@ -1176,8 +1177,8 @@ installers only ask for the language once.
 This determines the system-wide default language for all users.  But the
 installers often give the possibility to install extra localizations for
 additional languages.  For example, the localizations of KDE (the K
-Desktop Environment) and OpenOffice.org are often bundled separately,
-as one installable package per language.
+Desktop Environment) and LibreOffice are often bundled separately, as one
+installable package per language.
 
 At this point it is good to consider the intended use of the machine: If
 it is a machine designated for personal use, additional localizations are
@@ -1504,6 +1505,11 @@ a translation.
 
 All comments, of either kind, are optional.
 
+References to the program's source code, in lines that start with @code{#:},
+are of the form @code{@var{file_name}:@var{line_number}} or just
+@var{file_name}.  If the @var{file_name} contains spaces. it is enclosed
+within Unicode characters U+2068 and U+2069.
+
 @kwindex msgid
 @kwindex msgstr
 After white space and comments, entries show two strings, namely
@@ -1565,6 +1571,12 @@ program does some more tests to check the validity of the translation.
 @itemx no-objc-format
 @kwindex no-objc-format@r{ flag}
 Likewise for Objective C, see @ref{objc-format}.
+
+@item c++-format
+@kwindex c++-format@r{ flag}
+@itemx no-c++-format
+@kwindex no-c++-format@r{ flag}
+Likewise for C++, see @ref{c++-format}.
 
 @item python-format
 @kwindex python-format@r{ flag}
@@ -1823,8 +1835,9 @@ not be used anywhere else.
 
 Each of @var{untranslated-string} and @var{translated-string} respects
 the C syntax for a character string, including the surrounding quotes
-and embedded backslashed escape sequences.  When the time comes
-to write multi-line strings, one should not use escaped newlines.
+and embedded backslashed escape sequences, except that universal character
+escape sequences (@code{\u} and @code{\U}) are not allowed.  When the time
+comes to write multi-line strings, one should not use escaped newlines.
 Instead, a closing quote should follow the last character on the
 line to be continued, and an opening quote should resume the string
 at the beginning of the following PO file line.  For example:
@@ -1868,6 +1881,11 @@ space.  If the @samp{#} is not immediately followed by white space,
 this comment is most likely generated and managed by specialized GNU
 tools, and might disappear or be replaced unexpectedly when the PO
 file is given to @code{msgmerge}.
+
+For a PO file to be valid, no two entries without @code{msgctxt} may have
+the same @var{untranslated-string} or @var{untranslated-string-singular}.
+Similarly, no two entries may have the same @code{msgctxt} and the same
+@var{untranslated-string} or @var{untranslated-string-singular}.
 
 @node Sources
 @chapter Preparing Program Sources
@@ -2036,6 +2054,10 @@ Use format strings instead of string concatenation.
 
 @item
 Use placeholders in format strings instead of embedded URLs.
+
+@item
+Use placeholders in format strings instead of programmer-defined format
+string directives.
 
 @item
 Avoid unusual markup and unusual control characters.
@@ -2284,18 +2306,61 @@ The same holds for email addresses.
 
 So, you would change
 
-@example
+@smallexample
 fputs (_("GNU GPL version 3 <https://gnu.org/licenses/gpl.html>\n"),
        stream);
-@end example
+@end smallexample
 
 @noindent
 to
 
-@example
+@smallexample
 fprintf (stream, _("GNU GPL version 3 <%s>\n"),
          "https://gnu.org/licenses/gpl.html");
-@end example
+@end smallexample
+
+@subheading No programmer-defined format string directives
+
+The GNU C Library's @code{<printf.h>} facility and the C++ standard library's @code{<format>} header file make it possible for the programmer to define their own format string directives.  However, such format directives cannot be used in translatable strings, for two reasons:
+@itemize @bullet
+@item
+There is no reference documentation for format strings with such directives, that the translators could consult.  They would therefore have to guess where the directive starts and where it ends.
+@item
+An @samp{msgfmt -c} invocation cannot check whether the translator has produced a compatible translation of the format string.  As a consequence, when a format string contains a programmer-defined directive, the program may crash at runtime when it uses the translated format string.
+@end itemize
+
+To avoid this situation, you need to move the formatting with the custom directive into a format string that does not get translated.
+
+For example, assuming code that makes use of a @code{%r} directive:
+
+@smallexample
+fprintf (stream, _("The contents is: %r"), data);
+@end smallexample
+
+@noindent
+you would rewrite it to:
+
+@smallexample
+char *tmp;
+if (asprintf (&tmp, "%r", data) < 0)
+  error (...);
+fprintf (stream, _("The contents is: %s"), tmp);
+free (tmp);
+@end smallexample
+
+Similarly, in C++, assuming you have defined a custom @code{formatter} for the type of @code{data}, the code
+
+@smallexample
+cout << format (_("The contents is: @{:#$#@}"), data);
+@end smallexample
+
+@noindent
+should be rewritten to:
+
+@smallexample
+string tmp = format ("@{:#$#@}", data);
+cout << format (_("The contents is: @{@}"), tmp);
+@end smallexample
 
 @subheading No unusual markup
 
@@ -2402,6 +2467,19 @@ Note also that long strings can be split across lines, into multiple
 adjacent string tokens.  Automatic string concatenation is performed
 at compile time according to ISO C and ISO C++; @code{xgettext} also
 supports this syntax.
+
+In C++, marking a C++ format string requires a small code change,
+because the first argument to @code{std::format} must be a constant
+expression.
+For example,
+@smallexample
+std::format ("@{@} @{@}!", "Hello", "world")
+@end smallexample
+@noindent
+needs to be changed to
+@smallexample
+std::vformat (gettext ("@{@} @{@}!"), std::make_format_args("Hello", "world"))
+@end smallexample
 
 Later on, the maintenance is relatively easy.  If, as a programmer,
 you add or modify a string, you will have to ask yourself if the
@@ -2637,7 +2715,9 @@ the @code{c-format} flag.  This kind of comment should be used when
 @code{xgettext} does not recognize the string as a format string but
 it really is one and it should be tested.  Please note that when the
 comment is in the same line as the @code{gettext} keyword, it must be
-before the string to be translated.
+before the string to be translated.  Also note that a comment such as
+@code{xgettext:c-format} applies only to the first string in the same
+or the next line, not to multiple strings.
 
 This situation happens quite often.  The @code{printf} function is often
 called with strings which do not contain a format specifier.  Of course
@@ -2941,11 +3021,14 @@ invocation.  However, you usually don't need to export and document this
 initialization function: It is sufficient that all entry points of the
 library call the initialization function if it hasn't been called before.
 The typical idiom used to achieve this is a static boolean variable that
-indicates whether the initialization function has been called. Like this:
+indicates whether the initialization function has been called.  If the
+library is meant to be used in multithreaded applications, this variable
+needs to be marked @code{volatile}, so that its value get propagated
+between threads. Like this:
 
 @example
 @group
-static bool libfoo_initialized;
+static volatile bool libfoo_initialized;
 
 static void
 libfoo_initialize (void)
@@ -2975,6 +3058,10 @@ foo_refcount (struct foo *argument)
 @}
 @end group
 @end example
+
+@noindent
+The more general solution for initialization functions, POSIX
+@code{pthread_once}, is not needed in this case.
 
 @item
 The usual declaration of the @samp{_} macro in each source file was
@@ -5908,6 +5995,14 @@ translation are all stored consecutively, separated through a
 @key{NUL} byte.  Here also, the length in the string descriptor
 includes all of them.
 
+@cindex encoding in MO files
+The character encoding of the strings can be any standard ASCII-compatible
+encoding, such as UTF-8, ISO-8859-1, EUC-JP, etc., as long as the
+encoding's name is stated in the header entry (@pxref{Header Entry}).
+Starting with GNU @code{gettext} version 0.22, the MO files produced by
+@code{msgfmt} have them in UTF-8 encoding, unless the @code{msgfmt}
+option @samp{--no-convert} is used.
+
 Nothing prevents a MO file from having embedded @key{NUL}s in strings.
 However, the program interface currently used already presumes
 that strings are @key{NUL} terminated, so embedded @key{NUL}s are
@@ -8490,11 +8585,11 @@ more.  You can remove it.
 @cindex @file{aclocal.m4} file
 
 If you do not have an @file{aclocal.m4} file in your distribution,
-the simplest is to concatenate the files @file{gettext.m4},
-@file{host-cpu-c-abi.m4}, @file{intlmacosx.m4}, @file{iconv.m4},
-@file{lib-ld.m4}, @file{lib-link.m4}, @file{lib-prefix.m4}, @file{nls.m4},
-@file{po.m4}, @file{progtest.m4} from GNU @code{gettext}'s @file{m4/}
-directory into a single file.
+the simplest is to concatenate the files @file{build-to-host.m4},
+@file{gettext.m4}, @file{host-cpu-c-abi.m4}, @file{intlmacosx.m4},
+@file{iconv.m4}, @file{lib-ld.m4}, @file{lib-link.m4}, @file{lib-prefix.m4},
+@file{nls.m4}, @file{po.m4}, @file{progtest.m4} from GNU @code{gettext}'s
+@file{m4/} directory into a single file.
 
 If you already have an @file{aclocal.m4} file, then you will have
 to merge the said macro files into your @file{aclocal.m4}.  Note that if
@@ -8506,11 +8601,11 @@ Their contents may vary as we get more experience with strange systems
 out there.
 
 You should be using GNU @code{automake} 1.9 or newer.  With it, you need
-to copy the files @file{gettext.m4}, @file{host-cpu-c-abi.m4},
-@file{intlmacosx.m4}, @file{iconv.m4}, @file{lib-ld.m4}, @file{lib-link.m4},
-@file{lib-prefix.m4}, @file{nls.m4}, @file{po.m4}, @file{progtest.m4} from
-GNU @code{gettext}'s @file{m4/} directory to a subdirectory named @file{m4/}
-and add the line
+to copy the files @file{build-to-host.m4}, @file{gettext.m4},
+@file{host-cpu-c-abi.m4}, @file{intlmacosx.m4}, @file{iconv.m4},
+@file{lib-ld.m4}, @file{lib-link.m4}, @file{lib-prefix.m4}, @file{nls.m4},
+@file{po.m4}, @file{progtest.m4} from GNU @code{gettext}'s @file{m4/}
+directory to a subdirectory named @file{m4/} and add the line
 
 @example
 ACLOCAL_AMFLAGS = -I m4
@@ -8678,9 +8773,12 @@ To make LOCALEDIR known to the program, add the following lines to
 datadir = @@datadir@@
 datarootdir= @@datarootdir@@
 localedir = @@localedir@@
-DEFS = -DLOCALEDIR=\"$(localedir)\" @@DEFS@@
+DEFS = -DLOCALEDIR=$(localedir_c_make) @@DEFS@@
 @end example
 
+@noindent
+@code{$(localedir_c_make)} expands to the value of @code{localedir}, in
+C syntax, escaped for use in a @code{Makefile}.
 Note that @code{@@datadir@@} defaults to @samp{$(prefix)/share}, and
 @code{$(localedir)} defaults to @samp{$(prefix)/share/locale}.
 
@@ -8733,23 +8831,17 @@ To make LOCALEDIR known to the program, add the following to
 @file{Makefile.am}:
 
 @example
-<module>_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\"
+<module>_CPPFLAGS = -DLOCALEDIR=$(localedir_c_make)
 @end example
 
 @noindent
 for each specific module or compilation unit, or
 
 @example
-AM_CPPFLAGS = -DLOCALEDIR=\"$(localedir)\"
+AM_CPPFLAGS = -DLOCALEDIR=$(localedir_c_make)
 @end example
 
-for all modules and compilation units together.  Furthermore, if you are
-using an Autoconf version older then 2.60, add this line to define
-@samp{localedir}:
-
-@example
-localedir = $(datadir)/locale
-@end example
+for all modules and compilation units together.
 
 @item
 To ensure that the final linking will use @code{@@LIBINTL@@} or
@@ -8861,7 +8953,7 @@ library (shared or static libraries are both supported).  It also invokes
 @code{AM_PO_SUBDIRS}, thus preparing the @file{po/} directories of the
 package for building.
 
-@code{AM_GNU_GETTEXT} accepts up to three optional arguments.  The general
+@code{AM_GNU_GETTEXT} accepts up to two optional arguments.  The general
 syntax is
 
 @example
@@ -8912,10 +9004,10 @@ path (@code{CPPFLAGS} for the include file search path, @code{LDFLAGS} for
 the library search path).
 
 @item
-Except for glibc, the operating system's native @code{gettext} cannot
-exploit the GNU mo files, doesn't have the necessary locale dependency
-features, and cannot convert messages from the catalog's text encoding
-to the user's locale encoding.
+Except for glibc and the Solaris 11 libc, the operating system's native
+@code{gettext} cannot exploit the GNU mo files, doesn't have the
+necessary locale dependency features, and cannot convert messages from
+the catalog's text encoding to the user's locale encoding.
 
 @item
 GNU @code{libintl}, if installed, is not necessarily already in the
@@ -8930,6 +9022,25 @@ GNU @code{libintl} relies on POSIX/XSI @code{iconv}.  The macro checks for
 linker options needed to use iconv and appends them to the @code{LIBINTL}
 and @code{LTLIBINTL} variables.
 @end itemize
+
+Additionally, the @code{AM_GNU_GETTEXT} macro sets two variables, for
+convenience.  Both are derived from the @code{--localedir} configure
+option.  They are correct even on native Windows, where directories
+frequently contain backslashes.
+@table @code
+@item localedir_c
+This is the value of @code{localedir}, in C syntax.  This variable is
+meant to be substituted into C or C++ code through
+@code{AC_CONFIG_FILES}.
+
+@item localedir_c_make
+This is the value of @code{localedir}, in C syntax, escaped for use in
+a @code{Makefile}.  This variable is meant to be used in Makefiles,
+for example for defining a C macro named @code{LOCALEDIR}:
+@smallexample
+AM_CPPFLAGS = ... -DLOCALEDIR=$(localedir_c_make) ...
+@end smallexample
+@end table
 
 @node AM_GNU_GETTEXT_VERSION
 @subsection AM_GNU_GETTEXT_VERSION in @file{gettext.m4}
@@ -9462,6 +9573,7 @@ strings.
 @menu
 * c-format::                    C Format Strings
 * objc-format::                 Objective C Format Strings
+* c++-format::                  C++ Format Strings
 * python-format::               Python Format Strings
 * java-format::                 Java Format Strings
 * csharp-format::               C# Format Strings
@@ -9540,6 +9652,17 @@ glibc when NLS is disabled.)
 Objective C format strings are like C format strings.  They support an
 additional format directive: "%@@", which when executed consumes an argument
 of type @code{Object *}.
+
+@node c++-format
+@subsection C++ Format Strings
+
+C++ format strings are described in ISO C++ 20, namely in
+@uref{https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/n4861.pdf},
+section 20.20.2 Format string [format.string].
+
+An easier-to-read description is found at
+@uref{https://en.cppreference.com/w/cpp/utility/format/format#Parameters} and
+@uref{https://en.cppreference.com/w/cpp/utility/format/formatter#Standard_format_specification}.
 
 @node python-format
 @subsection Python Format Strings

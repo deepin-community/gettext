@@ -1,5 +1,5 @@
 /* xgettext YCP backend.
-   Copyright (C) 2001-2003, 2005-2009, 2011, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2003, 2005-2009, 2011, 2018-2023 Free Software Foundation, Inc.
 
    This file was written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "rc-str-list.h"
 #include "xgettext.h"
@@ -36,6 +37,7 @@
 #include "xg-arglist-context.h"
 #include "xg-message.h"
 #include "error.h"
+#include "error-progname.h"
 #include "xalloc.h"
 #include "gettext.h"
 
@@ -245,7 +247,7 @@ phase2_getc ()
                       savable_comment_add (buffer);
                       break;
                     }
-                  /* FALLTHROUGH */
+                  FALLTHROUGH;
 
                 default:
                   last_was_star = false;
@@ -445,7 +447,7 @@ phase5_get (token_ty *tp)
         case '\n':
           if (last_non_comment_line > last_comment_line)
             savable_comment_reset ();
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case '\r':
         case '\t':
         case ' ':
@@ -633,6 +635,13 @@ phase8_unget (token_ty *tp)
 static flag_context_list_table_ty *flag_context_list_table;
 
 
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depth.  */
+static int nesting_depth;
+
+
 /* The file is broken into tokens.
 
      Normal handling: Look for
@@ -683,9 +692,16 @@ extract_parenthesized (message_list_ty *mlp,
       switch (token.type)
         {
         case token_type_i18n:
+          if (++nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open parentheses"),
+                     logical_file_name, line_number);
+            }
           if (extract_parenthesized (mlp, inner_context, next_context_iter,
                                      true))
             return true;
+          nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -751,9 +767,16 @@ extract_parenthesized (message_list_ty *mlp,
           continue;
 
         case token_type_lparen:
+          if (++nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open parentheses"),
+                     logical_file_name, line_number);
+            }
           if (extract_parenthesized (mlp, inner_context, next_context_iter,
                                      false))
             return true;
+          nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           continue;
@@ -810,6 +833,7 @@ extract_ycp (FILE *f,
   phase8_pushback_length = 0;
 
   flag_context_list_table = flag_table;
+  nesting_depth = 0;
 
   /* Eat tokens until eof is seen.  When extract_parenthesized returns
      due to an unbalanced closing parenthesis, just restart it.  */

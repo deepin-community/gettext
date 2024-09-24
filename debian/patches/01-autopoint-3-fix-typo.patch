@@ -1,0 +1,18 @@
+From: Bruno Haible <bruno@clisp.org>
+Subject: tests: Fix a typo.
+Origin: upstream, https://git.savannah.gnu.org/gitweb/?p=gettext.git;a=commit;h=5eecb370ed02eb44f9e0dd7a648d961b8ccd54a1
+Forwarded: not-needed
+
+    * gettext-tools/tests/autopoint-3: Fix a typo in a file name.
+
+--- a/gettext-tools/tests/autopoint-3
++++ b/gettext-tools/tests/autopoint-3
+@@ -128,7 +128,7 @@
+ 
+ # Check that it all compiles.
+ : ${CONFIG_SHELL=${SHELL-/bin/sh}}
+-${CONFIG_SHELL} ./configure >/dev/null 2>autpoint.err
++${CONFIG_SHELL} ./configure >/dev/null 2>autopoint.err
+ test $? = 0 || { cat autopoint.err; Exit 1; }
+ 
+ ${MAKE} >/dev/null 2>autopoint.err

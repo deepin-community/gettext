@@ -1,5 +1,5 @@
 /* xgettext Vala backend.
-   Copyright (C) 2013-2014, 2018-2020 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014, 2018-2024 Free Software Foundation, Inc.
 
    This file was written by Daiki Ueno <ueno@gnu.org>, 2013.
 
@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "attribute.h"
 #include "message.h"
 #include "rc-str-list.h"
 #include "xgettext.h"
@@ -127,24 +128,70 @@ init_keywords ()
 void
 init_flag_table_vala ()
 {
-  xgettext_record_flag ("dgettext:2:pass-c-format");
-  xgettext_record_flag ("dcgettext:2:pass-c-format");
-  xgettext_record_flag ("ngettext:1:pass-c-format");
-  xgettext_record_flag ("ngettext:2:pass-c-format");
-  xgettext_record_flag ("dngettext:2:pass-c-format");
-  xgettext_record_flag ("dngettext:3:pass-c-format");
-  xgettext_record_flag ("dpgettext:2:pass-c-format");
-  xgettext_record_flag ("dpgettext2:3:pass-c-format");
-  xgettext_record_flag ("_:1:pass-c-format");
-  xgettext_record_flag ("Q_:1:pass-c-format");
-  xgettext_record_flag ("N_:1:pass-c-format");
-  xgettext_record_flag ("NC_:2:pass-c-format");
-
   /* Vala leaves string formatting to Glib functions and thus the
      format string is exactly same as C.  See also
      vapi/glib-2.0.vapi.  */
-  xgettext_record_flag ("printf:1:c-format");
-  xgettext_record_flag ("vprintf:1:c-format");
+
+  xgettext_record_flag ("dgettext:2:pass-c-format!Vala");
+  xgettext_record_flag ("dcgettext:2:pass-c-format!Vala");
+  xgettext_record_flag ("ngettext:1:pass-c-format!Vala");
+  xgettext_record_flag ("ngettext:2:pass-c-format!Vala");
+  xgettext_record_flag ("dngettext:2:pass-c-format!Vala");
+  xgettext_record_flag ("dngettext:3:pass-c-format!Vala");
+  xgettext_record_flag ("dpgettext:2:pass-c-format!Vala");
+  xgettext_record_flag ("dpgettext2:3:pass-c-format!Vala");
+  xgettext_record_flag ("_:1:pass-c-format!Vala");
+  xgettext_record_flag ("Q_:1:pass-c-format!Vala");
+  xgettext_record_flag ("N_:1:pass-c-format!Vala");
+  xgettext_record_flag ("NC_:2:pass-c-format!Vala");
+
+  /* In Vala, vprintf does not exist as a function, only as a method.
+     https://valadoc.org/?q=printf provides this list:
+
+     Method                                             Arguments
+
+     Posix.FILE.printf (posix)                          (string format, ...)
+     Posix.printf (posix)                               (string format, ...)
+     Alsa.Output.printf (alsa)                          (string format, ...)
+     Dazzle.Path.printf (libdazzle-1.0)                 ()
+     Dazzle.ShortcutChordTable.printf (libdazzle-1.0)   ()
+     string.printf (glib-2.0)                           (...)
+     GLib.FileStream.printf (glib-2.0)                  (string format, ...)
+     GLib.StringBuilder.printf (glib-2.0)               (string format, ...)
+     GLib.Variant.Variant.printf (glib-2.0)             (string format, ...)
+     FastCGI.FileStream.printf (fcgi)                   (string format, ...)
+     FastCGI.Stream.printf (fcgi)                       (string format, ...)
+     Purple.Stringref.printf (purple)                   (string format)
+     Gsl.Stream.printf (gsl)                            (string label, string file, int line, string reason)
+     Gsf.Output.printf (libgsf-1)                       (string format, ...)
+     GLib.OutputStream.printf (gio-2.0)                 (out size_t bytes_written, Cancellable? cancellable, string format, ...)
+     TokyoCabinet.XString.printf (tokyocabinet)         (string format, ...)
+     ZLib.GZFileStream.printf (zlib)                    (string format, ...)
+
+     Therefore, whenever the first argument is a string, it may be a format
+     string or a plain string.  We don't know.  Therefore we cannot enable
+     this flag.  Recognition of format strings that occur as a first argument
+     therefore relies on the heuristics.  */
+  /* Override the effect of
+       xgettext_record_flag ("printf:1:c-format");
+     in x-c.c.  */
+  xgettext_record_flag ("printf:1:undecided-c-format!Vala");
+
+  /* In Vala, vprintf does not exist as a function, only as a method.
+     https://valadoc.org/?q=vprintf provides this list:
+
+     Method                                             Arguments
+     string.vprintf (glib-2.0)                          (va_list args)
+     GLib.FileStream.vprintf (glib-2.0)                 (string format, va_list args)
+     GLib.StringBuilder.vprintf (glib-2.0)              (string format, va_list args)
+     FastCGI.FileStream.vprintf (fcgi)                  (string format, va_list args)
+     FastCGI.Stream.vprintf (fcgi)                      (string format, va_list args)
+     Gsf.Output.vprintf (libgsf-1)                      (string format, va_list args)
+     GLib.OutputStream.vprintf (gio-2.0)                (out size_t bytes_written, Cancellable? cancellable, string format, va_list args)
+
+     Therefore, whenever the first argument is a string, it must be a format
+     string.  */
+  xgettext_record_flag ("vprintf:1:c-format!Vala");
 }
 
 
@@ -296,7 +343,7 @@ phase2_getc ()
                   comment_line_end (2);
                   break;
                 }
-              /* FALLTHROUGH */
+              FALLTHROUGH;
 
             default:
               last_was_star = false;
@@ -387,7 +434,6 @@ free_token (token_ty *tp)
 
 /* Return value of phase7_getc when EOF is reached.  */
 #define P7_EOF (-1)
-#define P7_STRING_END (-2)
 
 /* Replace escape sequences within character strings with their single
    character equivalents.  */
@@ -411,10 +457,13 @@ free_token (token_ty *tp)
 static int
 phase7_getc ()
 {
-  int c, n, j;
+  int c, j;
 
   /* Use phase 1, because phase 2 elides comments.  */
   c = phase1_getc ();
+
+  if (c == EOF)
+    return P7_EOF;
 
   /* Return a magic newline indicator, so that we can distinguish
      between the user requesting a newline in the string (e.g. using
@@ -486,55 +535,82 @@ phase7_getc ()
         case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
           break;
         }
-      n = 0;
-      for (;;)
-        {
-          switch (c)
-            {
-            default:
-              phase1_ungetc (c);
-              return n;
+      {
+        int n;
+        bool overflow;
 
-            case '0': case '1': case '2': case '3': case '4':
-            case '5': case '6': case '7': case '8': case '9':
-              n = n * 16 + c - '0';
+        n = 0;
+        overflow = false;
+
+        for (;;)
+          {
+            switch (c)
+              {
+              default:
+                phase1_ungetc (c);
+                if (overflow)
+                  {
+                    error_with_progname = false;
+                    error (0, 0, _("%s:%d: warning: hexadecimal escape sequence out of range"),
+                           logical_file_name, line_number);
+                    error_with_progname = true;
+                  }
+                return n;
+
+              case '0': case '1': case '2': case '3': case '4':
+              case '5': case '6': case '7': case '8': case '9':
+                if (n < 0x100 / 16)
+                  n = n * 16 + c - '0';
+                else
+                  overflow = true;
               break;
 
-            case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-              n = n * 16 + 10 + c - 'A';
-              break;
+              case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
+                if (n < 0x100 / 16)
+                  n = n * 16 + 10 + c - 'A';
+                else
+                  overflow = true;
+                break;
 
-            case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
-              n = n * 16 + 10 + c - 'a';
-              break;
-            }
-          c = phase1_getc ();
-        }
-      return n;
+              case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+                if (n < 0x100 / 16)
+                  n = n * 16 + 10 + c - 'a';
+                else
+                  overflow = true;
+                break;
+              }
+            c = phase1_getc ();
+          }
+      }
 
     case '0':
-      n = 0;
-      for (j = 0; j < 3; ++j)
-        {
-          n = n * 8 + c - '0';
-          c = phase1_getc ();
-          switch (c)
-            {
-            default:
-              break;
+      {
+        int n;
 
-            case '0': case '1': case '2': case '3':
-            case '4': case '5': case '6': case '7':
-              continue;
-            }
-          break;
-        }
-      phase1_ungetc (c);
-      return n;
+        n = 0;
+        for (j = 0; j < 3; ++j)
+          {
+            n = n * 8 + c - '0';
+            c = phase1_getc ();
+            switch (c)
+              {
+              default:
+                break;
+
+              case '0': case '1': case '2': case '3':
+              case '4': case '5': case '6': case '7':
+                continue;
+              }
+            break;
+          }
+        phase1_ungetc (c);
+        return n;
+      }
 
     case 'u':
       {
         unsigned char buf[8];
+        int n;
 
         n = 0;
         for (j = 0; j < 4; j++)
@@ -670,7 +746,7 @@ phase3_get (token_ty *tp)
         case '\n':
           if (last_non_comment_line > last_comment_line)
             savable_comment_reset ();
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case ' ':
         case '\f':
         case '\t':
@@ -748,7 +824,7 @@ phase3_get (token_ty *tp)
               c = '.';
               break;
             }
-          /* FALLTHROUGH */
+          FALLTHROUGH;
 
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
@@ -811,7 +887,7 @@ phase3_get (token_ty *tp)
                   phase7_ungetc ('\n');
                   break;
                 }
-              if (c == EOF || c == P7_QUOTE)
+              if (c == P7_EOF || c == P7_QUOTE)
                 break;
             }
           tp->type = last_token_type = token_type_character_constant;
@@ -845,25 +921,27 @@ phase3_get (token_ty *tp)
               return;
             }
           template = true;
-          /* FALLTHROUGH */
+          FALLTHROUGH;
         case '"':
           {
             struct mixed_string_buffer msb;
-            int c2 = phase1_getc ();
+            {
+              int c2 = phase1_getc ();
 
-            if (c2 == '"')
-              {
-                int c3 = phase1_getc ();
-                if (c3 == '"')
-                  verbatim = true;
-                else
-                  {
-                    phase1_ungetc (c3);
-                    phase1_ungetc (c2);
-                  }
-              }
-            else
-              phase2_ungetc (c2);
+              if (c2 == '"')
+                {
+                  int c3 = phase1_getc ();
+                  if (c3 == '"')
+                    verbatim = true;
+                  else
+                    {
+                      phase1_ungetc (c3);
+                      phase1_ungetc (c2);
+                    }
+                }
+              else
+                phase2_ungetc (c2);
+            }
 
             /* Start accumulating the string.  */
             mixed_string_buffer_init (&msb, lc_string,
@@ -912,7 +990,7 @@ phase3_get (token_ty *tp)
                     }
                   if (c == P7_QUOTES)
                     break;
-                  if (c == EOF)
+                  if (c == P7_EOF)
                     break;
                   if (c == P7_QUOTE)
                     c = '\'';
@@ -1202,6 +1280,13 @@ x_vala_lex (token_ty *tp)
 static flag_context_list_table_ty *flag_context_list_table;
 
 
+/* Maximum supported nesting depth.  */
+#define MAX_NESTING_DEPTH 1000
+
+/* Current nesting depth.  */
+static int nesting_depth;
+
+
 /* The file is broken into tokens.  Scan the token stream, looking for
    a keyword, followed by a left paren, followed by a string.  When we
    see this sequence, we have something to remember.  We assume we are
@@ -1276,6 +1361,12 @@ extract_balanced (message_list_ty *mlp, token_type_ty delim,
           continue;
 
         case token_type_lparen:
+          if (++nesting_depth > MAX_NESTING_DEPTH)
+            {
+              error_with_progname = false;
+              error (EXIT_FAILURE, 0, _("%s:%d: error: too many open parentheses"),
+                     logical_file_name, line_number);
+            }
           if (extract_balanced (mlp, token_type_rparen,
                                 inner_context, next_context_iter,
                                 arglist_parser_alloc (mlp,
@@ -1284,6 +1375,7 @@ extract_balanced (message_list_ty *mlp, token_type_ty delim,
               arglist_parser_done (argparser, arg);
               return true;
             }
+          nesting_depth--;
           next_context_iter = null_context_list_iterator;
           state = 0;
           break;
@@ -1401,6 +1493,7 @@ extract_vala (FILE *f,
   last_token_type = token_type_other;
 
   flag_context_list_table = flag_table;
+  nesting_depth = 0;
 
   init_keywords ();
 

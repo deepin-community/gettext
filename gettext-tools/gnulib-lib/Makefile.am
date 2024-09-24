@@ -1,6 +1,5 @@
 ## Makefile for the gettext-tools/gnulib-lib subdirectory of GNU gettext
-## Copyright (C) 1995-1998, 2000-2006, 2009, 2016, 2019 Free Software
-## Foundation, Inc.
+## Copyright (C) 1995-1998, 2000-2006, 2009, 2016, 2019, 2021, 2023 Free Software Foundation, Inc.
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -27,6 +26,7 @@ DISTCLEANFILES =
 MAINTAINERCLEANFILES =
 SUFFIXES =
 
+lib_LTLIBRARIES =
 noinst_LTLIBRARIES =
 
 # Extra files to be installed.
@@ -38,7 +38,7 @@ pkgdata_DATA =
 AM_CPPFLAGS =
 
 # Hmm... is this still necessary?
-AM_CPPFLAGS += -I$(top_builddir)/intl -I$(top_srcdir)/intl
+AM_CPPFLAGS += -I$(top_builddir)/../gettext-runtime/intl -I$(top_srcdir)/../gettext-runtime/intl
 # Needed so that config.h and woe32dll/export.h are found.
 AM_CPPFLAGS += -I$(top_builddir) -I$(top_srcdir)
 
@@ -51,6 +51,9 @@ AM_CPPFLAGS += -DDEPENDS_ON_LIBICONV=1 -DDEPENDS_ON_LIBINTL=1
 if INCLUDED_LIBXML
 AM_CPPFLAGS += -DLIBXML_STATIC
 endif
+
+# Enable more warning options in this directory.
+AM_CFLAGS = @WARN_CFLAGS@
 
 # Rules generated and collected by gnulib-tool.
 include Makefile.gnulib
