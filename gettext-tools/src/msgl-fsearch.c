@@ -1,5 +1,5 @@
 /* Fast fuzzy searching among messages.
-   Copyright (C) 2006, 2008, 2011, 2013, 2023 Free Software Foundation, Inc.
+   Copyright (C) 2006-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2006.
 
    This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #include <math.h>
 #include <stdlib.h>
 
+#include "attribute.h"
 #include "xalloc.h"
 #include "po-charset.h"
 
@@ -130,7 +131,7 @@ addlast_index (index_list_ty list, index_ty idx)
 /* Add a given index to an index list.
    Return the new index list, if it had to be reallocated, or NULL if it
    didn't change.  */
-static inline index_list_ty
+MAYBE_UNUSED static inline index_list_ty
 add_index (index_list_ty list, index_ty idx)
 {
   index_list_ty result;
@@ -374,8 +375,6 @@ mult_index_list_accumulate (struct mult_index_list *accu, index_list_ty list)
   size_t len1 = accu->nitems;
   size_t len2 = list[IL_LENGTH];
   size_t need = len1 + len2;
-  struct mult_index *ptr1;
-  struct mult_index *ptr1_end;
   index_ty *ptr2;
   index_ty *ptr2_end;
   struct mult_index *destptr;
@@ -394,38 +393,44 @@ mult_index_list_accumulate (struct mult_index_list *accu, index_list_ty list)
     }
 
   /* Make a linear pass through accu and list simultaneously.  */
-  ptr1 = accu->item;
-  ptr1_end = ptr1 + len1;
   ptr2 = list + 2;
   ptr2_end = ptr2 + len2;
   destptr = accu->item2;
-  while (ptr1 < ptr1_end && ptr2 < ptr2_end)
+  if (len1 > 0)
     {
-      if (ptr1->index < *ptr2)
+      struct mult_index *ptr1;
+      struct mult_index *ptr1_end;
+
+      ptr1 = accu->item;
+      ptr1_end = ptr1 + len1;
+      while (ptr1 < ptr1_end && ptr2 < ptr2_end)
+        {
+          if (ptr1->index < *ptr2)
+            {
+              *destptr = *ptr1;
+              ptr1++;
+            }
+          else if (ptr1->index > *ptr2)
+            {
+              destptr->index = *ptr2;
+              destptr->count = 1;
+              ptr2++;
+            }
+          else /* ptr1->index == list[2 + i2] */
+            {
+              destptr->index = ptr1->index;
+              destptr->count = ptr1->count + 1;
+              ptr1++;
+              ptr2++;
+            }
+          destptr++;
+        }
+      while (ptr1 < ptr1_end)
         {
           *destptr = *ptr1;
           ptr1++;
+          destptr++;
         }
-      else if (ptr1->index > *ptr2)
-        {
-          destptr->index = *ptr2;
-          destptr->count = 1;
-          ptr2++;
-        }
-      else /* ptr1->index == list[2 + i2] */
-        {
-          destptr->index = ptr1->index;
-          destptr->count = ptr1->count + 1;
-          ptr1++;
-          ptr2++;
-        }
-      destptr++;
-    }
-  while (ptr1 < ptr1_end)
-    {
-      *destptr = *ptr1;
-      ptr1++;
-      destptr++;
     }
   while (ptr2 < ptr2_end)
     {

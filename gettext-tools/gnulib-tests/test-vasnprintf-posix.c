@@ -3630,6 +3630,7 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
     free (result);
   }
 
+#if NEED_PRINTF_WITH_N_DIRECTIVE
   /* Test the support of the %n format directive.  */
 
   {
@@ -3643,6 +3644,7 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
     ASSERT (count == 4);
     free (result);
   }
+#endif
 
   /* Test the support of the POSIX/XSI format strings with positions.  */
 
@@ -3885,7 +3887,6 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
     free (result);
   }
 
-#if HAVE_WCHAR_T
   static wchar_t L_xyz[4] = { 'x', 'y', 'z', 0 };
 
   { /* Width.  */
@@ -3927,7 +3928,6 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
     ASSERT (length == strlen (result));
     free (result);
   }
-#endif
 
   /* To verify that these tests succeed, it is necessary to run them under
      a tool that checks against invalid memory accesses, such as ElectricFence
@@ -3952,7 +3952,6 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
         free (block);
       }
   }
-#if HAVE_WCHAR_T
   {
     size_t i;
 
@@ -3975,9 +3974,7 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
         free (block);
       }
   }
-#endif
 
-#if HAVE_WCHAR_T
   /* Test that converting an invalid wchar_t[] to char[] fails with EILSEQ.  */
   {
     static const wchar_t input[] = { (wchar_t) 1702057263, 114, 0 };
@@ -4015,7 +4012,6 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
     else
       free (result);
   }
-#endif
 
   /* Test the support of the %c format directive.  */
 
@@ -4083,7 +4079,6 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
     free (result);
   }
 
-#if HAVE_WCHAR_T
   static wint_t L_x = (wchar_t) 'x';
 
   { /* Width.  */
@@ -4167,7 +4162,6 @@ test_function (char * (*my_asnprintf) (char *, size_t *, const char *, ...))
       my_asnprintf (NULL, &length, "%10lc %d", L_invalid, 33, 44, 55);
     free (result);
   }
-#endif
 
   /* Test the support of the 'x' conversion specifier for hexadecimal output of
      integers.  */
@@ -5269,5 +5263,5 @@ main (int argc, char *argv[])
 {
   test_vasnprintf ();
   test_asnprintf ();
-  return 0;
+  return test_exit_status;
 }

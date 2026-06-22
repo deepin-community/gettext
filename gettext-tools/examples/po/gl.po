@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gettext-examples 0.19-rc1\n"
 "Report-Msgid-Bugs-To: bug-gettext@gnu.org\n"
-"POT-Creation-Date: 2023-09-18 23:34+0200\n"
+"POT-Creation-Date: 2024-12-31 12:50+0100\n"
 "PO-Revision-Date: 2014-05-10 16:34+0100\n"
 "Last-Translator: Leandro Regueiro <leandro.regueiro@gmail.com>\n"
 "Language-Team: Galician <proxecto@trasno.net>\n"
@@ -23,8 +23,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: hello-c/hello.c:35 hello-c-gnome/hello.c:51
-#: hello-c-gnome3/hello.desktop.in.in:5 hello-c++/hello.cc:44
-#: hello-c++20/hello.cc:36 hello-c++-qt/hello.cc:50
+#: hello-c-gnome3/hello.desktop.in.in:4 hello-c++/hello.cc:44
+#: hello-c++20/hello.cc:48 hello-c++-qt/hello.cc:50
 #: hello-c++-kde/hellowindow.cc:47 hello-c++-gnome/hello.cc:55
 #: hello-c++-wxwidgets/hello.cc:73 hello-objc/hello.m:35
 #: hello-objc-gnustep/Hello.m:49 hello-objc-gnome/hello.m:52
@@ -66,7 +66,7 @@ msgstr ""
 msgid "<big><i>This is yet another text</i></big>"
 msgstr ""
 
-#: hello-c-gnome3/hello.desktop.in.in:4
+#: hello-c-gnome3/hello.desktop.in.in:3
 msgid "Hello"
 msgstr ""
 
@@ -86,7 +86,7 @@ msgstr ""
 msgid "Whether to use XML markup in the text."
 msgstr ""
 
-#: hello-c++20/hello.cc:37
+#: hello-c++20/hello.cc:50 hello-c++20/hello.cc:53
 #, fuzzy, c++-format
 msgid "This program is running as process number {:d}."
 msgstr "Este programa estase executando como o proceso número {pid}."

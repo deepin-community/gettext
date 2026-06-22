@@ -1,8 +1,40 @@
-gettext (0.22.5-2deepin1) unstable; urgency=medium
+gettext (0.23.1-2) unstable; urgency=medium
 
-  * feat: add sw64 support
+  * Parse recursive JSX expressions correctly.
+    (Upstream fix backported from 0.24).
+  * Add suggest on gnulib-l10n to gettext.
+  * Update Standards-Version.
 
- -- Deepin Packages Builder <packages@deepin.org>  Tue, 17 Jun 2025 10:05:14 +0800
+ -- Santiago Vila <sanvila@debian.org>  Sat, 26 Apr 2025 19:45:00 +0200
+
+gettext (0.23.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * There is now XML merge support. Closes: #881886.
+  * There is now XML man page support. Closes: #881888.
+  * Support files are now in /usr/libexec/gettext. Closes: #1032010.
+  * Now gettext extracts strings inside Python f-strings. Closes: #1053434.
+  * Fix error when a --exclude-file option is present. Closes: #1077059.
+  * Translations for messages in gnulib will be provided by gnulib-l10n.
+  * Add libacl1-dev, libattr1-dev and libncurses-dev to Build-Depends,
+    as recommended by upstream.
+
+ -- Santiago Vila <sanvila@debian.org>  Wed, 15 Jan 2025 16:45:00 +0100
+
+gettext (0.22.5-4) unstable; urgency=medium
+
+  * Ship styles in /usr/share/gettext/styles (bug introduced in 0.22.5-1).
+  * Add Vcs-Git and Vcs-Browser fields.
+  * Add a preliminary debian/salsa-ci.yml.
+
+ -- Santiago Vila <sanvila@debian.org>  Sun, 05 Jan 2025 15:20:00 +0100
+
+gettext (0.22.5-3) unstable; urgency=medium
+
+  * Disable tests that no longer work with new libunistring.
+  * Update Standards-Version (no special changes).
+
+ -- Santiago Vila <sanvila@debian.org>  Mon, 16 Dec 2024 01:20:00 +0100
 
 gettext (0.22.5-2) unstable; urgency=medium
 

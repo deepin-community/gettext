@@ -1,6 +1,5 @@
 /* Reading tcl/msgcat .msg files.
-   Copyright (C) 2002-2003, 2005-2008, 2010-2011, 2018, 2020 Free Software
-   Foundation, Inc.
+   Copyright (C) 2002-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2002.
 
    This program is free software: you can redistribute it and/or modify
@@ -28,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <error.h>
 #include "msgunfmt.h"
 #include "relocatable.h"
 #include "concat-filename.h"
@@ -36,8 +36,8 @@
 #include "wait-process.h"
 #include "read-catalog.h"
 #include "read-po.h"
+#include "xerror-handler.h"
 #include "xmalloca.h"
-#include "error.h"
 #include "gettext.h"
 
 #define _(str) gettext (str)
@@ -103,7 +103,7 @@ msgdomain_read_tcl (const char *locale_name, const char *directory)
     }
 
   /* Open a pipe to the Tcl interpreter.  */
-  child = create_pipe_in ("tclsh", "tclsh", argv, NULL,
+  child = create_pipe_in ("tclsh", "tclsh", argv, NULL, NULL,
                           DEV_NULL, false, true, true, fd);
 
   fp = fdopen (fd[0], "r");
@@ -111,7 +111,8 @@ msgdomain_read_tcl (const char *locale_name, const char *directory)
     error (EXIT_FAILURE, errno, _("fdopen() failed"));
 
   /* Read the message list.  */
-  mdlp = read_catalog_stream (fp, "(pipe)", "(pipe)", &input_format_po);
+  mdlp = read_catalog_stream (fp, "(pipe)", "(pipe)", &input_format_po,
+                              textmode_xerror_handler);
 
   fclose (fp);
 

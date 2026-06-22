@@ -1,5 +1,5 @@
 dnl Configuration for the gettext-runtime directory of GNU gettext
-dnl Copyright (C) 1995-2010, 2012-2015, 2018-2023 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2024 Free Software Foundation, Inc.
 dnl
 dnl This program is free software: you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -28,13 +28,16 @@ AC_CONFIG_HEADERS([config.h])
 dnl Installation directories.
 test "$docdir" != '${datarootdir}/doc/${PACKAGE_TARNAME}' || docdir='${datarootdir}/doc/gettext'
 
+dnl Define bindir_c and bindir_c_make.
+gl_BUILD_TO_HOST_BINDIR
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 
 gt_JAVA_CHOICE
 AS_IF([test "$JAVA_CHOICE" != no], [
-  gt_JAVACOMP([1.5], [1.6])
+  gt_JAVACOMP([1.8], [1.8])
   AC_CHECK_PROG([JAR], [jar], [jar])
   if test -n "$HAVE_JAVACOMP" && test -n "$JAR"; then
     BUILDJAVA=yes
@@ -85,10 +88,10 @@ dnl Prepares the libtool configuration for handling of Windows resources, and
 dnl sets the RC variable to a program that compiles Windows resource files.
 LT_LANG([Windows Resource])
 
-dnl On mingw and Cygwin, we can activate special Makefile rules which add
-dnl version information to the shared libraries and executables.
+dnl On native Windows and Cygwin, we can activate special Makefile rules which
+dnl add version information to the shared libraries and executables.
 case "$host_os" in
-  mingw* | cygwin*) is_woe32=yes ;;
+  mingw* | windows* | cygwin*) is_woe32=yes ;;
   *) is_woe32=no ;;
 esac
 AM_CONDITIONAL([WOE32], [test $is_woe32 = yes])
@@ -99,7 +102,7 @@ fi
 
 dnl Some code is only meant to be compiled on native Windows.
 case "$host_os" in
-  mingw*) is_windows_native=yes ;;
+  mingw* | windows*) is_windows_native=yes ;;
   *) is_windows_native=no ;;
 esac
 AM_CONDITIONAL([WINDOWS_NATIVE], [test $is_windows_native = yes])
@@ -115,7 +118,8 @@ gl_INIT
 AC_TYPE_SIZE_T
 AC_CHECK_FUNCS([setlocale])
 
-dnl Compilation on mingw and Cygwin needs special Makefile rules, because
+dnl Compilation on native Windows and Cygwin needs special Makefile rules,
+dnl because
 dnl 1. when we install a shared library, we must arrange to export
 dnl    auxiliary pointer variables for every exported variable,
 dnl 2. when we install a shared library and a static library simultaneously,
@@ -124,24 +128,23 @@ dnl    must arrange to define the auxiliary pointer variables for the
 dnl    exported variables _also_ in the static library.
 if test "$enable_shared" = yes; then
   case "$host_os" in
-    mingw* | cygwin*) is_woe32dll=yes ;;
+    mingw* | windows* | cygwin*) is_woe32dll=yes ;;
     *) is_woe32dll=no ;;
   esac
 else
   is_woe32dll=no
 fi
 AM_CONDITIONAL([WOE32DLL], [test $is_woe32dll = yes])
-if test $is_woe32dll = yes; then
-  AC_DEFINE([WOE32DLL], [1],
-    [Define when --enable-shared is used on mingw or Cygwin.])
-fi
 
 dnl Put some default definitions into config.h.
 AH_BOTTOM([
 /* On Windows, variables that may be in a DLL must be marked specially.
-   But here, the only such variable is 'exit_failure', and it is always
-   built into a static library, never into a shared library.  */
-#if defined WOE32DLL && !defined IN_RELOCWRAPPER && 0
+   The symbols marked with DLL_VARIABLE should be exported if and only if the
+   object file gets included in a DLL.  Libtool, on Windows platforms, defines
+   the C macro DLL_EXPORT (together with PIC) when compiling for a shared
+   library (called DLL under Windows) and does not define it when compiling
+   an object file meant to be linked statically into some executable.  */
+#if (defined _WIN32 || defined __CYGWIN__) && defined DLL_EXPORT && !defined IN_RELOCWRAPPER
 # define DLL_VARIABLE __declspec (dllimport)
 #else
 # define DLL_VARIABLE
@@ -197,7 +200,8 @@ AC_CONFIG_SUBDIRS([intl])
 
 AC_CONFIG_SUBDIRS([libasprintf])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile],
+                [FIX_MAKEFILE_DISTRIB])
 AC_CONFIG_FILES([uninstalled-config.sh])
 
 AC_CONFIG_FILES([doc/Makefile])
@@ -213,8 +217,7 @@ AC_CONFIG_FILES([src/gettext.sh], [chmod a+x src/gettext.sh])
 
 AC_CONFIG_FILES([po/Makefile.in])
 
-AC_CONFIG_FILES([man/Makefile],
-                [FIX_MAKEFILE_DISTRIB])
+AC_CONFIG_FILES([man/Makefile])
 AC_CONFIG_FILES([man/x-to-1])
 
 AC_CONFIG_FILES([m4/Makefile])

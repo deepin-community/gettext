@@ -3,7 +3,7 @@
 
 # Test of gettext facilities in the Vala language.
 # Assumes an fr_FR locale is installed.
-# Assumes the following packages are installed: vala.
+# Assumes the following packages are installed: vala or valac.
 
 # Test for presence of valac.
 (valac --version) >/dev/null 2>/dev/null
@@ -47,7 +47,7 @@ ${VALAC} --Xcc=-DGETTEXT_PACKAGE=\"prog\" prog.vala 2>prog.err \
 ${XGETTEXT} -o prog.tmp --omit-header --no-location prog.vala || Exit 1
 LC_ALL=C tr -d '\r' < prog.tmp > prog.pot || Exit 1
 
-cat <<EOF > prog.ok
+cat <<\EOF > prog.ok
 msgid "'Your command, please?', asked the waiter."
 msgstr ""
 

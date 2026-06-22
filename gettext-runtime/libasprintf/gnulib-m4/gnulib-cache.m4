@@ -27,7 +27,8 @@
 
 
 # Specification in the form of a command-line invocation:
-# gnulib-tool --import --local-dir=gnulib-local \
+# gnulib-tool --import \
+#  --local-dir=gnulib-local \
 #  --lib=libgnu \
 #  --source-base=gnulib-lib \
 #  --m4-base=gnulib-m4 \

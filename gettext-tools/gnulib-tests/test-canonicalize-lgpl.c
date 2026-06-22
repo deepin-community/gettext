@@ -157,6 +157,8 @@ main (void)
     {
       ASSERT (remove (BASE "/tra") == 0);
       ASSERT (rmdir (BASE) == 0);
+      if (test_exit_status != EXIT_SUCCESS)
+        return test_exit_status;
       fputs ("skipping test: symlinks not supported on this file system\n",
              stderr);
       return 77;
@@ -262,9 +264,9 @@ main (void)
     ASSERT (stat ("/", &st1) == 0);
     ASSERT (stat ("//", &st2) == 0);
     bool same = psame_inode (&st1, &st2);
-#if defined __MVS__ || defined MUSL_LIBC
-    /* On IBM z/OS and musl libc, "/" and "//" both canonicalize to
-       themselves, yet they both have st_dev == st_ino == 1.  */
+#if defined __MVS__
+    /* On IBM z/OS, "/" and "//" both canonicalize to themselves, yet they both
+       have st_dev == st_ino == 1.  */
     same = false;
 #endif
     if (same)
@@ -281,6 +283,13 @@ main (void)
     free (result2);
   }
 
+#if !(defined _WIN32 && !defined __CYGWIN__)
+  /* Check a device file.  */
+  {
+    char *result = canonicalize_file_name ("/dev/null");
+    ASSERT (result != NULL);
+  }
+#endif
 
   /* Cleanup.  */
   ASSERT (remove (BASE "/droot") == 0);
@@ -294,5 +303,5 @@ main (void)
   ASSERT (remove (BASE) == 0);
   ASSERT (remove ("ise") == 0);
 
-  return 0;
+  return test_exit_status;
 }

@@ -1,5 +1,5 @@
 /* Writing Java .properties files.
-   Copyright (C) 2003, 2005-2009, 2019, 2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software: you can redistribute it and/or modify
@@ -30,11 +30,12 @@
 
 #include <textstyle.h>
 
-#include "error.h"
+#include <error.h>
 #include "message.h"
 #include "msgl-ascii.h"
 #include "msgl-iconv.h"
 #include "po-charset.h"
+#include "xerror-handler.h"
 #include "unistr.h"
 #include "write-po.h"
 #include "xalloc.h"
@@ -241,13 +242,14 @@ write_message (ostream_t stream, const message_ty *mp,
 /* Writes an entire message list to the stream.  */
 static void
 write_properties (ostream_t stream, message_list_ty *mlp,
-                  const char *canon_encoding, size_t page_width, bool debug)
+                  const char *canon_encoding, size_t page_width,
+                  xerror_handler_ty xeh, bool debug)
 {
   bool blank_line;
   size_t j, i;
 
   /* Convert the messages to Unicode.  */
-  iconv_message_list (mlp, canon_encoding, po_charset_utf8, NULL);
+  iconv_message_list (mlp, canon_encoding, po_charset_utf8, NULL, xeh);
   for (j = 0; j < mlp->nitems; ++j)
     {
       message_ty *mp = mlp->item[j];
@@ -281,7 +283,8 @@ write_properties (ostream_t stream, message_list_ty *mlp,
 /* Output the contents of a PO file in Java .properties syntax.  */
 static void
 msgdomain_list_print_properties (msgdomain_list_ty *mdlp, ostream_t stream,
-                                 size_t page_width, bool debug)
+                                 size_t page_width, xerror_handler_ty xeh,
+                                 bool debug)
 {
   message_list_ty *mlp;
 
@@ -289,7 +292,7 @@ msgdomain_list_print_properties (msgdomain_list_ty *mdlp, ostream_t stream,
     mlp = mdlp->item[0]->messages;
   else
     mlp = message_list_alloc (false);
-  write_properties (stream, mlp, mdlp->encoding, page_width, debug);
+  write_properties (stream, mlp, mdlp->encoding, page_width, xeh, debug);
 }
 
 /* Describes a PO file in Java .properties syntax.  */

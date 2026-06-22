@@ -4,9 +4,9 @@
 # also regenerates all aclocal.m4, config.h.in, Makefile.in, configure files
 # with new versions of autoconf or automake.
 #
-# This script requires autoconf-2.64..2.71 and automake-1.13..1.16 in the PATH.
+# This script requires autoconf-2.64..2.72 and automake-1.13..1.17 in the PATH.
 
-# Copyright (C) 2003-2023 Free Software Foundation, Inc.
+# Copyright (C) 2003-2024 Free Software Foundation, Inc.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -70,12 +70,35 @@ if ! $skip_gnulib; then
     echo "*** gnulib-tool not found." 1>&2
     exit 1
   }
+  # Sync files that might have been modified in gnulib or in gettext.
+  sed_extract_serial='s/^#.* serial \([^ ]*\).*/\1/p
+1q'
+  for file in gettext.m4 nls.m4 po.m4 progtest.m4; do
+    if cmp "$GNULIB_SRCDIR/m4/$file" "gettext-runtime/m4/$file" >/dev/null; then
+      :
+    else
+      gnulib_serial=`sed -n -e "$sed_extract_serial" < "$GNULIB_SRCDIR/m4/$file"`
+      gettext_serial=`sed -n -e "$sed_extract_serial" < "gettext-runtime/m4/$file"`
+      if test -n "$gnulib_serial" && test -n "$gettext_serial"; then
+        if test "$gnulib_serial" -ge "$gettext_serial" 2> /dev/null; then
+          # The gnulib copy is newer, or it has an update copyright line.
+          mv "gettext-runtime/m4/$file" "gettext-runtime/m4/$file"'~'
+          cp "$GNULIB_SRCDIR/m4/$file" "gettext-runtime/m4/$file"
+        else
+          # The gettext copy is newer.
+          mv "$GNULIB_SRCDIR/m4/$file" "$GNULIB_SRCDIR/m4/$file"'~'
+          cp "gettext-runtime/m4/$file" "$GNULIB_SRCDIR/m4/$file"
+        fi
+      fi
+    fi
+  done
   # In gettext-runtime:
   GNULIB_MODULES_RUNTIME_FOR_SRC='
     atexit
     attribute
     basename-lgpl
     binary-io
+    bool
     closeout
     error
     getopt-gnu
@@ -88,13 +111,13 @@ if ! $skip_gnulib; then
     relocatable-prog
     setlocale
     sigpipe
-    stdbool
-    stdio
-    stdlib
+    stdio-h
+    stdlib-h
     strtoul
-    unistd
+    unistd-h
     unlocked-io
     xalloc
+    xstring-buffer
   '
   GNULIB_MODULES_RUNTIME_OTHER='
     gettext-runtime-misc
@@ -114,16 +137,18 @@ if ! $skip_gnulib; then
     bison
     filename
     flexmember
+    getcwd-lgpl
     havelib
+    iconv
     lib-symbol-visibility
     localcharset
     localename
     lock
     manywarnings
-    relocatable-lib-lgpl
     tsearch
     vasnprintf-posix
     vasnwprintf-posix
+    wgetcwd-lgpl
   '
   GNULIB_SETLOCALE_DEPENDENCIES=`$GNULIB_TOOL --extract-dependencies setlocale | sed -e 's/ .*//'`
   $GNULIB_TOOL --dir=gettext-runtime/intl --source-base=gnulib-lib --m4-base=gnulib-m4 --lgpl=2 --libtool --local-dir=gnulib-local --local-symlink \
@@ -143,9 +168,11 @@ if ! $skip_gnulib; then
     attribute
     backupfile
     basename-lgpl
+    bcp47
     binary-io
     bison
     bison-i18n
+    bool
     byteswap
     c-ctype
     c-strcase
@@ -154,10 +181,10 @@ if ! $skip_gnulib; then
     clean-temp
     closedir
     closeout
-    configmake
     copy-file
     csharpcomp
     csharpexec
+    cygpath
     error
     error-progname
     execute
@@ -174,7 +201,6 @@ if ! $skip_gnulib; then
     getaddrinfo
     getline
     getopt-gnu
-    gettext
     gettext-h
     iconv
     javacomp
@@ -182,7 +208,7 @@ if ! $skip_gnulib; then
     libunistring-optional
     libxml
     localcharset
-    locale
+    locale-h
     localename
     localtime
     lock
@@ -205,14 +231,14 @@ if ! $skip_gnulib; then
     relocatable-prog
     relocatable-script
     setlocale
+    sf-istream
     sh-filename
     sh-quote
     sigpipe
     sigprocmask
     spawn-pipe
-    stdbool
-    stdio
-    stdlib
+    stdio-h
+    stdlib-h
     stpcpy
     stpncpy
     strchrnul
@@ -223,15 +249,17 @@ if ! $skip_gnulib; then
     strtol
     strtoul
     supersede
-    sys_select
-    sys_stat
-    sys_time
+    sys_select-h
+    sys_stat-h
+    sys_time-h
     trim
+    unicase/u8-casefold
     unictype/ctype-space
     unictype/syntax-java-whitespace
     unilbrk/ulc-width-linebreaks
     uniname/uniname
-    unistd
+    uninorm/nfc
+    unistd-h
     unistr/u8-check
     unistr/u8-mbtouc
     unistr/u8-mbtoucr
@@ -249,17 +277,21 @@ if ! $skip_gnulib; then
     xmalloca
     xmemdup0
     xsetenv
+    xstrerror
     xstriconv
     xstriconveh
+    xstring-buffer
+    xstring-desc
     xvasprintf
   '
   # Common dependencies of GNULIB_MODULES_TOOLS_FOR_SRC and GNULIB_MODULES_TOOLS_FOR_LIBGREP.
   GNULIB_MODULES_TOOLS_FOR_SRC_COMMON_DEPENDENCIES='
     alloca-opt
+    bool
     extensions
     gettext-h
     include_next
-    locale
+    locale-h
     localcharset
     malloc-posix
     mbrtowc
@@ -270,14 +302,13 @@ if ! $skip_gnulib; then
     snippet/c++defs
     snippet/warn-on-use
     ssize_t
-    stdbool
-    stddef
-    stdint
-    stdlib
+    stddef-h
+    stdint-h
+    stdlib-h
     streq
-    unistd
+    unistd-h
     verify
-    wchar
+    wchar-h
     wctype-h
     windows-mutex
     windows-once
@@ -293,7 +324,7 @@ if ! $skip_gnulib; then
     javacomp-script
     javaexec-script
     manywarnings
-    stdint
+    stdint-h
   '
   GNULIB_MODULES_TOOLS_LIBUNISTRING_TESTS='
     unilbrk/u8-possible-linebreaks-tests
@@ -302,12 +333,13 @@ if ! $skip_gnulib; then
     unistr/u8-mbtouc-unsafe-tests
     uniwidth/width-tests
   '
+  GNULIB_MODULES_LIBGETTEXTLIB="$GNULIB_MODULES_TOOLS_FOR_SRC $GNULIB_MODULES_TOOLS_FOR_SRC_COMMON_DEPENDENCIES $GNULIB_MODULES_TOOLS_OTHER"
   $GNULIB_TOOL --dir=gettext-tools --lib=libgettextlib --source-base=gnulib-lib --m4-base=gnulib-m4 --tests-base=gnulib-tests --makefile-name=Makefile.gnulib --libtool --with-tests --local-dir=gnulib-local --local-symlink \
     --import \
     --avoid=fdutimensat-tests --avoid=futimens-tests --avoid=utime-tests --avoid=utimens-tests --avoid=utimensat-tests \
     --avoid=array-list-tests --avoid=linked-list-tests --avoid=linkedhash-list-tests \
     `for m in $GNULIB_MODULES_TOOLS_LIBUNISTRING_TESTS; do echo --avoid=$m; done` \
-    $GNULIB_MODULES_TOOLS_FOR_SRC $GNULIB_MODULES_TOOLS_FOR_SRC_COMMON_DEPENDENCIES $GNULIB_MODULES_TOOLS_OTHER || exit $?
+    $GNULIB_MODULES_LIBGETTEXTLIB || exit $?
   $GNULIB_TOOL --copy-file m4/libtextstyle.m4 gettext-tools/gnulib-m4/libtextstyle.m4 || exit $?
   # In gettext-tools/libgrep:
   GNULIB_MODULES_TOOLS_FOR_LIBGREP='
@@ -319,7 +351,7 @@ if ! $skip_gnulib; then
     `for m in $GNULIB_MODULES_TOOLS_FOR_SRC_COMMON_DEPENDENCIES; do \
        if test \`$GNULIB_TOOL --extract-applicability $m\` != all; then \
          case $m in \
-           locale | stdbool | stddef | stdint | stdlib | unistd | wchar | wctype-h) ;; \
+           bool | locale-h | stddef-h | stdint-h | stdlib-h | unistd-h | wchar-h | wctype-h) ;; \
            *) echo --avoid=$m ;; \
          esac; \
        fi; \
@@ -330,12 +362,12 @@ if ! $skip_gnulib; then
   GNULIB_MODULES_LIBGETTEXTPO='
     attribute
     basename-lgpl
+    bool
     close
     c-ctype
     c-strcase
     c-strstr
     error
-    error-progname
     filename
     fopen
     free-posix
@@ -350,12 +382,12 @@ if ! $skip_gnulib; then
     markup
     mem-hash-map
     minmax
+    once
     open
     relocatable-lib
     sigpipe
-    stdbool
-    stdio
-    stdlib
+    stdio-h
+    stdlib-h
     stpcpy
     stpncpy
     strchrnul
@@ -373,26 +405,53 @@ if ! $skip_gnulib; then
     xalloc
     xconcat-filename
     xmalloca
-    xerror
+    xstrerror
     xstriconv
     xvasprintf
   '
-  # Module 'fdopen' is enabled in gettext-tools/config.status, because
-  # it occurs as dependency of some module ('supersede') in
+  # Module 'fdopen' is enabled in gettext-tools/config.status,
+  # because it occurs as dependency of some module ('supersede') in
   # GNULIB_MODULES_TOOLS_FOR_SRC. Therefore on mingw, libgettextpo/stdio.h
   # contains '#define fdopen rpl_fdopen'. Therefore we need to include
   # fdopen.lo in libgettextpo.la.
-  # Module 'realloc-posix' is enabled in gettext-tools/config.status, because
-  # it occurs as dependency of some module ('read-file') in
+  # Module 'realloc-posix' is enabled in gettext-tools/config.status,
+  # because it occurs as dependency of some module ('read-file') in
   # GNULIB_MODULES_TOOLS_FOR_SRC. Therefore on mingw, libgettextpo/stdlib.h
   # contains '#define realloc rpl_realloc'. Therefore we need to include
   # realloc.lo in libgettextpo.la.
+  # Module 'strerror_r-posix' is enabled in gettext-tools/config.status,
+  # because it occurs as dependency of some module ('xstrerror') in
+  # GNULIB_MODULES_TOOLS_FOR_SRC. Therefore gettext-tools/config.h contains
+  # '#define GNULIB_STRERROR_R_POSIX 1'. Therefore on mingw,
+  # libgettextpo/error.o references strerror_r. Therefore we need to include
+  # strerror_r.lo in libgettextpo.la.
+  # Module 'mixin/printf-posix' is enabled in gettext-tools/config.status,
+  # because it occurs as dependency of some module ('xstring-buffer' ->
+  # 'string-buffer' -> 'vsnzprintf-posix') in GNULIB_MODULES_TOOLS_FOR_SRC.
+  # Therefore gettext-tools/config.h defines many NEED_* macros, from
+  # gl_PREREQ_VASNPRINTF_WITH_POSIX_EXTRAS. Therefore on mingw,
+  # libgettextpo/vasnprintf.c references isnand-nolibm.h.
   GNULIB_MODULES_LIBGETTEXTPO_OTHER='
     fdopen
     realloc-posix
+    strerror_r-posix
+    mixin/printf-posix
   '
   $GNULIB_TOOL --dir=gettext-tools --source-base=libgettextpo --m4-base=libgettextpo/gnulib-m4 --macro-prefix=gtpo --makefile-name=Makefile.gnulib --libtool --local-dir=gnulib-local --local-symlink \
     --import --avoid=progname $GNULIB_MODULES_LIBGETTEXTPO $GNULIB_MODULES_LIBGETTEXTPO_OTHER || exit $?
+  # In gettext-tools/tests:
+  GNULIB_MODULES_TOOLS_TESTS='
+    test-xfail
+    thread
+  '
+  $GNULIB_TOOL --dir=gettext-tools --macro-prefix=gttgl --lib=libtestsgnu --source-base=tests/gnulib-lib --m4-base=tests/gnulib-m4 --makefile-name=Makefile.gnulib --local-dir=gnulib-local --local-symlink \
+    --import \
+    `for m in $GNULIB_MODULES_LIBGETTEXTLIB; do \
+       if test \`$GNULIB_TOOL --local-dir=gnulib-local --extract-applicability $m\` != all; then \
+         echo --avoid=$m; \
+       fi; \
+     done` \
+    $GNULIB_MODULES_TOOLS_TESTS || exit $?
   # Overwrite older versions of .m4 files with the up-to-date version.
   cp gettext-runtime/m4/gettext.m4 gettext-tools/gnulib-m4/gettext.m4
   # Import build tools.  We use --copy-file to avoid directory creation.
@@ -411,6 +470,9 @@ if ! $skip_gnulib; then
   for file in config.guess config.sub; do
     $GNULIB_TOOL --copy-file build-aux/$file && chmod a+x build-aux/$file || exit $?
   done
+
+  # Fetch INSTALL.generic.
+  $GNULIB_TOOL --copy-file doc/INSTALL.UTF-8 INSTALL.generic
 fi
 
 # Make sure we get new versions of files brought in by automake.
@@ -480,25 +542,12 @@ cp -p gettext-runtime/po/boldquot.sed gettext-tools/po/boldquot.sed
 cp -p gettext-runtime/po/quot.sed gettext-tools/po/quot.sed
 cp -p gettext-runtime/po/en@quot.header gettext-tools/po/en@quot.header
 cp -p gettext-runtime/po/en@boldquot.header gettext-tools/po/en@boldquot.header
-cp -p gettext-runtime/po/insert-header.sin gettext-tools/po/insert-header.sin
-cp -p gettext-runtime/po/remove-potcdate.sin gettext-tools/po/remove-potcdate.sin
-# This file might be newer than Gnulib's.
-sed_extract_serial='s/^#.* serial \([^ ]*\).*/\1/p
-1q'
-for file in po.m4; do
-  existing_serial=`sed -n -e "$sed_extract_serial" < "gettext-tools/gnulib-m4/$file"`
-  gettext_serial=`sed -n -e "$sed_extract_serial" < "gettext-runtime/m4/$file"`
-  if test -n "$existing_serial" && test -n "$gettext_serial" \
-        && test "$existing_serial" -ge "$gettext_serial" 2> /dev/null; then
-    :
-  else
-    cp -p "gettext-runtime/m4/$file" "gettext-tools/gnulib-m4/$file"
-  fi
-done
+cp -p gettext-runtime/po/insert-header.sed gettext-tools/po/insert-header.sed
+cp -p gettext-runtime/po/remove-potcdate.sed gettext-tools/po/remove-potcdate.sed
 
 echo "$0: generating configure in gettext-tools..."
 cd gettext-tools
-aclocal -I m4 -I ../gettext-runtime/m4 -I ../m4 -I gnulib-m4 -I libgrep/gnulib-m4 -I libgettextpo/gnulib-m4 \
+aclocal -I m4 -I ../gettext-runtime/m4 -I ../m4 -I gnulib-m4 -I libgrep/gnulib-m4 -I libgettextpo/gnulib-m4 -I tests/gnulib-m4 \
   && autoconf \
   && autoheader && touch config.h.in \
   && touch ChangeLog \

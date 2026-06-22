@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: hello-c-gnome3 0\n"
 "Report-Msgid-Bugs-To: bug-gettext@gnu.org\n"
-"POT-Creation-Date: 2023-09-18 23:32+0200\n"
+"POT-Creation-Date: 2024-12-31 12:49+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -32,11 +32,11 @@ msgstr ""
 msgid "<big><i>This is yet another text</i></big>"
 msgstr ""
 
-#: hello-c-gnome3/hello.desktop.in.in:4
+#: hello-c-gnome3/hello.desktop.in.in:3
 msgid "Hello"
 msgstr ""
 
-#: hello-c-gnome3/hello.desktop.in.in:5
+#: hello-c-gnome3/hello.desktop.in.in:4
 msgid "Hello, world!"
 msgstr ""
 

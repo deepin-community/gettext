@@ -23,10 +23,6 @@ usr/share/info/libtextstyle.info
 # .elc files will be regenerated at install time
 usr/share/emacs/site-lisp/*.elc
 
-# usr/share/gettext/styles is used by libtextstyle, which has been
-# disabled, see #967028
-usr/share/gettext/styles/
-
 # not wanted by doc-base
 usr/share/doc/gettext/javadoc2/package-list
 

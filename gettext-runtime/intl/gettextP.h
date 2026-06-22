@@ -1,5 +1,5 @@
 /* Header describing internals of libintl library.
-   Copyright (C) 1995-2023 Free Software Foundation, Inc.
+   Copyright (C) 1995-2024 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@cygnus.com>, 1995.
 
    This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@
 
 /* Handle multi-threaded applications.  */
 #ifdef _LIBC
-# include <bits/libc-lock.h>
+# include <libc-lock.h>
 # define gl_rwlock_define __libc_rwlock_define
 #else
 # include "glthread/lock.h"
@@ -49,11 +49,12 @@ extern char *__dngettext (const char *__domainname,
 			  unsigned long int n);
 extern char *__dcngettext (const char *__domainname,
 			   const char *__msgid1, const char *__msgid2,
-			   unsigned long int __n, int __category);
+			   unsigned long int __n, int __category)
+     attribute_hidden;
 extern char *__dcigettext (const char *__domainname,
 			   const char *__msgid1, const char *__msgid2,
 			   int __plural, unsigned long int __n,
-			   int __category);
+			   int __category) attribute_hidden;
 extern char *__textdomain (const char *__domainname);
 extern char *__bindtextdomain (const char *__domainname,
 			       const char *__dirname);
@@ -61,7 +62,7 @@ extern char *__bind_textdomain_codeset (const char *__domainname,
 					const char *__codeset);
 extern void _nl_finddomain_subfreeres (void) attribute_hidden;
 extern void _nl_unload_domain (struct loaded_domain *__domain)
-     internal_function attribute_hidden;
+     attribute_hidden;
 #else
 /* Declare the exported libintl_* functions, in a way that allows us to
    call them under their real name.  */
@@ -69,18 +70,10 @@ extern void _nl_unload_domain (struct loaded_domain *__domain)
 # undef _INTL_REDIRECT_MACROS
 # define _INTL_REDIRECT_MACROS
 # include "libgnuintl.h"
-# ifdef IN_LIBGLOCALE
-extern char *gl_dcigettext (const char *__domainname,
-			    const char *__msgid1, const char *__msgid2,
-			    int __plural, unsigned long int __n,
-			    int __category,
-			    const char *__localename, const char *__encoding);
-# else
 extern char *libintl_dcigettext (const char *__domainname,
 				 const char *__msgid1, const char *__msgid2,
 				 int __plural, unsigned long int __n,
 				 int __category);
-# endif
 #endif
 
 #include "loadinfo.h"
@@ -88,10 +81,6 @@ extern char *libintl_dcigettext (const char *__domainname,
 #include "gmo.h"		/* Get nls_uint32.  */
 
 /* @@ end of prolog @@ */
-
-#ifndef internal_function
-# define internal_function
-#endif
 
 #ifndef attribute_hidden
 # define attribute_hidden
@@ -220,12 +209,7 @@ struct binding
 #if defined __KLIBC__ && !defined _LIBC
 # define _nl_msg_cat_cntr libintl_nl_msg_cat_cntr
 #endif
-#ifdef IN_LIBGLOCALE
-# include <glocale/config.h>
-extern LIBGLOCALE_DLL_EXPORTED int _nl_msg_cat_cntr;
-#else
-extern LIBINTL_DLL_EXPORTED int _nl_msg_cat_cntr;
-#endif
+extern LIBINTL_SHLIB_EXPORTED int _nl_msg_cat_cntr;
 
 #ifndef _LIBC
 extern const char *_nl_language_preferences_default (void);
@@ -243,23 +227,15 @@ struct loaded_l10nfile *_nl_find_domain (const char *__dirname,
 					 char *__locale,
 					 const char *__domainname,
 					 struct binding *__domainbinding)
-     internal_function;
+     attribute_hidden;
 void _nl_load_domain (struct loaded_l10nfile *__domain,
 		      struct binding *__domainbinding)
-     internal_function;
+     attribute_hidden;
 
-#ifdef IN_LIBGLOCALE
-char *_nl_find_msg (struct loaded_l10nfile *domain_file,
-		    struct binding *domainbinding, const char *encoding,
-		    const char *msgid,
-		    size_t *lengthp)
-     internal_function;
-#else
 char *_nl_find_msg (struct loaded_l10nfile *domain_file,
 		    struct binding *domainbinding, const char *msgid,
 		    int convert, size_t *lengthp)
-     internal_function;
-#endif
+     attribute_hidden;
 
 /* The internal variables in the standalone libintl.a must have different
    names than the internal variables in GNU libc, otherwise programs

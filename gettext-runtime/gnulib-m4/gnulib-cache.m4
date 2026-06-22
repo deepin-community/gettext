@@ -27,7 +27,8 @@
 
 
 # Specification in the form of a command-line invocation:
-# gnulib-tool --import --local-dir=gnulib-local \
+# gnulib-tool --import \
+#  --local-dir=gnulib-local \
 #  --lib=libgrt \
 #  --source-base=gnulib-lib \
 #  --m4-base=gnulib-m4 \
@@ -42,6 +43,7 @@
 #  attribute \
 #  basename-lgpl \
 #  binary-io \
+#  bool \
 #  closeout \
 #  csharpcomp-script \
 #  error \
@@ -59,13 +61,13 @@
 #  relocatable-prog \
 #  setlocale \
 #  sigpipe \
-#  stdbool \
-#  stdio \
-#  stdlib \
+#  stdio-h \
+#  stdlib-h \
 #  strtoul \
-#  unistd \
+#  unistd-h \
 #  unlocked-io \
-#  xalloc
+#  xalloc \
+#  xstring-buffer
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([../gnulib-local])
@@ -75,6 +77,7 @@ gl_MODULES([
   attribute
   basename-lgpl
   binary-io
+  bool
   closeout
   csharpcomp-script
   error
@@ -92,13 +95,13 @@ gl_MODULES([
   relocatable-prog
   setlocale
   sigpipe
-  stdbool
-  stdio
-  stdlib
+  stdio-h
+  stdlib-h
   strtoul
-  unistd
+  unistd-h
   unlocked-io
   xalloc
+  xstring-buffer
 ])
 gl_AVOID([])
 gl_SOURCE_BASE([gnulib-lib])

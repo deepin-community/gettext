@@ -47,14 +47,18 @@ AC_DEFUN([gl_EARLY],
   # Code from module alloca-opt:
   # Code from module assert-h:
   # Code from module attribute:
-  # Code from module errno:
+  # Code from module errno-h:
   # Code from module extensions:
+  # This is actually already done in the pre-early phase.
+  # AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
+  # Code from module extensions-aix:
+  AC_REQUIRE([gl_USE_AIX_EXTENSIONS])
   # Code from module extern-inline:
-  # Code from module float:
+  # Code from module float-h:
   # Code from module free-posix:
   # Code from module gen-header:
   # Code from module include_next:
-  # Code from module inttypes-incomplete:
+  # Code from module inttypes-h-incomplete:
   # Code from module limits-h:
   # Code from module manywarnings:
   # Code from module mbszero:
@@ -66,17 +70,18 @@ AC_DEFUN([gl_EARLY],
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
   # Code from module ssize_t:
-  # Code from module stddef:
-  # Code from module stdint:
-  # Code from module stdio:
+  # Code from module stddef-h:
+  # Code from module stdint-h:
+  # Code from module stdio-h:
   gl_STDIO_H_EARLY
-  # Code from module stdlib:
-  # Code from module string:
-  # Code from module sys_types:
-  # Code from module unistd:
+  # Code from module stdlib-h:
+  # Code from module string-h:
+  # Code from module sys_types-h:
+  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
+  # Code from module unistd-h:
   # Code from module vasnprintf:
   # Code from module warnings:
-  # Code from module wchar:
+  # Code from module wchar-h:
   # Code from module xsize:
 ])
 
@@ -115,8 +120,11 @@ AC_SUBST([LTALLOCA])
   gl_FLOAT_H
   gl_CONDITIONAL_HEADER([float.h])
   AC_PROG_MKDIR_P
-  gl_CONDITIONAL([GL_COND_OBJ_FLOAT], [test $REPLACE_FLOAT_LDBL = 1])
+  gl_CONDITIONAL([GL_COND_OBJ_FLOAT],
+                 [test $REPLACE_FLOAT_LDBL = 1 || test $REPLACE_FLOAT_SNAN = 1])
   gl_CONDITIONAL([GL_COND_OBJ_ITOLD], [test $REPLACE_ITOLD = 1])
+  dnl Prerequisites of lib/float.c.
+  AC_REQUIRE([gl_BIGENDIAN])
   gl_FUNC_FREE
   gl_CONDITIONAL([GL_COND_OBJ_FREE], [test $REPLACE_FREE = 1])
   AM_COND_IF([GL_COND_OBJ_FREE], [
@@ -394,6 +402,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/stdio-read.c
   lib/stdio-write.c
   lib/stdio.in.h
+  lib/stdlib.c
   lib/stdlib.in.h
   lib/string.in.h
   lib/sys_types.in.h
@@ -413,6 +422,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/codeset.m4
   m4/errno_h.m4
   m4/exponentd.m4
+  m4/extensions-aix.m4
   m4/extensions.m4
   m4/extern-inline.m4
   m4/float_h.m4
@@ -423,7 +433,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/inttypes.m4
   m4/inttypes_h.m4
   m4/limits-h.m4
-  m4/locale-fr.m4
+  m4/locale-en.m4
   m4/locale-ja.m4
   m4/locale-zh.m4
   m4/manywarnings-c++.m4
@@ -435,6 +445,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/mmap-anon.m4
   m4/multiarch.m4
   m4/musl.m4
+  m4/off64_t.m4
   m4/off_t.m4
   m4/pid_t.m4
   m4/printf.m4
@@ -452,7 +463,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/warn-on-use.m4
   m4/warnings.m4
   m4/wchar_h.m4
-  m4/wchar_t.m4
   m4/wint_t.m4
   m4/xsize.m4
   m4/zzgnulib.m4
