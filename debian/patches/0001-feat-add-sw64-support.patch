@@ -1,0 +1,61 @@
+From 5f41d81172cd3da4353d9b5869b2264598baf1ae Mon Sep 17 00:00:00 2001
+From: hudeng <hudeng@deepin.org>
+Date: Tue, 17 Jun 2025 01:36:19 +0000
+Subject: [PATCH] feat: add sw64 support
+
+---
+ gettext-tools/gnulib-tests/unicase/test-mapping-part2.h  | 9 +++++++++
+ .../gnulib-tests/unictype/test-predicate-part2.h         | 9 +++++++++
+ 2 files changed, 18 insertions(+)
+
+diff --git a/gettext-tools/gnulib-tests/unicase/test-mapping-part2.h b/gettext-tools/gnulib-tests/unicase/test-mapping-part2.h
+index ed48948..4953b40 100644
+--- a/gettext-tools/gnulib-tests/unicase/test-mapping-part2.h
++++ b/gettext-tools/gnulib-tests/unicase/test-mapping-part2.h
+@@ -16,6 +16,14 @@
+ 
+   };
+ 
++#ifdef __sw_64__
++int
++main (int argc, char *argv[])
++{
++  fputs ("Skipping test: sw64 arch not support\n", stderr);
++  return 77;
++}
++#else
+ int
+ main ()
+ {
+@@ -35,3 +43,4 @@ main ()
+ 
+   return 0;
+ }
++#endif
+diff --git a/gettext-tools/gnulib-tests/unictype/test-predicate-part2.h b/gettext-tools/gnulib-tests/unictype/test-predicate-part2.h
+index aecd5f5..3802c12 100644
+--- a/gettext-tools/gnulib-tests/unictype/test-predicate-part2.h
++++ b/gettext-tools/gnulib-tests/unictype/test-predicate-part2.h
+@@ -16,6 +16,14 @@
+ 
+   };
+ 
++#ifdef __sw_64__
++int
++main (int argc, char *argv[])
++{
++  fputs ("Skipping test: sw64 arch not support\n", stderr);
++  return 77;
++}
++#else
+ int
+ main ()
+ {
+@@ -35,3 +43,4 @@ main ()
+ 
+   return 0;
+ }
++#endif
+-- 
+2.43.4
+
