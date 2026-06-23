@@ -1,3 +1,11 @@
+gettext (0.23.1-2deepin1) unstable; urgency=medium
+
+  * Port deepin-specific patches from master branch:  - 02-autopoint-3-
+    remove-autom4te-cache.patch - 0001-feat-add-sw64-support.patch  Skip
+    01-autopoint-3-fix-typo.patch (already applied upstream)
+
+ -- lichenggang <lichenggang@uniontech.com>  Tue, 23 Jun 2026 21:24:27 +0800
+
 gettext (0.23.1-2) unstable; urgency=medium
 
   * Parse recursive JSX expressions correctly.
