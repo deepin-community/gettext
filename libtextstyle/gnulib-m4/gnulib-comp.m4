@@ -51,6 +51,7 @@ AC_DEFUN([lts_EARLY],
   # Code from module attribute:
   # Code from module basename-lgpl:
   # Code from module binary-io:
+  # Code from module bool:
   # Code from module c-ctype:
   # Code from module c-strcase:
   # Code from module c99:
@@ -61,11 +62,15 @@ AC_DEFUN([lts_EARLY],
   # Code from module concat-filename:
   # Code from module double-slash-root:
   # Code from module dup2:
-  # Code from module errno:
+  # Code from module errno-h:
   # Code from module error:
   # Code from module error-h:
   # Code from module exitfail:
   # Code from module extensions:
+  # This is actually already done in the pre-early phase.
+  # AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
+  # Code from module extensions-aix:
+  AC_REQUIRE([gl_USE_AIX_EXTENSIONS])
   # Code from module extern-inline:
   # Code from module fabs:
   # Code from module fatal-signal:
@@ -75,7 +80,7 @@ AC_DEFUN([lts_EARLY],
   # Code from module fd-ostream:
   # Code from module file-ostream:
   # Code from module filename:
-  # Code from module float:
+  # Code from module float-h:
   # Code from module fpieee:
   AC_REQUIRE([gl_FP_IEEE])
   # Code from module fpucw:
@@ -91,8 +96,10 @@ AC_DEFUN([lts_EARLY],
   # Code from module getdtablesize:
   # Code from module gethostname:
   # Code from module getprogname:
+  # Code from module gettext:
   # Code from module gettext-h:
   # Code from module gettimeofday:
+  # Code from module gnulib-i18n:
   # Code from module havelib:
   # Code from module html-ostream:
   # Code from module html-styled-ostream:
@@ -103,7 +110,7 @@ AC_DEFUN([lts_EARLY],
   # Code from module include_next:
   # Code from module inline:
   # Code from module intprops:
-  # Code from module inttypes-incomplete:
+  # Code from module inttypes-h-incomplete:
   # Code from module isatty:
   # Code from module isinf:
   # Code from module isnan:
@@ -126,13 +133,14 @@ AC_DEFUN([lts_EARLY],
   # Code from module malloc-posix:
   # Code from module malloca:
   # Code from module manywarnings:
-  # Code from module math:
+  # Code from module math-h:
   # Code from module mbszero:
   # Code from module mem-hash-map:
   # Code from module memchr:
   # Code from module memory-ostream:
   # Code from module memory-ostream-tests:
   # Code from module minmax:
+  # Code from module mixin/printf-posix:
   # Code from module moo:
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
@@ -141,6 +149,7 @@ AC_DEFUN([lts_EARLY],
   # Code from module nocrash:
   # Code from module noop-styled-ostream:
   # Code from module obstack:
+  # Code from module once:
   # Code from module open:
   # Code from module ostream:
   # Code from module pathmax:
@@ -148,14 +157,17 @@ AC_DEFUN([lts_EARLY],
   # Code from module printf-frexp:
   # Code from module printf-frexpl:
   # Code from module printf-safe:
+  # Code from module pthread-h:
+  gl_ANYTHREADLIB_EARLY
+  # Code from module pthread-once:
   # Code from module raise:
   # Code from module read:
-  # Code from module realloc-gnu:
   # Code from module realloc-posix:
   # Code from module reallocarray:
   # Code from module safe-read:
   # Code from module safe-write:
   # Code from module same-inode:
+  # Code from module sched-h:
   # Code from module sigaction:
   # Code from module signal-h:
   # Code from module signbit:
@@ -174,27 +186,27 @@ AC_DEFUN([lts_EARLY],
   # Code from module stat:
   # Code from module stat-time:
   # Code from module std-gnu11:
-  # Code from module stdarg:
+  # Code from module stdarg-h:
   dnl Some compilers (e.g., AIX 5.3 cc) need to be in c99 mode
   dnl for the builtin va_copy to work.  gl_PROG_CC_C99 arranges for this.
   gl_PROG_CC_C99
-  # Code from module stdbool:
-  # Code from module stdckdint:
-  # Code from module stddef:
-  # Code from module stdint:
-  # Code from module stdio:
+  # Code from module stdckdint-h:
+  # Code from module stddef-h:
+  # Code from module stdint-h:
+  # Code from module stdio-h:
   gl_STDIO_H_EARLY
-  # Code from module stdlib:
+  # Code from module stdlib-h:
   # Code from module stpcpy:
   # Code from module strerror:
   # Code from module strerror-override:
-  # Code from module string:
+  # Code from module string-h:
   # Code from module styled-ostream:
-  # Code from module sys_socket:
-  # Code from module sys_stat:
-  # Code from module sys_time:
-  # Code from module sys_types:
-  # Code from module sys_uio:
+  # Code from module sys_socket-h:
+  # Code from module sys_stat-h:
+  # Code from module sys_time-h:
+  # Code from module sys_types-h:
+  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
+  # Code from module sys_uio-h:
   # Code from module term-ostream:
   # Code from module term-ostream-tests:
   # Code from module term-style-control:
@@ -205,17 +217,19 @@ AC_DEFUN([lts_EARLY],
   # Code from module threadlib:
   gl_THREADLIB_EARLY
   # Code from module time-h:
-  # Code from module unistd:
+  # Code from module unistd-h:
   # Code from module unistr/base:
   # Code from module unistr/u8-mbtouc:
-  # Code from module unitypes:
+  # Code from module unitypes-h:
   # Code from module vararrays:
   # Code from module vasnprintf:
   # Code from module vasprintf:
   # Code from module vasprintf-posix:
+  # Code from module vaszprintf:
   # Code from module vsnprintf:
+  # Code from module vsnzprintf:
   # Code from module warnings:
-  # Code from module wchar:
+  # Code from module wchar-h:
   # Code from module windows-mutex:
   # Code from module windows-once:
   # Code from module windows-recmutex:
@@ -255,6 +269,7 @@ AC_DEFUN([lts_INIT],
   gl_ASSERT_H
   gl_CONDITIONAL_HEADER([assert.h])
   AC_PROG_MKDIR_P
+  gl_C_BOOL
   gl_FUNC_CALLOC_GNU
   if test $REPLACE_CALLOC_FOR_CALLOC_GNU = 1; then
     AC_LIBOBJ([calloc])
@@ -269,6 +284,7 @@ AC_DEFUN([lts_INIT],
   gl_FUNC_CLOSE
   gl_CONDITIONAL([GL_COND_OBJ_CLOSE], [test $REPLACE_CLOSE = 1])
   gl_UNISTD_MODULE_INDICATOR([close])
+  gl_MODULE_INDICATOR([close])
   gl_DOUBLE_SLASH_ROOT
   gl_FUNC_DUP2
   gl_CONDITIONAL([GL_COND_OBJ_DUP2], [test $REPLACE_DUP2 = 1])
@@ -305,8 +321,11 @@ AC_DEFUN([lts_INIT],
   gl_FLOAT_H
   gl_CONDITIONAL_HEADER([float.h])
   AC_PROG_MKDIR_P
-  gl_CONDITIONAL([GL_COND_OBJ_FLOAT], [test $REPLACE_FLOAT_LDBL = 1])
+  gl_CONDITIONAL([GL_COND_OBJ_FLOAT],
+                 [test $REPLACE_FLOAT_LDBL = 1 || test $REPLACE_FLOAT_SNAN = 1])
   gl_CONDITIONAL([GL_COND_OBJ_ITOLD], [test $REPLACE_ITOLD = 1])
+  dnl Prerequisites of lib/float.c.
+  AC_REQUIRE([gl_BIGENDIAN])
   gl_FUNC_FREE
   gl_CONDITIONAL([GL_COND_OBJ_FREE], [test $REPLACE_FREE = 1])
   AM_COND_IF([GL_COND_OBJ_FREE], [
@@ -334,6 +353,7 @@ AC_DEFUN([lts_INIT],
     gl_PREREQ_FSTAT
   ])
   gl_SYS_STAT_MODULE_INDICATOR([fstat])
+  gl_MODULE_INDICATOR([fstat])
   gl_FUNC_FSYNC
   gl_CONDITIONAL([GL_COND_OBJ_FSYNC], [test $HAVE_FSYNC = 0])
   AM_COND_IF([GL_COND_OBJ_FSYNC], [
@@ -353,6 +373,8 @@ AC_DEFUN([lts_INIT],
     gl_PREREQ_GETHOSTNAME
   ])
   gl_UNISTD_MODULE_INDICATOR([gethostname])
+  gl_MODULE_INDICATOR([gethostname])
+  AC_REQUIRE([AC_CANONICAL_HOST])
   gl_FUNC_GETPROGNAME
   gl_CONDITIONAL([GL_COND_OBJ_GETPROGNAME],
                  [test $HAVE_GETPROGNAME = 0 || test $REPLACE_GETPROGNAME = 1])
@@ -360,6 +382,8 @@ AC_DEFUN([lts_INIT],
     gl_PREREQ_GETPROGNAME
   ])
   gl_STDLIB_MODULE_INDICATOR([getprogname])
+  dnl you must add AM_GNU_GETTEXT([external]) or similar to configure.ac.
+  AM_GNU_GETTEXT_VERSION([0.22])
   AC_SUBST([LIBINTL])
   AC_SUBST([LTLIBINTL])
   gl_FUNC_GETTIMEOFDAY
@@ -369,6 +393,7 @@ AC_DEFUN([lts_INIT],
     gl_PREREQ_GETTIMEOFDAY
   ])
   gl_SYS_TIME_MODULE_INDICATOR([gettimeofday])
+  GNULIB_I18N
   AC_DEFUN([gl_HAVE_MODULE_HAVELIB])
   AM_ICONV
   m4_ifdef([gl_ICONV_MODULE_INDICATOR],
@@ -494,6 +519,7 @@ AC_DEFUN([lts_INIT],
   ])
   gl_STRING_MODULE_INDICATOR([memchr])
   gl_MINMAX
+  # Conditionally invoke gl_PREREQ_VASNPRINTF_WITH_POSIX_EXTRAS.
   gl_MOO
   AC_REQUIRE([gl_MSVC_INVAL])
   gl_CONDITIONAL([GL_COND_OBJ_MSVC_INVAL],
@@ -509,6 +535,7 @@ AC_DEFUN([lts_INIT],
   gl_CONDITIONAL([GL_COND_OBJ_OBSTACK],
                  [test $HAVE_OBSTACK = 0 || test $REPLACE_OBSTACK = 1])
   AC_PROG_MKDIR_P
+  gl_ONCE
   gl_FUNC_OPEN
   gl_CONDITIONAL([GL_COND_OBJ_OPEN], [test $REPLACE_OPEN = 1])
   AM_COND_IF([GL_COND_OBJ_OPEN], [
@@ -520,6 +547,13 @@ AC_DEFUN([lts_INIT],
   gl_FUNC_PRINTF_FREXP
   gl_FUNC_PRINTF_FREXPL
   m4_divert_text([INIT_PREPARE], [gl_printf_safe=yes])
+  gl_PTHREAD_H
+  gl_PTHREAD_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
+  gl_PTHREAD_ONCE
+  gl_CONDITIONAL([GL_COND_OBJ_PTHREAD_ONCE],
+                 [test $HAVE_PTHREAD_ONCE = 0 || test $REPLACE_PTHREAD_ONCE = 1])
+  gl_PTHREAD_MODULE_INDICATOR([pthread-once])
   gl_FUNC_RAISE
   gl_CONDITIONAL([GL_COND_OBJ_RAISE],
                  [test $HAVE_RAISE = 0 || test $REPLACE_RAISE = 1])
@@ -533,15 +567,10 @@ AC_DEFUN([lts_INIT],
     gl_PREREQ_READ
   ])
   gl_UNISTD_MODULE_INDICATOR([read])
-  gl_FUNC_REALLOC_GNU
-  if test $REPLACE_REALLOC_FOR_REALLOC_GNU = 1; then
-    AC_LIBOBJ([realloc])
-  fi
-  gl_STDLIB_MODULE_INDICATOR([realloc-gnu])
   gl_FUNC_REALLOC_POSIX
-  if test $REPLACE_REALLOC_FOR_REALLOC_POSIX = 1; then
-    AC_LIBOBJ([realloc])
-  fi
+  gl_FUNC_REALLOC_0_NONNULL
+  gl_CONDITIONAL([GL_COND_OBJ_REALLOC_POSIX],
+                 [test $REPLACE_REALLOC_FOR_REALLOC_POSIX != 0])
   gl_STDLIB_MODULE_INDICATOR([realloc-posix])
   gl_FUNC_REALLOCARRAY
   gl_CONDITIONAL([GL_COND_OBJ_REALLOCARRAY],
@@ -553,6 +582,9 @@ AC_DEFUN([lts_INIT],
   gl_STDLIB_MODULE_INDICATOR([reallocarray])
   gl_PREREQ_SAFE_READ
   gl_PREREQ_SAFE_WRITE
+  gl_SCHED_H
+  gl_SCHED_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
   gl_SIGACTION
   gl_CONDITIONAL([GL_COND_OBJ_SIGACTION], [test $HAVE_SIGACTION = 0])
   AM_COND_IF([GL_COND_OBJ_SIGACTION], [
@@ -591,12 +623,12 @@ AC_DEFUN([lts_INIT],
     gl_PREREQ_STAT
   ])
   gl_SYS_STAT_MODULE_INDICATOR([stat])
+  gl_MODULE_INDICATOR([stat])
   gl_STAT_TIME
   gl_STAT_BIRTHTIME
   gl_STDARG_H
   gl_CONDITIONAL_HEADER([stdarg.h])
   AC_PROG_MKDIR_P
-  gl_C_BOOL
   AC_CHECK_HEADERS_ONCE([stdckdint.h])
   if test $ac_cv_header_stdckdint_h = yes; then
     GL_GENERATE_STDCKDINT_H=false
@@ -723,8 +755,13 @@ AC_DEFUN([lts_INIT],
     [AM_][XGETTEXT_OPTION([--flag=asprintf:2:c-format])
      AM_][XGETTEXT_OPTION([--flag=vasprintf:2:c-format])])
   gl_FUNC_VASPRINTF_POSIX
+  gl_STDIO_MODULE_INDICATOR([vaszprintf])
+  m4_ifdef([AM_XGETTEXT_OPTION],
+    [AM_][XGETTEXT_OPTION([--flag=aszprintf:2:c-format])
+     AM_][XGETTEXT_OPTION([--flag=vaszprintf:2:c-format])])
   gl_FUNC_VSNPRINTF
   gl_STDIO_MODULE_INDICATOR([vsnprintf])
+  gl_STDIO_MODULE_INDICATOR([vsnzprintf])
   gl_WCHAR_H
   gl_WCHAR_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
@@ -934,6 +971,7 @@ AC_DEFUN([lts_FILE_LIST], [
   lib/asnprintf.c
   lib/asprintf.c
   lib/assert.in.h
+  lib/aszprintf.c
   lib/attribute.h
   lib/basename-lgpl.c
   lib/basename-lgpl.h
@@ -1013,6 +1051,8 @@ AC_DEFUN([lts_FILE_LIST], [
   lib/glibconfig.in.h
   lib/glthread/lock.c
   lib/glthread/lock.h
+  lib/glthread/once.c
+  lib/glthread/once.h
   lib/glthread/threadlib.c
   lib/html-ostream.oo.c
   lib/html-ostream.oo.h
@@ -1225,6 +1265,8 @@ AC_DEFUN([lts_FILE_LIST], [
   lib/printf-frexpl.h
   lib/printf-parse.c
   lib/printf-parse.h
+  lib/pthread-once.c
+  lib/pthread.in.h
   lib/raise.c
   lib/read.c
   lib/realloc.c
@@ -1235,6 +1277,7 @@ AC_DEFUN([lts_FILE_LIST], [
   lib/safe-write.h
   lib/same-inode.c
   lib/same-inode.h
+  lib/sched.in.h
   lib/sig-handler.c
   lib/sig-handler.h
   lib/sigaction.c
@@ -1259,6 +1302,7 @@ AC_DEFUN([lts_FILE_LIST], [
   lib/stdio-read.c
   lib/stdio-write.c
   lib/stdio.in.h
+  lib/stdlib.c
   lib/stdlib.in.h
   lib/stpcpy.c
   lib/strerror-override.c
@@ -1294,8 +1338,10 @@ AC_DEFUN([lts_FILE_LIST], [
   lib/vasnprintf.c
   lib/vasnprintf.h
   lib/vasprintf.c
+  lib/vaszprintf.c
   lib/verify.h
   lib/vsnprintf.c
+  lib/vsnzprintf.c
   lib/w32sock.h
   lib/warn-on-use.h
   lib/wchar.in.h
@@ -1326,6 +1372,7 @@ AC_DEFUN([lts_FILE_LIST], [
   m4/absolute-header.m4
   m4/alloca.m4
   m4/assert_h.m4
+  m4/build-to-host.m4
   m4/c-bool.m4
   m4/calloc.m4
   m4/check-math-lib.m4
@@ -1334,13 +1381,13 @@ AC_DEFUN([lts_FILE_LIST], [
   m4/curses.m4
   m4/double-slash-root.m4
   m4/dup2.m4
-  m4/eealloc.m4
   m4/errno_h.m4
   m4/error.m4
   m4/error_h.m4
   m4/exponentd.m4
   m4/exponentf.m4
   m4/exponentl.m4
+  m4/extensions-aix.m4
   m4/extensions.m4
   m4/extern-inline.m4
   m4/fabs.m4
@@ -1358,12 +1405,16 @@ AC_DEFUN([lts_FILE_LIST], [
   m4/getdtablesize.m4
   m4/gethostname.m4
   m4/getprogname.m4
+  m4/gettext.m4
   m4/gettimeofday.m4
   m4/gnulib-common.m4
+  m4/gnulib-i18n.m4
   m4/host-cpu-c-abi.m4
   m4/iconv.m4
   m4/include_next.m4
   m4/inline.m4
+  m4/intl-thread-locale.m4
+  m4/intlmacosx.m4
   m4/intmax_t.m4
   m4/inttypes.m4
   m4/inttypes_h.m4
@@ -1383,7 +1434,7 @@ AC_DEFUN([lts_FILE_LIST], [
   m4/libunistring-base.m4
   m4/libxml.m4
   m4/limits-h.m4
-  m4/locale-fr.m4
+  m4/locale-en.m4
   m4/locale-ja.m4
   m4/locale-zh.m4
   m4/lock.m4
@@ -1405,19 +1456,27 @@ AC_DEFUN([lts_FILE_LIST], [
   m4/msvc-nothrow.m4
   m4/multiarch.m4
   m4/musl.m4
+  m4/nls.m4
   m4/no-c++.m4
   m4/nocrash.m4
   m4/obstack.m4
+  m4/off64_t.m4
   m4/off_t.m4
+  m4/once.m4
   m4/open-cloexec.m4
   m4/open-slash.m4
   m4/open.m4
   m4/pathmax.m4
   m4/pid_t.m4
+  m4/po.m4
   m4/pow.m4
   m4/printf-frexp.m4
   m4/printf-frexpl.m4
   m4/printf.m4
+  m4/progtest.m4
+  m4/pthread-once.m4
+  m4/pthread-spin.m4
+  m4/pthread_h.m4
   m4/pthread_rwlock_rdlock.m4
   m4/raise.m4
   m4/read.m4
@@ -1425,6 +1484,7 @@ AC_DEFUN([lts_FILE_LIST], [
   m4/reallocarray.m4
   m4/safe-read.m4
   m4/safe-write.m4
+  m4/sched_h.m4
   m4/sig_atomic_t.m4
   m4/sigaction.m4
   m4/signal_h.m4
@@ -1450,7 +1510,9 @@ AC_DEFUN([lts_FILE_LIST], [
   m4/stdlib_h.m4
   m4/stpcpy.m4
   m4/strerror.m4
+  m4/strerrorname_np.m4
   m4/string_h.m4
+  m4/sys_cdefs_h.m4
   m4/sys_socket_h.m4
   m4/sys_stat_h.m4
   m4/sys_time_h.m4
@@ -1470,7 +1532,6 @@ AC_DEFUN([lts_FILE_LIST], [
   m4/warn-on-use.m4
   m4/warnings.m4
   m4/wchar_h.m4
-  m4/wchar_t.m4
   m4/wint_t.m4
   m4/write.m4
   m4/xalloc.m4
@@ -1491,6 +1552,7 @@ AC_DEFUN([lts_FILE_LIST], [
   tests/test-term-ostream-xterm-linux-debian.out
   tests/test-term-ostream-xterm-linux-mandriva.out
   tests/test-term-ostream-xterm-mingw.out
+  tests/test-term-ostream-xterm-msys2.out
   tests/test-term-ostream-xterm-netbsd3.out
   tests/test-term-ostream-xterm-osf51.out
   tests/test-term-ostream-xterm-r6.out

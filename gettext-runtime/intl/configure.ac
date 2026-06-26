@@ -1,5 +1,5 @@
 dnl Configuration for the gettext-runtime directory of GNU gettext
-dnl Copyright (C) 1995-2016, 2018-2024 Free Software Foundation, Inc.
+dnl Copyright (C) 1995-2024 Free Software Foundation, Inc.
 dnl
 dnl This program is free software: you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -42,10 +42,6 @@ gl_PROG_AR_RANLIB
 dnl Set preferences for the gnulib module 'threadlib'.
 gl_AVOID_WINPTHREAD
 
-dnl Set preferences for the gnulib module 'relocatable-lib-lgpl':
-dnl Enable relocatability unconditionally.
-enable_relocatable=yes
-
 dnl Early checks, assembled by gnulib.
 gl_EARLY
 
@@ -61,10 +57,10 @@ dnl Prepares the libtool configuration for handling of Windows resources, and
 dnl sets the RC variable to a program that compiles Windows resource files.
 LT_LANG([Windows Resource])
 
-dnl On mingw and Cygwin, we can activate special Makefile rules which add
-dnl version information to the shared libraries and executables.
+dnl On native Windows and Cygwin, we can activate special Makefile rules which
+dnl add version information to the shared libraries and executables.
 case "$host_os" in
-  mingw* | cygwin*) is_woe32=yes ;;
+  mingw* | windows* | cygwin*) is_woe32=yes ;;
   *) is_woe32=no ;;
 esac
 AM_CONDITIONAL([WOE32], [test $is_woe32 = yes])
@@ -75,18 +71,10 @@ fi
 
 dnl Some code is only meant to be compiled on native Windows.
 case "$host_os" in
-  mingw*) is_windows_native=yes ;;
+  mingw* | windows*) is_windows_native=yes ;;
   *) is_windows_native=no ;;
 esac
 AM_CONDITIONAL([WINDOWS_NATIVE], [test $is_windows_native = yes])
-
-dnl Support building libintl.a with -fPIC (needed by GCC).
-dnl <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100096>
-AC_ARG_ENABLE([host-shared],
-  [AS_HELP_STRING([[--enable-host-shared]], [special hack for GCC])],
-  [PICFLAG='-fPIC'],
-  [PICFLAG=])
-AC_SUBST([PICFLAG])
 
 dnl Checks for libraries.
 
@@ -102,12 +90,68 @@ AM_CONDITIONAL([PRELOADABLE_LIBINTL],
 dnl Checks for header files, functions and declarations.
 gl_INIT
 
-gt_INTL_SUBDIR_CORE
+dnl Checks for the core files of the intl subdirectory:
+dnl   dcigettext.c
+dnl   eval-plural.h
+dnl   explodename.c
+dnl   finddomain.c
+dnl   gettextP.h
+dnl   gmo.h
+dnl   hash-string.h hash-string.c
+dnl   l10nflist.c
+dnl   libgnuintl.h.in (except the *printf stuff)
+dnl   loadinfo.h
+dnl   loadmsgcat.c
+dnl   localealias.c
+dnl   log.c
+dnl   plural-exp.h plural-exp.c
+dnl   plural.y
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_FUNC_ALLOCA
+AC_FUNC_MMAP
+gl_LOCK
 
-gt_PRINTF_POSIX
-case $gt_cv_func_printf_posix in
-  *yes) HAVE_POSIX_PRINTF=1 ;;
-  *)    HAVE_POSIX_PRINTF=0 ;;
+AC_LINK_IFELSE(
+  [AC_LANG_PROGRAM(
+     [[int foo (int a) { a = __builtin_expect (a, 10); return a == 10 ? 0 : 1; }]],
+     [[]])],
+  [AC_DEFINE([HAVE_BUILTIN_EXPECT], [1],
+     [Define to 1 if the compiler understands __builtin_expect.])])
+
+AC_CHECK_HEADERS([inttypes.h unistd.h sys/param.h])
+AC_CHECK_FUNCS([getcwd getegid geteuid getgid getuid mempcpy munmap \
+  stpcpy strcasecmp uselocale __fsetlocking])
+
+dnl Use the *_unlocked functions only if they are declared.
+dnl (because some of them were defined without being declared in Solaris
+dnl 2.5.1 but were removed in Solaris 2.6, whereas we want binaries built
+dnl on Solaris 2.5.1 to run on Solaris 2.6).
+AC_CHECK_DECLS([feof_unlocked, fgets_unlocked], , , [#include <stdio.h>])
+
+AM_ICONV
+
+dnl intl/plural.c is generated from intl/plural.y. It requires bison,
+dnl because plural.y uses bison specific features. It requires at least
+dnl bison-3.0 for %precedence.
+dnl bison is only needed for the maintainer (who touches plural.y). But in
+dnl order to avoid separate Makefiles or --enable-maintainer-mode, we put
+dnl the rule in general Makefile. Now, some people carelessly touch the
+dnl files or have a broken "make" program, hence the plural.c rule will
+dnl sometimes fire. To avoid an error, defines BISON to ":" if it is not
+dnl present or too old.
+gl_PROG_BISON([INTLBISON], [3.0])
+
+gl_PRINTF_POSITIONS
+case "$gl_cv_func_printf_positions" in
+  *yes)
+    AC_DEFINE([HAVE_POSIX_PRINTF], [1],
+      [Define if your printf() function supports format strings with positions.])
+    HAVE_POSIX_PRINTF=1
+    ;;
+  *)
+    HAVE_POSIX_PRINTF=0
+    ;;
 esac
 AC_SUBST([HAVE_POSIX_PRINTF])
 
@@ -156,7 +200,8 @@ else
 fi
 AC_SUBST([ENHANCE_LOCALE_FUNCS])
 
-dnl Compilation on mingw and Cygwin needs special Makefile rules, because
+dnl Compilation on native Windows and Cygwin needs special Makefile rules,
+dnl because
 dnl 1. when we install a shared library, we must arrange to export
 dnl    auxiliary pointer variables for every exported variable,
 dnl 2. when we install a shared library and a static library simultaneously,
@@ -165,27 +210,32 @@ dnl    must arrange to define the auxiliary pointer variables for the
 dnl    exported variables _also_ in the static library.
 if test "$enable_shared" = yes; then
   case "$host_os" in
-    mingw* | cygwin*) is_woe32dll=yes ;;
+    mingw* | windows* | cygwin*) is_woe32dll=yes ;;
     *) is_woe32dll=no ;;
   esac
 else
   is_woe32dll=no
 fi
-WOE32DLL=$is_woe32dll
+if test $is_woe32dll = yes; then
+  WOE32DLL=1
+else
+  WOE32DLL=0
+fi
 AC_SUBST([WOE32DLL])
 AM_CONDITIONAL([WOE32DLL], [test $is_woe32dll = yes])
-if test $is_woe32dll = yes; then
-  AC_DEFINE([WOE32DLL], [1],
-    [Define when --enable-shared is used on mingw or Cygwin.])
-fi
 
 dnl Put some default definitions into config.h.
 AH_BOTTOM([
 /* Tweak gnulib code according to the needs of this library.  */
 #define IN_LIBINTL 1
 
-/* On Windows, variables that may be in a DLL must be marked specially.  */
-#if (defined _MSC_VER && defined _DLL) && !defined IN_RELOCWRAPPER
+/* On Windows, variables that may be in a DLL must be marked specially.
+   The symbols marked with DLL_VARIABLE should be exported if and only if the
+   object file gets included in a DLL.  Libtool, on Windows platforms, defines
+   the C macro DLL_EXPORT (together with PIC) when compiling for a shared
+   library (called DLL under Windows) and does not define it when compiling
+   an object file meant to be linked statically into some executable.  */
+#if (defined _MSC_VER && defined DLL_EXPORT) && !defined IN_RELOCWRAPPER
 # define DLL_VARIABLE __declspec (dllimport)
 #else
 # define DLL_VARIABLE
@@ -292,9 +342,6 @@ AH_VERBATIM([znoexport], [
 #define printf_frexp               _libintl_printf_frexp
 /* Symbols defined by gnulib module 'printf-frexpl'.  */
 #define printf_frexpl              _libintl_printf_frexpl
-/* Symbols defined by gnulib module 'relocatable-lib-lgpl'.  */
-#define relocate                   _libintl_relocate
-#define relocate2                  _libintl_relocate2
 /* Symbols defined by gnulib module 'setlocale-null'.  */
 #define setlocale_null             _libintl_setlocale_null
 #define setlocale_null_r           _libintl_setlocale_null_r

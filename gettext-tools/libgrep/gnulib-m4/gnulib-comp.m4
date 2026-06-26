@@ -42,46 +42,57 @@ AC_DEFUN([grgl_EARLY],
   AC_REQUIRE([gl_PROG_AR_RANLIB])
 
   # Code from module attribute:
+  # Code from module bool:
   # Code from module btowc:
   # Code from module builtin-expect:
   # Code from module c99:
+  # Code from module extensions-aix:
+  AC_REQUIRE([gl_USE_AIX_EXTENSIONS])
   # Code from module extern-inline:
   # Code from module gen-header:
   # Code from module glibc-internal/dynarray:
+  # Code from module gnulib-i18n:
   # Code from module intprops:
-  # Code from module inttypes-incomplete:
+  # Code from module inttypes-h-incomplete:
   # Code from module iswblank:
   # Code from module iswctype:
   # Code from module iswdigit:
   # Code from module iswpunct:
   # Code from module iswxdigit:
-  # Code from module langinfo:
+  # Code from module langinfo-h:
   # Code from module libc-config:
   # Code from module limits-h:
-  # Code from module locale:
+  # Code from module locale-h:
   # Code from module localeconv:
   # Code from module lock:
+  # Code from module malloc-gnu:
   # Code from module mbrlen:
   # Code from module mbszero:
   # Code from module mbtowc:
   # Code from module nl_langinfo:
+  # Code from module once:
+  # Code from module pthread-h:
+  gl_ANYTHREADLIB_EARLY
+  # Code from module pthread-once:
   # Code from module regex:
+  # Code from module sched-h:
   # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
   # Code from module std-gnu11:
-  # Code from module stdbool:
-  # Code from module stdckdint:
-  # Code from module stddef:
-  # Code from module stdint:
-  # Code from module stdlib:
-  # Code from module sys_types:
+  # Code from module stdckdint-h:
+  # Code from module stddef-h:
+  # Code from module stdint-h:
+  # Code from module stdlib-h:
+  # Code from module sys_types-h:
+  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
   # Code from module threadlib:
   gl_THREADLIB_EARLY
-  # Code from module unistd:
+  # Code from module time-h:
+  # Code from module unistd-h:
   # Code from module vararrays:
-  # Code from module wchar:
+  # Code from module wchar-h:
   # Code from module wcrtomb:
   # Code from module wctype:
   # Code from module wctype-h:
@@ -107,6 +118,7 @@ AC_DEFUN([grgl_INIT],
   gl_source_base='libgrep'
   gl_source_base_prefix=
   m4_pushdef([gl_MODULE_INDICATOR_CONDITION], [IN_GETTEXT_TOOLS_LIBGREP])
+  gl_C_BOOL
   gl_FUNC_BTOWC
   gl_CONDITIONAL([GL_COND_OBJ_BTOWC],
                  [test $HAVE_BTOWC = 0 || test $REPLACE_BTOWC = 1])
@@ -117,6 +129,7 @@ AC_DEFUN([grgl_INIT],
   gl___BUILTIN_EXPECT
   AC_REQUIRE([gl_EXTERN_INLINE])
   AC_PROG_MKDIR_P
+  GNULIB_I18N
   gl_INTTYPES_INCOMPLETE
   gl_INTTYPES_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
@@ -156,8 +169,14 @@ AC_DEFUN([grgl_INIT],
     gl_PREREQ_LOCALECONV
   ])
   gl_LOCALE_MODULE_INDICATOR([localeconv])
+  gl_MODULE_INDICATOR([localeconv])
   gl_LOCK
   gl_MODULE_INDICATOR([lock])
+  gl_FUNC_MALLOC_GNU
+  if test $REPLACE_MALLOC_FOR_MALLOC_GNU = 1; then
+    AC_LIBOBJ([malloc])
+  fi
+  gl_STDLIB_MODULE_INDICATOR([malloc-gnu])
   gl_FUNC_MBRLEN
   gl_CONDITIONAL([GL_COND_OBJ_MBRLEN],
                  [test $HAVE_MBRLEN = 0 || test $REPLACE_MBRLEN = 1])
@@ -185,12 +204,22 @@ AC_DEFUN([grgl_INIT],
     gl_PREREQ_NL_LANGINFO_LOCK
   fi
   gl_LANGINFO_MODULE_INDICATOR([nl_langinfo])
+  gl_ONCE
+  gl_PTHREAD_H
+  gl_PTHREAD_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
+  gl_PTHREAD_ONCE
+  gl_CONDITIONAL([GL_COND_OBJ_PTHREAD_ONCE],
+                 [test $HAVE_PTHREAD_ONCE = 0 || test $REPLACE_PTHREAD_ONCE = 1])
+  gl_PTHREAD_MODULE_INDICATOR([pthread-once])
   gl_REGEX
   gl_CONDITIONAL([GL_COND_OBJ_REGEX], [test $ac_use_included_regex = yes])
   AM_COND_IF([GL_COND_OBJ_REGEX], [
     gl_PREREQ_REGEX
   ])
-  gl_C_BOOL
+  gl_SCHED_H
+  gl_SCHED_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
   AC_CHECK_HEADERS_ONCE([stdckdint.h])
   if test $ac_cv_header_stdckdint_h = yes; then
     GL_GENERATE_STDCKDINT_H=false
@@ -215,6 +244,9 @@ AC_DEFUN([grgl_INIT],
   gl_SYS_TYPES_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
   AC_REQUIRE([gl_THREADLIB])
+  gl_TIME_H
+  gl_TIME_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
   gl_UNISTD_H
   gl_UNISTD_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
@@ -417,6 +449,8 @@ AC_DEFUN([grgl_FILE_LIST], [
   lib/dynarray.h
   lib/glthread/lock.c
   lib/glthread/lock.h
+  lib/glthread/once.c
+  lib/glthread/once.h
   lib/glthread/threadlib.c
   lib/intprops-internal.h
   lib/intprops.h
@@ -432,6 +466,7 @@ AC_DEFUN([grgl_FILE_LIST], [
   lib/limits.in.h
   lib/locale.in.h
   lib/localeconv.c
+  lib/malloc.c
   lib/malloc/dynarray-skeleton.c
   lib/malloc/dynarray.h
   lib/malloc/dynarray_at_failure.c
@@ -445,17 +480,22 @@ AC_DEFUN([grgl_FILE_LIST], [
   lib/mbtowc.c
   lib/nl_langinfo-lock.c
   lib/nl_langinfo.c
+  lib/pthread-once.c
+  lib/pthread.in.h
   lib/regcomp.c
   lib/regex.c
   lib/regex.h
   lib/regex_internal.c
   lib/regex_internal.h
   lib/regexec.c
+  lib/sched.in.h
   lib/stdckdint.in.h
   lib/stddef.in.h
   lib/stdint.in.h
+  lib/stdlib.c
   lib/stdlib.in.h
   lib/sys_types.in.h
+  lib/time.in.h
   lib/unistd.c
   lib/unistd.in.h
   lib/warn-on-use.h
@@ -469,12 +509,14 @@ AC_DEFUN([grgl_FILE_LIST], [
   m4/00gnulib.m4
   m4/__inline.m4
   m4/btowc.m4
+  m4/build-to-host.m4
   m4/builtin-expect.m4
   m4/c-bool.m4
   m4/codeset.m4
-  m4/eealloc.m4
+  m4/extensions-aix.m4
   m4/extern-inline.m4
   m4/gnulib-common.m4
+  m4/gnulib-i18n.m4
   m4/inttypes.m4
   m4/iswblank.m4
   m4/iswctype.m4
@@ -483,6 +525,7 @@ AC_DEFUN([grgl_FILE_LIST], [
   m4/iswxdigit.m4
   m4/langinfo_h.m4
   m4/limits-h.m4
+  m4/locale-en.m4
   m4/locale-fr.m4
   m4/locale-ja.m4
   m4/locale-zh.m4
@@ -495,22 +538,29 @@ AC_DEFUN([grgl_FILE_LIST], [
   m4/mbtowc.m4
   m4/musl.m4
   m4/nl_langinfo.m4
+  m4/off64_t.m4
   m4/off_t.m4
+  m4/once.m4
   m4/pid_t.m4
+  m4/pthread-once.m4
+  m4/pthread-spin.m4
+  m4/pthread_h.m4
   m4/pthread_rwlock_rdlock.m4
   m4/regex.m4
+  m4/sched_h.m4
   m4/std-gnu11.m4
   m4/stddef_h.m4
   m4/stdint.m4
   m4/stdlib_h.m4
+  m4/sys_cdefs_h.m4
   m4/sys_types_h.m4
   m4/threadlib.m4
+  m4/time_h.m4
   m4/unistd_h.m4
   m4/vararrays.m4
   m4/visibility.m4
   m4/warn-on-use.m4
   m4/wchar_h.m4
-  m4/wchar_t.m4
   m4/wcrtomb.m4
   m4/wctype.m4
   m4/wctype_h.m4

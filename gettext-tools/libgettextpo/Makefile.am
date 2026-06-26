@@ -1,5 +1,5 @@
 ## Makefile for the gettext-tools/libgettextpo subdirectory of GNU gettext
-## Copyright (C) 1995-1998, 2000-2016, 2019-2023 Free Software Foundation, Inc.
+## Copyright (C) 1995-2024 Free Software Foundation, Inc.
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 ## Process this file with automake to produce Makefile.in.
 
-AUTOMAKE_OPTIONS = 1.5 gnits no-dependencies subdir-objects
+AUTOMAKE_OPTIONS = 1.5 gnits subdir-objects
 EXTRA_DIST =
 BUILT_SOURCES =
 MOSTLYCLEANFILES = core *.stackdump
@@ -34,9 +34,11 @@ noinst_LTLIBRARIES =
 
 nodist_noinst_HEADERS = config.h
 
+# Note that Automake's $(DEFAULT_INCLUDES) already contains
+# -I. -I$(srcdir) -I$(top_builddir).
+# The option -I$(top_srcdir) is needed so that woe32dll/export.h is found.
 AM_CPPFLAGS = \
-  -I. -I$(srcdir) \
-  -I.. -I$(top_srcdir) \
+  -I$(top_srcdir) \
   -I../src -I$(top_srcdir)/src \
   -I../../gettext-runtime/intl -I$(top_srcdir)/../gettext-runtime/intl
 
@@ -52,21 +54,18 @@ libgettextpo_la_SOURCES = \
 # These are auxiliary sources whose symbols should not be exported.
 libgettextpo_la_AUXSOURCES = \
   ../src/str-list.c \
-  ../src/dir-list.c \
   ../src/message.c \
   ../src/pos.c \
   ../src/msgl-ascii.c \
-  ../src/po-error.c \
-  ../src/po-xerror.c \
   ../src/write-catalog.c \
   ../src/write-po.c \
-  ../src/open-catalog.c \
   ../src/po-charset.c \
-  ../src/po-lex.c \
-  ../src/po-gram-gen.c \
-  ../src/read-po.c \
+  ../src/read-catalog-special.c \
   ../src/read-catalog-abstract.c \
   ../src/read-catalog.c \
+  ../src/read-po.c \
+  ../src/read-po-lex.c \
+  ../src/read-po-gram.c \
   ../src/plural-table.c \
   ../src/format-c.c \
   ../src/format-c++-brace.c \
@@ -106,7 +105,7 @@ libgettextpo_la_AUXSOURCES = \
 # Libtool's library version information for libgettextpo.
 # See the libtool documentation, section "Library interface versions".
 LTV_CURRENT=5
-LTV_REVISION=10
+LTV_REVISION=12
 LTV_AGE=5
 
 # How to build libgettextpo.la.
@@ -213,6 +212,9 @@ else
 	cp $(srcdir)/gettext-po.in.h gettext-po.h-tmp
 endif
 	mv gettext-po.h-tmp gettext-po.h
+
+# Internal documentation.
+EXTRA_DIST += multithread-safe.txt
 
 # Allow users to use "gnulib-tool --update".
 EXTRA_DIST += gnulib-m4/gnulib-cache.m4

@@ -162,6 +162,10 @@ _isatty_nothrow (int fd)
 # define _isatty_nothrow _isatty
 #endif
 
+#ifdef IN_LIBTEXTSTYLE
+# define isatty libtextstyle_isatty
+#endif
+
 /* Determine whether FD refers to a console device.  Return 1 if yes.
    Return 0 and set errno if no. (ptsname_r relies on the errno value.)  */
 int

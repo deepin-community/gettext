@@ -1,5 +1,5 @@
 /* Error handling during reading and writing of PO files.
-   Copyright (C) 2004, 2023 Free Software Foundation, Inc.
+   Copyright (C) 2004-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2004.
 
    This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 /* Specification.  */
 #include "po-error.h"
 
-#include "error.h"
+#include <error.h>
 #include "xerror.h"
 
 
@@ -38,7 +38,19 @@ void (*po_error_at_line) (int status, int errnum,
                           const char *format, ...)
   = error_at_line;
 
+static void
+void_multiline_warning (char *prefix, char *message)
+{
+  multiline_warning (prefix, message);
+}
+
+static void
+void_multiline_error (char *prefix, char *message)
+{
+  multiline_error (prefix, message);
+}
+
 void (*po_multiline_warning) (char *prefix, char *message)
-  = multiline_warning;
+  = void_multiline_warning;
 void (*po_multiline_error) (char *prefix, char *message)
-  = multiline_error;
+  = void_multiline_error;

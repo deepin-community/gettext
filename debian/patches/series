@@ -1,3 +1,2 @@
-01-autopoint-3-fix-typo.patch
-02-autopoint-3-remove-autom4te-cache.patch
-0001-feat-add-sw64-support.patch
+fix-test-non-english-locale.patch
+parse-recursive-jsx-expressions-correctly.patch

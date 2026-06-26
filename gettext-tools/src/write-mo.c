@@ -1,5 +1,5 @@
 /* Writing binary .mo files.
-   Copyright (C) 1995-1998, 2000-2007, 2016, 2020, 2023 Free Software Foundation, Inc.
+   Copyright (C) 1995-2024 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@gnu.ai.mit.edu>, April 1995.
 
    This program is free software: you can redistribute it and/or modify
@@ -37,8 +37,8 @@
 #include "gmo.h"
 #include "hash-string.h"
 
+#include <error.h>
 #include "byteswap.h"
-#include "error.h"
 #include "mem-hash-map.h"
 #include "message.h"
 #include "format.h"
@@ -47,6 +47,7 @@
 #include "xmalloca.h"
 #include "po-charset.h"
 #include "msgl-iconv.h"
+#include "xerror-handler.h"
 #include "msgl-header.h"
 #include "binary-io.h"
 #include "supersede.h"
@@ -262,7 +263,7 @@ struct sysdep_instantiation_rule
   const char *prefix_for_FAST32;
   const char *prefix_for_PTR;
 };
-const struct sysdep_instantiation_rule useful_instantiation_rules[] =
+static const struct sysdep_instantiation_rule useful_instantiation_rules[] =
 {
   /*  0 */ { "ll",  "",   "",  "ll",  "",  "",  ""    },
   /*  1 */ { "l",   "",   "",  "l",   "",  "",  "l"   },
@@ -1195,7 +1196,8 @@ msgdomain_write_mo (message_list_ty *mlp,
              It is also helpful for performance on glibc systems, since most
              locales nowadays have UTF-8 as locale encoding, whereas some PO
              files still are encoded in EUC-JP or so.  */
-          iconv_message_list (mlp, NULL, po_charset_utf8, input_file);
+          iconv_message_list (mlp, NULL, po_charset_utf8, input_file,
+                              textmode_xerror_handler);
         }
 
       /* Support for "reproducible builds": Delete information that may vary

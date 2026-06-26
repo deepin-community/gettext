@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gettext-examples 0.19.4.73\n"
 "Report-Msgid-Bugs-To: bug-gettext@gnu.org\n"
-"POT-Creation-Date: 2023-09-18 23:34+0200\n"
+"POT-Creation-Date: 2024-12-31 12:50+0100\n"
 "PO-Revision-Date: 2018-02-15 18:26+0600\n"
 "Last-Translator: Ilyas Bakirov <just_ilyas@yahoo.com>\n"
 "Language-Team: Kirghiz <i18n-team-ky-kyrgyz@lists.sourceforge.net>\n"
@@ -20,8 +20,8 @@ msgstr ""
 "X-Generator: Poedit 2.0.6\n"
 
 #: hello-c/hello.c:35 hello-c-gnome/hello.c:51
-#: hello-c-gnome3/hello.desktop.in.in:5 hello-c++/hello.cc:44
-#: hello-c++20/hello.cc:36 hello-c++-qt/hello.cc:50
+#: hello-c-gnome3/hello.desktop.in.in:4 hello-c++/hello.cc:44
+#: hello-c++20/hello.cc:48 hello-c++-qt/hello.cc:50
 #: hello-c++-kde/hellowindow.cc:47 hello-c++-gnome/hello.cc:55
 #: hello-c++-wxwidgets/hello.cc:73 hello-objc/hello.m:35
 #: hello-objc-gnustep/Hello.m:49 hello-objc-gnome/hello.m:52
@@ -65,7 +65,7 @@ msgstr "<big><u>Дагы бир текст</u></big>"
 msgid "<big><i>This is yet another text</i></big>"
 msgstr "<big><i>Жана дагы бир текст</i></big>"
 
-#: hello-c-gnome3/hello.desktop.in.in:4
+#: hello-c-gnome3/hello.desktop.in.in:3
 msgid "Hello"
 msgstr "Салам"
 
@@ -85,7 +85,7 @@ msgstr "XML белгени колдонуу"
 msgid "Whether to use XML markup in the text."
 msgstr "Текст ичинле XML белги эсепке алынсынбы."
 
-#: hello-c++20/hello.cc:37
+#: hello-c++20/hello.cc:50 hello-c++20/hello.cc:53
 #, fuzzy, c++-format
 msgid "This program is running as process number {:d}."
 msgstr "Бул программа {pid} процесс номери катары иштеп жатат."

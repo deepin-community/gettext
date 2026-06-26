@@ -1,5 +1,5 @@
 /* Writing Java ResourceBundles.
-   Copyright (C) 2001-2003, 2005-2010, 2014, 2016, 2018-2020, 2023 Free Software Foundation, Inc.
+   Copyright (C) 2001-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
    This program is free software: you can redistribute it and/or modify
@@ -53,9 +53,9 @@
 # define S_IXUSR 00100
 #endif
 
+#include <error.h>
 #include "attribute.h"
 #include "c-ctype.h"
-#include "error.h"
 #include "xerror.h"
 #include "xvasprintf.h"
 #include "verify.h"
@@ -63,6 +63,7 @@
 #include "message.h"
 #include "msgfmt.h"
 #include "msgl-iconv.h"
+#include "xerror-handler.h"
 #include "msgl-header.h"
 #include "plural-exp.h"
 #include "po-charset.h"
@@ -1067,7 +1068,8 @@ msgdomain_write_java (message_list_ty *mlp, const char *canon_encoding,
   retval = 1;
 
   /* Convert the messages to Unicode.  */
-  iconv_message_list (mlp, canon_encoding, po_charset_utf8, NULL);
+  iconv_message_list (mlp, canon_encoding, po_charset_utf8, NULL,
+                      textmode_xerror_handler);
 
   /* Support for "reproducible builds": Delete information that may vary
      between builds in the same conditions.  */
@@ -1213,7 +1215,7 @@ msgdomain_write_java (message_list_ty *mlp, const char *canon_encoding,
      Java compilers create the class files in the source file's directory -
      which is in a temporary directory in our case.  */
   java_sources[0] = java_file_name;
-  if (compile_java_class (java_sources, 1, NULL, 0, "1.5", "1.6", directory,
+  if (compile_java_class (java_sources, 1, NULL, 0, "1.8", "1.8", directory,
                           true, false, true, verbose > 0))
     {
       if (!verbose)

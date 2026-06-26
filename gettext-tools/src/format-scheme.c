@@ -1,5 +1,5 @@
 /* Scheme format strings.
-   Copyright (C) 2001-2007, 2009, 2014, 2019, 2023 Free Software Foundation, Inc.
+   Copyright (C) 2001-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
    This program is free software: you can redistribute it and/or modify
@@ -22,6 +22,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+#include <error.h>
+#include "attribute.h"
 #include "format.h"
 #include "c-ctype.h"
 #include "gcd.h"
@@ -29,8 +31,6 @@
 #include "xvasprintf.h"
 #include "format-invalid.h"
 #include "minmax.h"
-#include "error.h"
-#include "error-progname.h"
 #include "gettext.h"
 
 #define _(str) gettext (str)
@@ -2321,7 +2321,7 @@ make_repeated_list (struct format_arg_list *sublist, unsigned int period)
 
 /* Possible signatures of format directives.  */
 static const enum format_arg_type I [1] = { FAT_INTEGER_NULL };
-_GL_ATTRIBUTE_MAYBE_UNUSED
+MAYBE_UNUSED
 static const enum format_arg_type II [2] = {
   FAT_INTEGER_NULL, FAT_INTEGER_NULL
 };
@@ -3401,7 +3401,7 @@ format_get_number_of_directives (void *descr)
 
 static bool
 format_check (void *msgid_descr, void *msgstr_descr, bool equality,
-              formatstring_error_logger_t error_logger,
+              formatstring_error_logger_t error_logger, void *error_logger_data,
               const char *pretty_msgid, const char *pretty_msgstr)
 {
   struct spec *spec1 = (struct spec *) msgid_descr;
@@ -3413,7 +3413,8 @@ format_check (void *msgid_descr, void *msgstr_descr, bool equality,
       if (!equal_list (spec1->list, spec2->list))
         {
           if (error_logger)
-            error_logger (_("format specifications in '%s' and '%s' are not equivalent"),
+            error_logger (error_logger_data,
+                          _("format specifications in '%s' and '%s' are not equivalent"),
                           pretty_msgid, pretty_msgstr);
           err = true;
         }
@@ -3429,7 +3430,8 @@ format_check (void *msgid_descr, void *msgstr_descr, bool equality,
                 equal_list (intersection, spec2->list))))
         {
           if (error_logger)
-            error_logger (_("format specifications in '%s' are not a subset of those in '%s'"),
+            error_logger (error_logger_data,
+                          _("format specifications in '%s' are not a subset of those in '%s'"),
                           pretty_msgstr, pretty_msgid);
           err = true;
         }

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gettext-examples-0.22\n"
 "Report-Msgid-Bugs-To: bug-gettext@gnu.org\n"
-"POT-Creation-Date: 2023-09-18 23:34+0200\n"
+"POT-Creation-Date: 2024-12-31 12:50+0100\n"
 "PO-Revision-Date: 2023-12-24 15:52+0000\n"
 "Last-Translator: Rihards Priedītis <rprieditis@gmail.com>\n"
 "Language-Team: Latvian <translation-team-lv@lists.sourceforge.net>\n"
@@ -22,8 +22,8 @@ msgstr ""
 "X-Generator: Poedit 3.4.2\n"
 
 #: hello-c/hello.c:35 hello-c-gnome/hello.c:51
-#: hello-c-gnome3/hello.desktop.in.in:5 hello-c++/hello.cc:44
-#: hello-c++20/hello.cc:36 hello-c++-qt/hello.cc:50
+#: hello-c-gnome3/hello.desktop.in.in:4 hello-c++/hello.cc:44
+#: hello-c++20/hello.cc:48 hello-c++-qt/hello.cc:50
 #: hello-c++-kde/hellowindow.cc:47 hello-c++-gnome/hello.cc:55
 #: hello-c++-wxwidgets/hello.cc:73 hello-objc/hello.m:35
 #: hello-objc-gnustep/Hello.m:49 hello-objc-gnome/hello.m:52
@@ -67,7 +67,7 @@ msgstr "<big><u>Šis ir vēl viens teksts</u></big>"
 msgid "<big><i>This is yet another text</i></big>"
 msgstr "<big><i>Šis ir vēl viens teksts</i></big>"
 
-#: hello-c-gnome3/hello.desktop.in.in:4
+#: hello-c-gnome3/hello.desktop.in.in:3
 msgid "Hello"
 msgstr "Sveiki"
 
@@ -87,7 +87,7 @@ msgstr "Izmantot XML marķēšanu"
 msgid "Whether to use XML markup in the text."
 msgstr "Vai tekstā izmantot XML marķēšanu."
 
-#: hello-c++20/hello.cc:37
+#: hello-c++20/hello.cc:50 hello-c++20/hello.cc:53
 #, c++-format
 msgid "This program is running as process number {:d}."
 msgstr "Šī programma darbojas ar procesa numuru {:d}."

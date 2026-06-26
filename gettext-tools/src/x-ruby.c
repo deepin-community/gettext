@@ -1,5 +1,5 @@
 /* xgettext Ruby backend.
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2020.
 
    This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <error.h>
 #include "message.h"
 #include "sh-quote.h"
 #include "spawn-pipe.h"
@@ -37,14 +38,14 @@
 #include "xgettext.h"
 #include "xg-message.h"
 #include "c-strstr.h"
-#include "read-catalog-abstract.h"
-#include "error.h"
+#include "read-catalog-special.h"
 #include "gettext.h"
 
 /* A convenience macro.  I don't like writing gettext() every time.  */
 #define _(str) gettext (str)
 
 /* The Ruby syntax is defined in
+   https://en.wikibooks.org/wiki/Ruby_Programming/Syntax
    https://ruby-doc.org/core-2.7.1/doc/syntax_rdoc.html
    https://ruby-doc.org/core-2.7.1/doc/syntax/comments_rdoc.html
    https://ruby-doc.org/core-2.7.1/doc/syntax/literals_rdoc.html
@@ -74,6 +75,12 @@ init_flag_table_ruby (void)
 
 
 /* ========================= Extracting strings.  ========================== */
+
+static bool
+is_not_header (const message_ty *mp)
+{
+  return !is_header (mp);
+}
 
 void
 extract_ruby (const char *found_in_dir, const char *real_filename,
@@ -127,7 +134,7 @@ extract_ruby (const char *found_in_dir, const char *real_filename,
           free (command);
         }
 
-      child = create_pipe_in (progname, progname, argv, found_in_dir,
+      child = create_pipe_in (progname, progname, argv, NULL, found_in_dir,
                               DEV_NULL, false, true, true, fd);
 
       fp = fdopen (fd[0], "r");
@@ -191,9 +198,9 @@ extract_ruby (const char *found_in_dir, const char *real_filename,
 
                           t += strlen ("xgettext:");
 
-                          po_parse_comment_special (t, &tmp_fuzzy, tmp_format,
-                                                    &tmp_range, &tmp_wrap,
-                                                    tmp_syntax_check);
+                          parse_comment_special (t, &tmp_fuzzy, tmp_format,
+                                                 &tmp_range, &tmp_wrap,
+                                                 tmp_syntax_check);
 
                           interesting = false;
                           for (i = 0; i < NFORMATS; i++)
@@ -247,4 +254,11 @@ extract_ruby (const char *found_in_dir, const char *real_filename,
   msgdomain_list_free (mdlp2);
 
   free (dummy_filename);
+
+  if (xgettext_omit_header)
+    {
+      /* Remove the header entry.  */
+      if (mdlp->nitems > 0)
+        message_list_remove_if_not (mdlp->item[0]->messages, is_not_header);
+    }
 }
