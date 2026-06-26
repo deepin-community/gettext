@@ -2,7 +2,7 @@ The following packages should be installed before GNU gettext is installed
 (runtime dependencies that are also build dependencies):
 
 * GNU libiconv
-  + Not needed on systems with glibc, on macOS, and NetBSD.
+  + Not needed on systems with glibc and on NetBSD.
     But highly recommended on all other systems.
     Needed for character set conversion of PO files from/to Unicode
     and for the iconv_ostream class of libtextstyle.
@@ -16,6 +16,8 @@ The following packages should be installed before GNU gettext is installed
     - Other: https://repology.org/project/libiconv/versions
   + If it is installed in a nonstandard directory, pass the option
     --with-libiconv-prefix=DIR to 'configure'.
+  + On mingw, a slim alternative is the 'win-iconv' package version 0.0.8
+    from https://github.com/win-iconv/win-iconv .
 
 * GNU ncurses (preferred)
   or libtermcap (discouraged) or a curses library (legacy).
@@ -31,7 +33,7 @@ The following packages should be installed before GNU gettext is installed
     - On Red Hat distributions: ncurses-devel.
     - Other: https://repology.org/project/ncurses/versions
   + If it is installed in a nonstandard directory, pass the option
-    --with-ncurses-prefix=DIR or --with-libtermcap-prefix to 'configure'.
+    --with-libncurses-prefix=DIR or --with-libtermcap-prefix to 'configure'.
 
 * libxml2
   + Recommended.
@@ -52,7 +54,7 @@ The following packages should be installed before GNU gettext is installed
     --with-libxml2-prefix=DIR to 'configure'.
 
 * libacl
-  + Recommended.
+  + Recommended on Linux systems.
     Needed so that the creation of backup files respects the access control
     lists (ACLs) set on the original files.
   + Homepage:
@@ -63,6 +65,19 @@ The following packages should be installed before GNU gettext is installed
     - On Debian and Debian-based systems: acl, libacl1-dev,
     - On Red Hat distributions: acl, libacl-devel.
     - Other: https://repology.org/project/acl/versions
+
+  * libattr
+    + Recommended on Linux systems.
+      Needed so that the creation of backup files respects the access control
+      lists (ACLs) set on the original files, with fewer system calls.
+    + Homepage:
+      https://savannah.nongnu.org/projects/attr/
+    + Download:
+      https://download.savannah.nongnu.org/releases/attr/
+    + Pre-built package name:
+      - On Debian and Debian-based systems: libattr1-dev,
+      - On Red Hat distributions: libattr-devel.
+      - Other: https://repology.org/project/attr/versions
 
 * A Java runtime and compiler (e.g. OpenJDK, AdoptOpenJDK, or kaffe).
   + Recommended.
@@ -81,18 +96,28 @@ The following packages should be installed before GNU gettext is installed
       java-11-openjdk or java-1.8.0-openjdk or java-1.7.0-openjdk.
     - Other: https://repology.org/project/openjdk/versions
 
-* A C# runtime and compiler (e.g. mono).
+* A C# runtime and compiler (e.g. mono or dotnet).
   + Recommended.
     Needed for building GNU.Gettext.dll. Also needed for 'msgfmt' and
     'msgunfmt', so that they can handle C# resources and assemblies.
-  + Homepage:
-    http://www.mono-project.com/
-  + Download:
-    http://www.mono-project.com/download/
-  + Pre-built package name:
-    - On Debian and Debian-based systems: mono-runtime,
-    - On Red Hat distributions: mono.
-    - Other: https://repology.org/project/mono/versions
+  o Mono:
+    + Homepage:
+      https://www.mono-project.com/
+    + Download:
+      https://www.mono-project.com/download/
+    + Pre-built package name:
+      - On Debian and Debian-based systems: mono-runtime,
+      - On Red Hat distributions: mono.
+      - Other: https://repology.org/project/mono/versions
+  o dotnet:
+    + Homepage:
+      https://dotnet.microsoft.com/
+    + Download:
+      https://dotnet.microsoft.com/en-us/download
+    + Pre-built package name:
+      - On Debian and Debian-based systems: dotnet7 or dotnet8,
+      - On Red Hat distributions: dotnet7.0 or dotnet8.0.
+      - Other: https://repology.org/project/dotnet/versions
   + If more than one C# is installed, pass the option --enable-csharp=IMPL
     to 'configure', to disambiguate.
 
@@ -190,7 +215,13 @@ The following packages should be installed before GNU gettext is installed
 The following packages should be installed when GNU gettext is installed
 (runtime dependencies, but not build dependencies):
 
-None.
+* The Gnulib localizations.
+  + Recommended.
+    Needed for localization of some of the programs to the user's language.
+  + Documentation:
+    https://www.gnu.org/software/gnulib/manual/html_node/Localization.html
+  + Download:
+    https://ftp.gnu.org/gnu/gnulib/gnulib-l10n-*
 
 
 The following should be installed when GNU gettext is built, but are not

@@ -56,6 +56,7 @@ is_device (int fd)
 #endif
 
 /* In this file, we use only system functions, no overrides from gnulib.  */
+#undef abort
 #undef atoi
 #undef close
 #undef fcntl
@@ -74,6 +75,12 @@ is_device (int fd)
 #undef strlen
 #undef strstr
 #undef write
+
+/* macOS 12's "warning: 'sprintf' is deprecated" is pointless,
+   as sprintf is used safely here.  */
+#if defined __APPLE__ && defined __MACH__ && _GL_GNUC_PREREQ (4, 2)
+# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 #include "qemu.h"
 

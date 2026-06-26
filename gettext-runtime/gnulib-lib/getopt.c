@@ -42,7 +42,7 @@
 # define funlockfile(fp) _IO_funlockfile (fp)
 #else
 # include "gettext.h"
-# define _(msgid) gettext (msgid)
+# define _(msgid) dgettext ("gnulib", msgid)
 /* When used standalone, flockfile and funlockfile might not be
    available.  */
 # if (!defined _POSIX_THREAD_SAFE_FUNCTIONS \
@@ -723,7 +723,7 @@ _getopt_internal (int argc, char **argv, const char *optstring,
   return result;
 }
 
-/* glibc gets a LSB-compliant getopt and a POSIX-complaint __posix_getopt.
+/* glibc gets a LSB-compliant getopt and a POSIX-compliant __posix_getopt.
    Standalone applications just get a POSIX-compliant getopt.
    POSIX and LSB both require these functions to take 'char *const *argv'
    even though this is incorrect (because of the permutation).  */
@@ -732,7 +732,7 @@ _getopt_internal (int argc, char **argv, const char *optstring,
   NAME (int argc, char *const *argv, const char *optstring)	\
   {								\
     return _getopt_internal (argc, (char **)argv, optstring,	\
-			     0, 0, 0, POSIXLY_CORRECT);		\
+			     NULL, NULL, 0, POSIXLY_CORRECT);	\
   }
 
 #ifdef _LIBC

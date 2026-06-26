@@ -1,5 +1,5 @@
 ## Makefile for the lib subdirectory of GNU libtextstyle.
-## Copyright (C) 2009-2023 Free Software Foundation, Inc.
+## Copyright (C) 2009-2024 Free Software Foundation, Inc.
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 ## Process this file with automake to produce Makefile.in.
 
-AUTOMAKE_OPTIONS = 1.13 gnits subdir-objects no-dependencies
+AUTOMAKE_OPTIONS = 1.13 gnits subdir-objects
 EXTRA_DIST =
 BUILT_SOURCES =
 MOSTLYCLEANFILES = core *.stackdump
@@ -36,9 +36,9 @@ nobase_nodist_include_HEADERS =
 
 noinst_HEADERS = notinline.h
 
+# Note that Automake's $(DEFAULT_INCLUDES) already contains
+# -I. -I$(srcdir) -I$(top_builddir).
 AM_CPPFLAGS = \
-  -I. -I$(srcdir) \
-  -I$(top_builddir) -I$(top_srcdir) \
   -Iglib \
   -DIN_LIBTEXTSTYLE
 
@@ -186,7 +186,7 @@ EXTRA_DIST           += libtextstyle.sym.in declared.sh
 libtextstyle.sym : $(srcdir)/libtextstyle.sym.in
 	cat $(srcdir)/libtextstyle.sym.in \
 	  | case "@host_os@" in \
-	      mingw*) cat ;; \
+	      mingw* | windows*) cat ;; \
 	      *) grep -v '^libtextstyle_isatty$$' ;; \
 	    esac \
 	  > $@-t
@@ -216,9 +216,6 @@ config.h: $(BUILT_SOURCES) libtextstyle.sym
 	  echo '#include "../config.h"'; \
 	  echo; \
 	  echo '#endif /* LIBTEXTSTYLE_CONFIG_H */'; \
-	  case "@host_os@" in \
-	    mingw*) echo '#define isatty libtextstyle_isatty' ;; \
-	  esac; \
 	} > config.h && \
 	if test -n "$(NAMESPACING)" && test -n "$(HAVE_GLOBAL_SYMBOL_PIPE)"; then \
 	  { \
@@ -286,7 +283,7 @@ AM_CPPFLAGS += -DDEPENDS_ON_LIBICONV=1
 # Libtool's library version information for libtextstyle.
 # See the libtool documentation, section "Library interface versions".
 LTV_CURRENT=2
-LTV_REVISION=1
+LTV_REVISION=3
 LTV_AGE=2
 
 # How to build libtextstyle.la.

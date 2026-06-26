@@ -119,7 +119,7 @@ main (int argc, char *argv[])
       {
       case '1':
         /* C or POSIX locale.  */
-        return 0;
+        return test_exit_status;
 
       case '2':
         /* Locale encoding is UTF-8.  */
@@ -133,7 +133,7 @@ main (int argc, char *argv[])
           ASSERT (strcmp (result, "\302\267foo") == 0);
           free (result);
         }
-        return 0;
+        return test_exit_status;
 
       case '3':
         /* Locale encoding is GB18030.  */
@@ -144,14 +144,14 @@ main (int argc, char *argv[])
           free (result);
         }
         #endif
-        #if !(defined __FreeBSD__ || defined __DragonFly__)
+        #if !(defined __FreeBSD__ || defined __DragonFly__ || defined __illumos__)
         { /* U+3000 IDEOGRAPHIC SPACE */
           char *result = trim ("\241\241\241\244foo\241\241");
           ASSERT (strcmp (result, "\241\244foo") == 0);
           free (result);
         }
         #endif
-        return 0;
+        return test_exit_status;
       }
 
   return 1;

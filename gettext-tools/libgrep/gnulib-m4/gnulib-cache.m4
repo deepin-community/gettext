@@ -27,7 +27,8 @@
 
 
 # Specification in the form of a command-line invocation:
-# gnulib-tool --import --local-dir=gnulib-local \
+# gnulib-tool --import \
+#  --local-dir=gnulib-local \
 #  --lib=libgrep \
 #  --source-base=libgrep \
 #  --m4-base=libgrep/gnulib-m4 \
@@ -65,7 +66,7 @@ gl_MODULES([
   mbrlen
   regex
 ])
-gl_AVOID([ alloca-opt extensions gettext-h include_next localcharset malloc-posix mbrtowc mbsinit multiarch setlocale-null ssize_t streq verify windows-mutex windows-once windows-recmutex windows-rwlock])
+gl_AVOID([alloca-opt extensions gettext-h include_next localcharset malloc-posix mbrtowc mbsinit multiarch setlocale-null ssize_t streq verify windows-mutex windows-once windows-recmutex windows-rwlock])
 gl_SOURCE_BASE([libgrep])
 gl_M4_BASE([libgrep/gnulib-m4])
 gl_PO_BASE([])

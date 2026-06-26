@@ -17,14 +17,14 @@
 
 /* Written by Paul Eggert <eggert@twinsun.com> */
 
+#include <config.h>
+
 /* Without this pragma, gcc 4.7.0 20111124 mistakenly suggests that
    the quoting_options_from_style function might be candidate for
    attribute 'pure'  */
-#if (__GNUC__ == 4 && 6 <= __GNUC_MINOR__) || 4 < __GNUC__
+#if _GL_GNUC_PREREQ (4, 6)
 # pragma GCC diagnostic ignored "-Wsuggest-attribute=pure"
 #endif
-
-#include <config.h>
 
 #include "quotearg.h"
 #include "quote.h"
@@ -45,7 +45,7 @@
 #include <wchar.h>
 
 #include "gettext.h"
-#define _(msgid) gettext (msgid)
+#define _(msgid) dgettext ("gnulib", msgid)
 #define N_(msgid) msgid
 
 #ifndef SIZE_MAX
@@ -86,7 +86,7 @@ char const *const quoting_style_args[] =
   "escape",
   "locale",
   "clocale",
-  0
+  NULL
 };
 
 /* Correspondences to quoting style names.  */
@@ -255,12 +255,11 @@ quotearg_buffer_restyled (char *buffer, size_t buffersize,
   size_t i;
   size_t len = 0;
   size_t orig_buffersize = 0;
-  char const *quote_string = 0;
+  char const *quote_string = NULL;
   size_t quote_string_len = 0;
   bool backslash_escapes = false;
   bool unibyte_locale = MB_CUR_MAX == 1;
   bool elide_outer_quotes = (flags & QA_ELIDE_OUTER_QUOTES) != 0;
-  bool pending_shell_escape_end = false;
   bool encountered_single_quote = false;
   bool all_c_and_shell_quote_compat = true;
 
@@ -303,7 +302,8 @@ quotearg_buffer_restyled (char *buffer, size_t buffersize,
       } \
     while (0)
 
- process_input:
+ process_input: ;
+  bool pending_shell_escape_end = false;
 
   switch (quoting_style)
     {
@@ -811,7 +811,7 @@ quotearg_alloc_mem (char const *arg, size_t argsize, size_t *size,
   int e = errno;
   /* Elide embedded null bytes if we can't return a size.  */
   int flags = p->flags | (size ? 0 : QA_ELIDE_NULL_BYTES);
-  size_t bufsize = quotearg_buffer_restyled (0, 0, arg, argsize, p->style,
+  size_t bufsize = quotearg_buffer_restyled (NULL, 0, arg, argsize, p->style,
                                              flags, p->quote_these_too,
                                              p->left_quote,
                                              p->right_quote) + 1;

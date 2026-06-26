@@ -1,5 +1,5 @@
 /* Message list concatenation and duplicate handling.
-   Copyright (C) 2001-2003, 2005-2008, 2012, 2015, 2019-2021, 2023 Free Software Foundation, Inc.
+   Copyright (C) 2001-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
    This program is free software: you can redistribute it and/or modify
@@ -30,16 +30,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "error.h"
+#include <error.h>
 #include "xerror.h"
 #include "xvasprintf.h"
 #include "message.h"
-#include "read-catalog.h"
+#include "read-catalog-file.h"
 #include "po-charset.h"
 #include "msgl-ascii.h"
 #include "msgl-ofn.h"
 #include "msgl-equal.h"
 #include "msgl-iconv.h"
+#include "xerror-handler.h"
 #include "xalloc.h"
 #include "xmalloca.h"
 #include "c-strstr.h"
@@ -532,7 +533,7 @@ Converting the output to %s.\n\
             if (!(to_code == NULL && canon_charsets[n][k] == canon_to_code))
               if (iconv_message_list (mdlp->item[k]->messages,
                                       canon_charsets[n][k], canon_to_code,
-                                      files[n]))
+                                      files[n], textmode_xerror_handler))
                 {
                   multiline_error (xstrdup (""),
                                    xasprintf (_("\

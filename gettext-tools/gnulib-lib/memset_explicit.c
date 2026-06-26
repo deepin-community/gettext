@@ -16,11 +16,7 @@
 
 #include <config.h>
 
-/* memset_s need this define */
-#if HAVE_MEMSET_S
-# define __STDC_WANT_LIB_EXT1__ 1
-#endif
-
+/* Specification.  */
 #include <string.h>
 
 /* Set S's bytes to C, where S has LEN bytes.  The compiler will not
@@ -31,7 +27,10 @@ memset_explicit (void *s, int c, size_t len)
 #if HAVE_EXPLICIT_MEMSET
   return explicit_memset (s, c, len);
 #elif HAVE_MEMSET_S
-  (void) memset_s (s, len, c, len);
+# if !HAVE_MEMSET_S_SUPPORTS_ZERO
+  if (len > 0)
+# endif
+    (void) memset_s (s, len, c, len);
   return s;
 #elif defined __GNUC__ && !defined __clang__
   memset (s, c, len);

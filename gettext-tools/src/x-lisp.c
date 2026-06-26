@@ -1,5 +1,5 @@
 /* xgettext Lisp backend.
-   Copyright (C) 2001-2003, 2005-2009, 2018-2023 Free Software Foundation, Inc.
+   Copyright (C) 2001-2024 Free Software Foundation, Inc.
 
    This file was written by Bruno Haible <haible@clisp.cons.org>, 2001.
 
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <error.h>
 #include "attribute.h"
 #include "message.h"
 #include "xgettext.h"
@@ -38,8 +39,7 @@
 #include "xg-arglist-callshape.h"
 #include "xg-arglist-parser.h"
 #include "xg-message.h"
-#include "error.h"
-#include "error-progname.h"
+#include "if-error.h"
 #include "xalloc.h"
 #include "mem-hash-map.h"
 #include "gettext.h"
@@ -941,14 +941,12 @@ static int nesting_depth;
 
 /* Read the next object.  */
 static void
-read_object (struct object *op, flag_context_ty outer_context)
+read_object (struct object *op, flag_region_ty *outer_region)
 {
   if (nesting_depth > MAX_NESTING_DEPTH)
-    {
-      error_with_progname = false;
-      error (EXIT_FAILURE, 0, _("%s:%d: error: too deeply nested objects"),
-             logical_file_name, line_number);
-    }
+    if_error (IF_SEVERITY_FATAL_ERROR,
+              logical_file_name, line_number, (size_t)(-1), false,
+              _("too deeply nested objects"));
   for (;;)
     {
       struct char_syntax curr;
@@ -1031,18 +1029,18 @@ read_object (struct object *op, flag_context_ty outer_context)
                 for (;; arg++)
                   {
                     struct object inner;
-                    flag_context_ty inner_context;
+                    flag_region_ty *inner_region;
 
                     if (arg == 0)
-                      inner_context = null_context;
+                      inner_region = null_context_region ();
                     else
-                      inner_context =
-                        inherited_context (outer_context,
+                      inner_region =
+                        inheriting_region (outer_region,
                                            flag_context_list_iterator_advance (
                                              &context_iter));
 
                     ++nesting_depth;
-                    read_object (&inner, inner_context);
+                    read_object (&inner, inner_region);
                     nesting_depth--;
 
                     /* Recognize end of list.  */
@@ -1053,6 +1051,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                         last_non_comment_line = line_number;
                         if (argparser != NULL)
                           arglist_parser_done (argparser, arg);
+                        unref_region (inner_region);
                         return;
                       }
 
@@ -1113,13 +1112,14 @@ read_object (struct object *op, flag_context_ty outer_context)
                                                          inner.line_number_at_start);
                             free (s);
                             arglist_parser_remember (argparser, arg, ms,
-                                                     inner_context,
+                                                     inner_region,
                                                      logical_file_name,
                                                      inner.line_number_at_start,
                                                      savable_comment, false);
                           }
                       }
 
+                    unref_region (inner_region);
                     free_object (&inner);
                   }
 
@@ -1153,7 +1153,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                 struct object inner;
 
                 ++nesting_depth;
-                read_object (&inner, null_context);
+                read_object (&inner, null_context_region ());
                 nesting_depth--;
 
                 /* Dots and EOF are not allowed here.  But be tolerant.  */
@@ -1221,7 +1221,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                     pos.file_name = logical_file_name;
                     pos.line_number = op->line_number_at_start;
                     remember_a_message (mlp, NULL, string_of_object (op), false,
-                                        false, null_context, &pos,
+                                        false, null_context_region (), &pos,
                                         NULL, savable_comment, false);
                   }
                 last_non_comment_line = line_number;
@@ -1263,7 +1263,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                     {
                       struct object inner;
                       ++nesting_depth;
-                      read_object (&inner, null_context);
+                      read_object (&inner, null_context_region ());
                       nesting_depth--;
                       /* Dots and EOF are not allowed here.
                          But be tolerant.  */
@@ -1383,7 +1383,7 @@ read_object (struct object *op, flag_context_ty outer_context)
                     {
                       struct object inner;
                       ++nesting_depth;
-                      read_object (&inner, null_context);
+                      read_object (&inner, null_context_region ());
                       nesting_depth--;
                       /* Dots and EOF are not allowed here.
                          But be tolerant.  */
@@ -1440,7 +1440,7 @@ extract_lisp (FILE *f,
     {
       struct object toplevel_object;
 
-      read_object (&toplevel_object, null_context);
+      read_object (&toplevel_object, null_context_region ());
 
       if (toplevel_object.type == t_eof)
         break;

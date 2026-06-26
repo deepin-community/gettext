@@ -13,8 +13,8 @@ gettext: hardening-no-fortify-functions [usr/lib/*/preloadable_libintl.so]
 #
 # Not for use by other packages.
 #
-gettext: package-name-doesnt-match-sonames libgettextlib-0.22.5 libgettextsrc-0.22.5 libgnuintl8 libtextstyle0
-gettext: no-symbols-control-file usr/lib/*/libgettextsrc-0.22.5.so
+gettext: package-name-doesnt-match-sonames libgettextlib-0.23.1 libgettextsrc-0.23.1 libgnuintl8 libtextstyle0
+gettext: no-symbols-control-file usr/lib/*/libgettextsrc-0.23.1.so
 #
 # These files are not really documentation, and must be in their current locations
 # for some programs shipped in this package to work correctly.

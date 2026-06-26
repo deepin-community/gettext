@@ -158,7 +158,7 @@ WaitForMultipleObjects (DWORD nCount, const HANDLE *pHandles, BOOL bWaitAll,
 #include "wait-process.h"
 #include "gettext.h"
 
-#define _(str) gettext (str)
+#define _(msgid) dgettext ("gnulib", msgid)
 
 #include "pipe-filter-aux.h"
 
@@ -269,7 +269,7 @@ pipe_filter_ii_execute (const char *progname,
 #endif
 
   /* Open a bidirectional pipe to a subprocess.  */
-  child = create_pipe_bidi (progname, prog_path, prog_argv,
+  child = create_pipe_bidi (progname, prog_path, prog_argv, NULL,
                             NULL, null_stderr, true, exit_on_error,
                             fd);
   if (child == -1)

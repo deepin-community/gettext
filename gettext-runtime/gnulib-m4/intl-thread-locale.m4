@@ -1,8 +1,10 @@
-# intl-thread-locale.m4 serial 12
+# intl-thread-locale.m4
+# serial 12
 dnl Copyright (C) 2015-2024 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
+dnl This file is offered as-is, without any warranty.
 dnl
 dnl This file can be used in projects which are not available under
 dnl the GNU General Public License or the GNU Lesser General Public

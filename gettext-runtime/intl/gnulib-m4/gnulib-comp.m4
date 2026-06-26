@@ -47,13 +47,18 @@ AC_DEFUN([gl_EARLY],
   # Code from module assert-h:
   # Code from module attribute:
   # Code from module bison:
+  # Code from module bool:
   # Code from module c99:
-  # Code from module errno:
+  # Code from module errno-h:
   # Code from module extensions:
+  # This is actually already done in the pre-early phase.
+  # AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
+  # Code from module extensions-aix:
+  AC_REQUIRE([gl_USE_AIX_EXTENSIONS])
   # Code from module extern-inline:
   # Code from module filename:
   # Code from module flexmember:
-  # Code from module float:
+  # Code from module float-h:
   # Code from module fpieee:
   AC_REQUIRE([gl_FP_IEEE])
   # Code from module fpucw:
@@ -61,36 +66,43 @@ AC_DEFUN([gl_EARLY],
   # Code from module frexp-nolibm:
   # Code from module frexpl-nolibm:
   # Code from module gen-header:
+  # Code from module getcwd-lgpl:
   # Code from module gettext-runtime-intl-misc:
   # Code from module hard-locale:
   # Code from module havelib:
+  # Code from module iconv:
   # Code from module include_next:
-  # Code from module inttypes-incomplete:
+  # Code from module inttypes-h-incomplete:
   # Code from module isnand-nolibm:
   # Code from module isnanf-nolibm:
   # Code from module isnanl-nolibm:
-  # Code from module langinfo:
+  # Code from module langinfo-h:
   # Code from module lib-symbol-visibility:
   # Code from module limits-h:
   # Code from module localcharset:
-  # Code from module locale:
+  # Code from module locale-h:
   # Code from module localename:
   # Code from module localename-unsafe:
   # Code from module localename-unsafe-limited:
   # Code from module lock:
   # Code from module manywarnings:
-  # Code from module math:
+  # Code from module math-h:
   # Code from module mbrtowc:
   # Code from module mbsinit:
   # Code from module mbszero:
   # Code from module memchr:
+  # Code from module mixin/printf-posix:
   # Code from module multiarch:
   # Code from module nocrash:
+  # Code from module once:
   # Code from module printf-frexp:
   # Code from module printf-frexpl:
   # Code from module printf-safe:
-  # Code from module relocatable-lib-lgpl:
-  # Code from module search:
+  # Code from module pthread-h:
+  gl_ANYTHREADLIB_EARLY
+  # Code from module pthread-once:
+  # Code from module sched-h:
+  # Code from module search-h:
   # Code from module setlocale-null:
   # Code from module setlocale-null-unlocked:
   # Code from module signbit:
@@ -101,26 +113,28 @@ AC_DEFUN([gl_EARLY],
   # Code from module snippet/warn-on-use:
   # Code from module ssize_t:
   # Code from module std-gnu11:
-  # Code from module stdbool:
-  # Code from module stddef:
-  # Code from module stdint:
-  # Code from module stdio:
+  # Code from module stddef-h:
+  # Code from module stdint-h:
+  # Code from module stdio-h:
   gl_STDIO_H_EARLY
-  # Code from module stdlib:
+  # Code from module stdlib-h:
   # Code from module streq:
-  # Code from module string:
-  # Code from module sys_types:
+  # Code from module string-h:
+  # Code from module sys_types-h:
+  AC_REQUIRE([AC_USE_SYSTEM_EXTENSIONS])
   # Code from module thread-optim:
   # Code from module threadlib:
   gl_THREADLIB_EARLY
+  # Code from module time-h:
   # Code from module tsearch:
-  # Code from module unistd:
+  # Code from module unistd-h:
   # Code from module vasnprintf:
   # Code from module vasnprintf-posix:
   # Code from module vasnwprintf:
   # Code from module vasnwprintf-posix:
   # Code from module warnings:
-  # Code from module wchar:
+  # Code from module wchar-h:
+  # Code from module wgetcwd-lgpl:
   # Code from module windows-mutex:
   # Code from module windows-once:
   # Code from module windows-recmutex:
@@ -154,6 +168,7 @@ AC_DEFUN([gl_INIT],
   gl_CONDITIONAL_HEADER([assert.h])
   AC_PROG_MKDIR_P
   # See the comments in bison.m4.
+  gl_C_BOOL
   gl_HEADER_ERRNO_H
   gl_CONDITIONAL_HEADER([errno.h])
   AC_PROG_MKDIR_P
@@ -162,8 +177,11 @@ AC_DEFUN([gl_INIT],
   gl_FLOAT_H
   gl_CONDITIONAL_HEADER([float.h])
   AC_PROG_MKDIR_P
-  gl_CONDITIONAL([GL_COND_OBJ_FLOAT], [test $REPLACE_FLOAT_LDBL = 1])
+  gl_CONDITIONAL([GL_COND_OBJ_FLOAT],
+                 [test $REPLACE_FLOAT_LDBL = 1 || test $REPLACE_FLOAT_SNAN = 1])
   gl_CONDITIONAL([GL_COND_OBJ_ITOLD], [test $REPLACE_ITOLD = 1])
+  dnl Prerequisites of lib/float.c.
+  AC_REQUIRE([gl_BIGENDIAN])
   gl_FUNC_FREE
   gl_CONDITIONAL([GL_COND_OBJ_FREE], [test $REPLACE_FREE = 1])
   AM_COND_IF([GL_COND_OBJ_FREE], [
@@ -180,6 +198,9 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([frexpl])
   fi
   gl_MATH_MODULE_INDICATOR([frexpl])
+  gl_FUNC_GETCWD_LGPL
+  gl_CONDITIONAL([GL_COND_OBJ_GETCWD_LGPL], [test $REPLACE_GETCWD = 1])
+  gl_UNISTD_MODULE_INDICATOR([getcwd])
   dnl Make sure LOCALENAME_ENHANCE_LOCALE_FUNCS gets initialized to 0 before,
   dnl not after, it has been set to 1 by gt_INTL_THREAD_LOCALE_NAME.
   AC_REQUIRE([gl_LOCALE_H_DEFAULTS])
@@ -191,6 +212,9 @@ AC_DEFUN([gl_INIT],
   LIB_HARD_LOCALE="$HARD_LOCALE_LIB"
   AC_SUBST([LIB_HARD_LOCALE])
   AC_DEFUN([gl_HAVE_MODULE_HAVELIB])
+  AM_ICONV
+  m4_ifdef([gl_ICONV_MODULE_INDICATOR],
+    [gl_ICONV_MODULE_INDICATOR([iconv])])
   gl_INTTYPES_INCOMPLETE
   gl_INTTYPES_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
@@ -264,14 +288,22 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_MEMCHR
   ])
   gl_STRING_MODULE_INDICATOR([memchr])
+  # Conditionally invoke gl_PREREQ_VASNPRINTF_WITH_POSIX_EXTRAS.
   gl_MULTIARCH
+  gl_ONCE
   gl_FUNC_PRINTF_FREXP
   gl_FUNC_PRINTF_FREXPL
   m4_divert_text([INIT_PREPARE], [gl_printf_safe=yes])
-  gl_RELOCATABLE_LIBRARY
-  if test $RELOCATABLE = yes; then
-    AC_LIBOBJ([relocatable])
-  fi
+  gl_PTHREAD_H
+  gl_PTHREAD_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
+  gl_PTHREAD_ONCE
+  gl_CONDITIONAL([GL_COND_OBJ_PTHREAD_ONCE],
+                 [test $HAVE_PTHREAD_ONCE = 0 || test $REPLACE_PTHREAD_ONCE = 1])
+  gl_PTHREAD_MODULE_INDICATOR([pthread-once])
+  gl_SCHED_H
+  gl_SCHED_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
   gl_SEARCH_H
   gl_SEARCH_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
@@ -287,7 +319,6 @@ AC_DEFUN([gl_INIT],
   gl_MATH_MODULE_INDICATOR([signbit])
   gl_SIZE_MAX
   gt_TYPE_SSIZE_T
-  gl_C_BOOL
   gl_STDDEF_H
   gl_STDDEF_H_REQUIRE_DEFAULTS
   gl_CONDITIONAL_HEADER([stddef.h])
@@ -336,6 +367,9 @@ AC_DEFUN([gl_INIT],
   AC_PROG_MKDIR_P
   AC_CHECK_HEADERS([sys/single_threaded.h])
   AC_REQUIRE([gl_THREADLIB])
+  gl_TIME_H
+  gl_TIME_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
   gl_FUNC_TSEARCH
   gl_CONDITIONAL([GL_COND_OBJ_TSEARCH],
                  [test $HAVE_TSEARCH = 0 || test $HAVE_TWALK = 0 || test $REPLACE_TSEARCH = 1 || test $REPLACE_TWALK = 1])
@@ -355,6 +389,7 @@ AC_DEFUN([gl_INIT],
   gl_WCHAR_H
   gl_WCHAR_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
+  gl_WCHAR_MODULE_INDICATOR([wgetcwd])
   AC_REQUIRE([AC_CANONICAL_HOST])
   gl_CONDITIONAL([GL_COND_OBJ_WINDOWS_MUTEX],
                  [case "$host_os" in mingw* | windows*) true;; *) false;; esac])
@@ -543,7 +578,6 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
   build-aux/config.rpath
-  doc/relocatable.texi
   lib/_Noreturn.h
   lib/alloca.in.h
   lib/arg-nonnull.h
@@ -562,8 +596,11 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/free.c
   lib/frexp.c
   lib/frexpl.c
+  lib/getcwd-lgpl.c
   lib/glthread/lock.c
   lib/glthread/lock.h
+  lib/glthread/once.c
+  lib/glthread/once.h
   lib/glthread/threadlib.c
   lib/hard-locale.c
   lib/hard-locale.h
@@ -607,9 +644,9 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/printf-frexpl.h
   lib/printf-parse.c
   lib/printf-parse.h
-  lib/relocatable.c
-  lib/relocatable.h
-  lib/relocatable.valgrind
+  lib/pthread-once.c
+  lib/pthread.in.h
+  lib/sched.in.h
   lib/search.in.h
   lib/setlocale-lock.c
   lib/setlocale_null-unlocked.c
@@ -624,12 +661,14 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/stdio-read.c
   lib/stdio-write.c
   lib/stdio.in.h
+  lib/stdlib.c
   lib/stdlib.in.h
   lib/streq.h
   lib/string.in.h
   lib/struniq.h
   lib/sys_types.in.h
   lib/thread-optim.h
+  lib/time.in.h
   lib/tsearch.c
   lib/unistd.c
   lib/unistd.in.h
@@ -640,6 +679,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/verify.h
   lib/warn-on-use.h
   lib/wchar.in.h
+  lib/wgetcwd-lgpl.c
   lib/windows-initguard.h
   lib/windows-mutex.c
   lib/windows-mutex.h
@@ -668,6 +708,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/exponentd.m4
   m4/exponentf.m4
   m4/exponentl.m4
+  m4/extensions-aix.m4
   m4/extensions.m4
   m4/extern-inline.m4
   m4/flexmember.m4
@@ -676,8 +717,10 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/free.m4
   m4/frexp.m4
   m4/frexpl.m4
+  m4/getcwd.m4
   m4/gnulib-common.m4
   m4/host-cpu-c-abi.m4
+  m4/iconv.m4
   m4/include_next.m4
   m4/intl-thread-locale.m4
   m4/intlmacosx.m4
@@ -695,7 +738,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/lib-prefix.m4
   m4/limits-h.m4
   m4/localcharset.m4
-  m4/locale-fr.m4
+  m4/locale-en.m4
   m4/locale-ja.m4
   m4/locale-zh.m4
   m4/locale_h.m4
@@ -712,13 +755,18 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/multiarch.m4
   m4/musl.m4
   m4/nocrash.m4
+  m4/off64_t.m4
   m4/off_t.m4
+  m4/once.m4
   m4/pid_t.m4
   m4/printf-frexp.m4
   m4/printf-frexpl.m4
   m4/printf.m4
+  m4/pthread-once.m4
+  m4/pthread-spin.m4
+  m4/pthread_h.m4
   m4/pthread_rwlock_rdlock.m4
-  m4/relocatable-lib.m4
+  m4/sched_h.m4
   m4/search_h.m4
   m4/setlocale_null.m4
   m4/signbit.m4
@@ -731,8 +779,10 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/stdio_h.m4
   m4/stdlib_h.m4
   m4/string_h.m4
+  m4/sys_cdefs_h.m4
   m4/sys_types_h.m4
   m4/threadlib.m4
+  m4/time_h.m4
   m4/tsearch.m4
   m4/unistd_h.m4
   m4/vasnprintf-posix.m4
@@ -742,7 +792,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/warn-on-use.m4
   m4/warnings.m4
   m4/wchar_h.m4
-  m4/wchar_t.m4
   m4/wint_t.m4
   m4/wmemcpy.m4
   m4/wmemset.m4

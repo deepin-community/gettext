@@ -22,7 +22,7 @@ endif
 
 # On emulated m68k and sh4 targets, OpenMP can cause lockups,
 # we therefore disable it for the time being.
-ifneq (,$(findstring $(DEB_HOST_ARCH), m68k sh4 sw64))
+ifneq (,$(findstring $(DEB_HOST_ARCH), m68k sh4))
   CONFIGURE_OPTIONS += --disable-openmp
 else
   CONFIGURE_OPTIONS += --enable-openmp

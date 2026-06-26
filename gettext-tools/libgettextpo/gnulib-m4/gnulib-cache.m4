@@ -27,7 +27,8 @@
 
 
 # Specification in the form of a command-line invocation:
-# gnulib-tool --import --local-dir=gnulib-local \
+# gnulib-tool --import \
+#  --local-dir=gnulib-local \
 #  --lib=libgnu \
 #  --source-base=libgettextpo \
 #  --m4-base=libgettextpo/gnulib-m4 \
@@ -41,12 +42,12 @@
 #  --avoid=progname \
 #  attribute \
 #  basename-lgpl \
+#  bool \
 #  c-ctype \
 #  c-strcase \
 #  c-strstr \
 #  close \
 #  error \
-#  error-progname \
 #  fdopen \
 #  filename \
 #  fopen \
@@ -62,17 +63,19 @@
 #  markup \
 #  mem-hash-map \
 #  minmax \
+#  mixin/printf-posix \
+#  once \
 #  open \
 #  realloc-posix \
 #  relocatable-lib \
 #  sigpipe \
-#  stdbool \
-#  stdio \
-#  stdlib \
+#  stdio-h \
+#  stdlib-h \
 #  stpcpy \
 #  stpncpy \
 #  strchrnul \
 #  strerror \
+#  strerror_r-posix \
 #  string-desc \
 #  unictype/ctype-space \
 #  unilbrk/ulc-width-linebreaks \
@@ -85,8 +88,8 @@
 #  vasprintf \
 #  xalloc \
 #  xconcat-filename \
-#  xerror \
 #  xmalloca \
+#  xstrerror \
 #  xstriconv \
 #  xvasprintf
 
@@ -95,12 +98,12 @@ gl_LOCAL_DIR([../gnulib-local])
 gl_MODULES([
   attribute
   basename-lgpl
+  bool
   c-ctype
   c-strcase
   c-strstr
   close
   error
-  error-progname
   fdopen
   filename
   fopen
@@ -116,17 +119,19 @@ gl_MODULES([
   markup
   mem-hash-map
   minmax
+  mixin/printf-posix
+  once
   open
   realloc-posix
   relocatable-lib
   sigpipe
-  stdbool
-  stdio
-  stdlib
+  stdio-h
+  stdlib-h
   stpcpy
   stpncpy
   strchrnul
   strerror
+  strerror_r-posix
   string-desc
   unictype/ctype-space
   unilbrk/ulc-width-linebreaks
@@ -139,12 +144,12 @@ gl_MODULES([
   vasprintf
   xalloc
   xconcat-filename
-  xerror
   xmalloca
+  xstrerror
   xstriconv
   xvasprintf
 ])
-gl_AVOID([ progname])
+gl_AVOID([progname])
 gl_SOURCE_BASE([libgettextpo])
 gl_M4_BASE([libgettextpo/gnulib-m4])
 gl_PO_BASE([])

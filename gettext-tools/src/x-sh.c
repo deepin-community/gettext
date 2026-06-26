@@ -1,5 +1,5 @@
 /* xgettext sh backend.
-   Copyright (C) 2003, 2005-2009, 2014, 2018-2023 Free Software Foundation, Inc.
+   Copyright (C) 2003-2024 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software: you can redistribute it and/or modify
@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <error.h>
 #include "attribute.h"
 #include "message.h"
 #include "xgettext.h"
@@ -38,8 +39,7 @@
 #include "xg-arglist-callshape.h"
 #include "xg-arglist-parser.h"
 #include "xg-message.h"
-#include "error.h"
-#include "error-progname.h"
+#include "if-error.h"
 #include "xalloc.h"
 #include "mem-hash-map.h"
 #include "../../gettext-runtime/src/escapes.h"
@@ -743,7 +743,7 @@ static int nesting_depth;
 
 /* Forward declaration of local functions.  */
 static enum word_type read_command_list (int looking_for,
-                                         flag_context_ty outer_context);
+                                         flag_region_ty *outer_region);
 
 
 
@@ -751,7 +751,7 @@ static enum word_type read_command_list (int looking_for,
    'looking_for' denotes a parse terminator, either CLOSING_BACKQUOTE, ')'
    or '\0'.  */
 static void
-read_word (struct word *wp, int looking_for, flag_context_ty context)
+read_word (struct word *wp, int looking_for, flag_region_ty *region)
 {
   int c;
   bool all_unquoted_digits;
@@ -972,7 +972,7 @@ read_word (struct word *wp, int looking_for, flag_context_ty context)
                   /* Command substitution (Bash syntax).  */
                   phase2_ungetc (c3);
                   ++nesting_depth;
-                  read_command_list (')', context);
+                  read_command_list (')', region);
                   nesting_depth--;
                 }
 
@@ -1143,14 +1143,13 @@ read_word (struct word *wp, int looking_for, flag_context_ty context)
                       string.chars[string.charcount++] = (unsigned char) c;
                     }
                   remember_a_message (mlp, NULL, string_of_token (&string),
-                                      false, false, context, &pos,
+                                      false, false, region, &pos,
                                       NULL, savable_comment, false);
                   free_token (&string);
 
-                  error_with_progname = false;
-                  error (0, 0, _("%s:%lu: warning: the syntax $\"...\" is deprecated due to security reasons; use eval_gettext instead"),
-                         pos.file_name, (unsigned long) pos.line_number);
-                  error_with_progname = true;
+                  if_error (IF_SEVERITY_WARNING,
+                            pos.file_name, pos.line_number, (size_t)(-1), false,
+                            _("the syntax $\"...\" is deprecated due to security reasons; use eval_gettext instead"));
 
                   /* The result at runtime is not constant. Therefore we
                      change wp->type.  */
@@ -1203,7 +1202,7 @@ read_word (struct word *wp, int looking_for, flag_context_ty context)
           saw_opening_backquote ();
 
           ++nesting_depth;
-          read_command_list (CLOSING_BACKQUOTE, context);
+          read_command_list (CLOSING_BACKQUOTE, region);
           nesting_depth--;
 
           wp->type = t_other;
@@ -1225,7 +1224,7 @@ read_word (struct word *wp, int looking_for, flag_context_ty context)
             {
               /* Process substitution (Bash syntax).  */
               ++nesting_depth;
-              read_command_list (')', context);
+              read_command_list (')', region);
               nesting_depth--;
 
               wp->type = t_other;
@@ -1262,7 +1261,7 @@ read_word (struct word *wp, int looking_for, flag_context_ty context)
    or '\0'.
    Returns the type of the word that terminated the command.  */
 static enum word_type
-read_command (int looking_for, flag_context_ty outer_context)
+read_command (int looking_for, flag_region_ty *outer_region)
 {
   /* Read the words that make up the command.
      Here we completely ignore field splitting at whitespace and wildcard
@@ -1285,17 +1284,17 @@ read_command (int looking_for, flag_context_ty outer_context)
   for (;;)
     {
       struct word inner;
-      flag_context_ty inner_context;
+      flag_region_ty *inner_region;
 
       if (arg == 0)
-        inner_context = null_context;
+        inner_region = null_context_region ();
       else
-        inner_context =
-          inherited_context (outer_context,
+        inner_region =
+          inheriting_region (outer_region,
                              flag_context_list_iterator_advance (
                                &context_iter));
 
-      read_word (&inner, looking_for, inner_context);
+      read_word (&inner, looking_for, inner_region);
 
       /* Recognize end of command.  */
       if (inner.type == t_separator
@@ -1304,6 +1303,7 @@ read_command (int looking_for, flag_context_ty outer_context)
         {
           if (argparser != NULL)
             arglist_parser_done (argparser, arg);
+          unref_region (inner_region);
           return inner.type;
         }
 
@@ -1316,7 +1316,7 @@ read_command (int looking_for, flag_context_ty outer_context)
               pos.file_name = logical_file_name;
               pos.line_number = inner.line_number_at_start;
               remember_a_message (mlp, NULL, string_of_word (&inner), false,
-                                  false, inner_context, &pos,
+                                  false, inner_region, &pos,
                                   NULL, savable_comment, false);
             }
         }
@@ -1407,7 +1407,7 @@ read_command (int looking_for, flag_context_ty outer_context)
                       free (s);
                       argparser->next_is_msgctxt = false;
                       arglist_parser_remember_msgctxt (argparser, ms,
-                                                       inner_context,
+                                                       inner_region,
                                                        logical_file_name,
                                                        inner.line_number_at_start);
                       matters_for_argparser = false;
@@ -1433,7 +1433,7 @@ read_command (int looking_for, flag_context_ty outer_context)
                       free (s);
                       argparser->next_is_msgctxt = false;
                       arglist_parser_remember_msgctxt (argparser, ms,
-                                                       inner_context,
+                                                       inner_region,
                                                        logical_file_name,
                                                        inner.line_number_at_start);
                       matters_for_argparser = false;
@@ -1472,7 +1472,7 @@ read_command (int looking_for, flag_context_ty outer_context)
                                                       inner.line_number_at_start);
                       free (s);
                       arglist_parser_remember (argparser, arg, ms,
-                                               inner_context,
+                                               inner_region,
                                                logical_file_name,
                                                inner.line_number_at_start,
                                                savable_comment, false);
@@ -1494,6 +1494,7 @@ read_command (int looking_for, flag_context_ty outer_context)
             arg++;
         }
 
+      unref_region (inner_region);
       free_word (&inner);
     }
 }
@@ -1504,19 +1505,17 @@ read_command (int looking_for, flag_context_ty outer_context)
    or '\0'.
    Returns the type of the word that terminated the command list.  */
 static enum word_type
-read_command_list (int looking_for, flag_context_ty outer_context)
+read_command_list (int looking_for, flag_region_ty *outer_region)
 {
   if (nesting_depth > MAX_NESTING_DEPTH)
-    {
-      error_with_progname = false;
-      error (EXIT_FAILURE, 0, _("%s:%d: error: too deeply nested command list"),
-             logical_file_name, line_number);
-    }
+    if_error (IF_SEVERITY_FATAL_ERROR,
+              logical_file_name, line_number, (size_t)(-1), false,
+              _("too deeply nested command list"));
   for (;;)
     {
       enum word_type terminator;
 
-      terminator = read_command (looking_for, outer_context);
+      terminator = read_command (looking_for, outer_region);
       if (terminator != t_separator)
         return terminator;
     }
@@ -1554,7 +1553,7 @@ extract_sh (FILE *f,
   init_keywords ();
 
   /* Eat tokens until eof is seen.  */
-  read_command_list ('\0', null_context);
+  read_command_list ('\0', null_context_region ());
 
   fp = NULL;
   real_file_name = NULL;

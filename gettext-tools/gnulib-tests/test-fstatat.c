@@ -34,6 +34,11 @@ SIGNATURE_CHECK (fstatat, int, (int, char const *, struct stat *, int));
 #include "ignore-value.h"
 #include "macros.h"
 
+/* This program tests deprecated functions 'statat' and 'lstatat'.  */
+#if _GL_GNUC_PREREQ (4, 3)
+# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #ifndef BASE
 # define BASE "test-fstatat.t"
 #endif
@@ -103,5 +108,5 @@ main (_GL_UNUSED int argc, _GL_UNUSED char *argv[])
   if (result == 77)
     fputs ("skipping test: symlinks not supported on this file system\n",
            stderr);
-  return result;
+  return (result ? result : test_exit_status);
 }
