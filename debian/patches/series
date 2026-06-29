@@ -1,2 +1,3 @@
 fix-test-non-english-locale.patch
 parse-recursive-jsx-expressions-correctly.patch
+feat-add-sw64-support.patch
